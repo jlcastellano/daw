@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Programación didáctica | Despliegue de Aplicaciones Web (0614) — 2.º DAW</title>
+<style>
+  :root{
+    --fg:#111;
+    --bg:#ffffff;
+    --muted:#555;
+    --accent:#0b6efd;
+    --table-border:#d9d9d9;
+    --hr:#e5e5e5;
+  }
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif;font-size:16px;line-height:1.5;}
+  .doc{max-width:1000px;margin:0 auto;padding:24px 16px 64px;}
+  header h1{font-size:1.6rem;margin:0 0 4px;font-weight:700;}
+  header .subtitle{color:var(--muted);font-size:0.98rem;margin-bottom:12px;}
+  hr{border:0;border-top:1px solid var(--hr);margin:16px 0 24px;}
+  h2{font-size:1.15rem;margin:20px 0 8px;border-left:4px solid var(--accent);padding-left:8px;}
+  h3{font-size:1.02rem;margin:16px 0 6px;}
+  p{margin:8px 0;}
+  ul,ol{margin:8px 0 8px 20px;}
+  li{margin:4px 0;}
+  .small{font-size:0.95rem;}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:0.96rem;}
+  th,td{border:1px solid var(--table-border);padding:8px;vertical-align:top;}
+  th{background:#f7f7f7;text-align:left;}
+  .note{background:#f9fbff;border:1px solid #dceaff;border-left:4px solid var(--accent);padding:10px 12px;margin:12px 0;border-radius:4px;}
+  .table-wrap{overflow-x:auto;}
+  @media print{
+    .doc{padding:0;}
+    header h1{font-size:18pt;}
+    h2{font-size:14pt;}
+    h3{font-size:12pt;}
+    a{color:#000;text-decoration:none;}
+  }
+</style>
+</head>
+<body>
+<div class="doc">
+  <header>
+    <h1>Despliegue de Aplicaciones Web (0614) — 2.º DAW</h1>
+  </header>
+  <hr />
+
+  <h2>Índice de la programación</h2>
+  <ol class="small">
+    <li>Legislación vigente</li>
+    <li>Contextualización</li>
+    <li>Objetivos específicos del módulo</li>
+    <li>Competencias profesionales, personales y sociales</li>
+    <li>Materiales y recursos didácticos</li>
+    <li>Contenido
+      <ol>
+        <li>Unidades temáticas (según indice.html)</li>
+        <li>Resultados de aprendizaje y criterios de evaluación (oficiales)</li>
+      </ol>
+    </li>
+    <li>Temporización</li>
+    <li>Calendario de evaluaciones</li>
+    <li>Correspondencia entre Contenidos, Resultados de Aprendizaje y Criterios de Evaluación</li>
+    <li>Procedimiento de evaluación
+      <ol>
+        <li>Criterios de calificación</li>
+        <li>Proceso de recuperación</li>
+      </ol>
+    </li>
+    <li>Metodología didáctica
+      <ol>
+        <li>Integración de la IA en la metodología didáctica</li>
+      </ol>
+    </li>
+    <li>Atención a la diversidad</li>
+    <li>Consideraciones finales</li>
+  </ol>
+
+  <h2>1. Legislación vigente</h2>
+  <ul>
+    <li>Ley Orgánica 3/2022, de 31 de marzo, de ordenación e integración de la Formación Profesional.</li>
+    <li>Real Decreto 686/2010, de 20 de mayo, por el que se establece el título de Técnico Superior en Desarrollo de Aplicaciones Web y se fijan sus enseñanzas mínimas.</li>
+    <li>En Andalucía: Orden de 5 de agosto de 2010 (currículo del título de DAW); Decreto 46/2011, de 22 de febrero; e instrucciones de evaluación vigentes.</li>
+  </ul>
+  <p>RA/CE oficiales del módulo “Despliegue de aplicaciones web” (DAW) conforme a RD 686/2010 y su desarrollo autonómico.</p>
+
+  <h2>2. Contextualización</h2>
+  <p>El módulo forma al alumnado para desplegar y administrar operativamente aplicaciones web. El temario se ajusta al índice definitivo de indice.html: servicios de red (DNS y directorio), transferencia de archivos, arquitecturas web, administración de servidores web y de aplicaciones, y documentación/control de versiones.</p>
+
+  <h2>3. Objetivos específicos del módulo</h2>
+  <ul>
+    <li>Configurar servicios de red clave para el despliegue (DNS, LDAP).</li>
+    <li>Instalar y administrar servicios de transferencia de archivos seguros.</li>
+    <li>Implantar y administrar arquitecturas y servidores web.</li>
+    <li>Administrar servidores de aplicaciones y su seguridad.</li>
+    <li>Generar documentación operativa y utilizar control de versiones con buenas prácticas.</li>
+  </ul>
+
+  <h2>4. Competencias profesionales, personales y sociales</h2>
+  <p>Despliegue y mantenimiento de aplicaciones, administración de servicios, seguridad operativa, documentación y colaboración técnica.</p>
+
+  <h2>5. Materiales y recursos didácticos</h2>
+  <h3>Infraestructura</h3>
+  <p>Red con acceso a Internet y puertos controlados (53, 80/443, 21/22...).</p>
+  <h3>Hardware</h3>
+  <p>Equipos con 8–16 GB de RAM y virtualización.</p>
+  <h3>Software</h3>
+  <ul>
+    <li>Sistemas: Windows 11 y Linux (VM/WSL).</li>
+    <li>Servicios: BIND9, OpenLDAP, proFTPd/SFTP, Apache/Nginx, Tomcat/GlassFish/Jetty.</li>
+    <li>Herramientas: OpenSSL/Certbot, cURL, netcat, dig, ldap-utils, Git.</li>
+  </ul>
+
+  <h2>6. Contenido</h2>
+  <p>Los contenidos se organizan en unidades temáticas alineadas con los RA y CE oficiales del módulo 0614, combinando teoría y práctica en entornos virtualizados y reales.</p>
+
+    <h3>1. SERVICIOS DE RED IMPLICADOS EN EL DESPLIEGUE DE UNA APLICACIÓN</h2>
+    <ul>
+        <li>1.1. Introducción</li>
+        <li>1.2. Sistema de nombre de dominio</li>
+        <li>1.3. Zonas de búsquedas, tipos de servidores DNS y registros</li>
+        <li>1.4. Funcionamiento del servicio DNS y tipos de consultas</li>
+        <li>1.5. Instalación y configuración de un servidor DNS en SO Linux</li>
+        <li>1.6. Servicio de directorio: características y funcionalidad</li>
+        <li>1.7. Organización de LDAP</li>
+        <li>1.8. Archivos básicos de configuración y uso</li>
+        <li>1.9. Instalación de OpenLDAP en SO Linux</li>
+        <li>1.10. Adaptación de la configuración del servidor de directorios para el despliegue de la aplicación</li>
+    </ul>
+
+    <h3>2. INSTALACIÓN Y ADMINISTRACIÓN DE SERVIDORES DE TRANSFERENCIA DE ARCHIVOS</h2>
+    <ul>
+        <li>2.1. Introducción</li>
+        <li>2.2. Servicio de transferencia de archivos. Permisos y cuotas</li>
+        <li>2.3. Tipos de usuarios, accesos al servicio y transferencia de ficheros</li>
+        <li>2.4. Modos de conexión al cliente</li>
+        <li>2.5. Protocolo seguro de transferencia de archivos</li>
+        <li>2.6. Utilización de herramientas gráficas y en modo texto. Comandos</li>
+        <li>2.7. Instalación y configuración del servidor proFTPd en SO Linux</li>
+        <li>2.8. Utilización del servicio de transferencia de archivos</li>
+    </ul>
+
+    <h3>3. IMPLANTACIÓN DE ARQUITECTURAS WEB</h2>
+    <ul>
+        <li>3.1. Introducción</li>
+        <li>3.2. Arquitecturas web</li>
+        <li>3.3. Evolución de la tecnología web</li>
+        <li>3.4. Tecnologías usadas en aplicaciones web</li>
+        <li>3.5. Servidores y aplicaciones libres y propietarias</li>
+        <li>3.6. Protocolo HTTP vs HTTPS</li>
+        <li>3.7. Clasificación de servidores de aplicaciones del mercado actual</li>
+        <li>3.8. Instalación y configuración básica del servidor Apache</li>
+        <li>3.9. Estructura y recursos que componen una aplicación web</li>
+    </ul>
+
+    <h3>4. ADMINISTRACIÓN DE SERVIDORES WEB</h2>
+    <ul>
+        <li>4.1. Introducción</li>
+        <li>4.2. Configuración avanzada del servidor web</li>
+        <li>4.3. Hosts virtuales. Creación, configuración y utilización</li>
+        <li>4.4. Módulos: instalación, configuración y uso</li>
+        <li>4.5. Autenticación y control de acceso a directorios</li>
+        <li>4.6. Certificados. Servidores de certificados</li>
+        <li>4.7. Pruebas de funcionamiento, monitorización y rendimiento del servidor web</li>
+        <li>4.8. Configuración de hosts virtuales en SO Windows</li>
+    </ul>
+
+    <h3>5. ADMINISTRACIÓN DE SERVIDORES DE APLICACIONES</h2>
+    <ul>
+        <li>5.1. Introducción</li>
+        <li>5.2. Arquitectura y configuración básica del servidor de aplicaciones</li>
+        <li>5.3. Administrar aplicaciones web</li>
+        <li>5.4. Autenticación de usuarios. Dominios de seguridad para la autenticación</li>
+        <li>5.5. Administración de sesiones. Sesiones persistentes</li>
+        <li>5.6. Archivos de registro de acceso y filtro de solicitudes</li>
+        <li>5.7. Instalación y configuración del servidor de aplicaciones en SO Windows</li>
+        <li>5.8. Despliegue de aplicaciones en el servidor de aplicaciones</li>
+        <li>5.9. Seguridad en el servidor de aplicaciones</li>
+    </ul>
+
+    <h3>6. DOCUMENTACIÓN Y SISTEMAS DE CONTROL DE VERSIONES</h2>
+    <ul>
+        <li>6.1. Introducción</li>
+        <li>6.2. Herramientas externas para la generación de documentación</li>
+        <li>6.3. Formatos estándar para la documentación</li>
+        <li>6.4. Creación y utilización de plantillas</li>
+        <li>6.5. Herramientas colaborativas para la elaboración y mantenimiento de la documentación</li>
+        <li>6.6. Instalación, configuración y uso de sistemas de control de versiones en SO Windows</li>
+        <li>6.7. Operaciones avanzadas</li>
+        <li>6.8. Seguridad de los sistemas de control de versiones</li>
+        <li>6.9. Historia de un repositorio</li>
+    </ul>
+
+  <h3>6.2. Resultados de aprendizaje y criterios de evaluación (oficiales)</h3>
+
+  <p><strong>RA1.</strong> Configura el entorno de desarrollo y producción, identificando necesidades de despliegue.</p>
+  <p><strong>RA2.</strong> Despliega aplicaciones web en servidores, aplicando procedimientos establecidos.</p>
+  <p><strong>RA3.</strong> Administra acceso a datos y servicios asociados, garantizando integridad y disponibilidad.</p>
+  <p><strong>RA4.</strong> Asegura el servicio de la aplicación, aplicando medidas de seguridad.</p>
+  <p><strong>RA5.</strong> Automatiza tareas de despliegue y mantenimiento.</p>
+  <p><strong>RA6.</strong> Documenta y monitoriza el servicio.</p>
+
+  <h2>7. Temporización</h2>
+  <p>Total: 40 horas lectivas en 20 semanas (2 h/semana). 2 evaluaciones: 12 semanas (24 h) + 8 semanas (16 h).</p>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Evaluación</th>
+          <th>Periodo orientativo</th>
+          <th>Unidades (indice.html)</th>
+          <th>Semanas (2 h/sem)</th>
+          <th>Horas</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1.ª</td>
+          <td>Septiembre – Diciembre</td>
+          <td>Bloque 1 (Servicios de red), Bloque 2 (Transferencia), inicio Bloque 3 (Arquitecturas web)</td>
+          <td>12</td>
+          <td>24 h</td>
+        </tr>
+        <tr>
+          <td>2.ª</td>
+          <td>Enero – Febrero</td>
+          <td>Resto Bloque 3, Bloque 4 (Servidor web), Bloque 5 (Servidor de aplicaciones), Bloque 6 (Doc. y VCS)</td>
+          <td>8</td>
+          <td>16 h</td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr>
+          <th colspan="3" style="text-align:right;">Total</th>
+          <th>20</th>
+          <th>40 h</th>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <p>Reparto sugerido por bloques (orientativo y ajustable a calendario):</p>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Bloque / Unidad</th>
+          <th>Semanas</th>
+          <th>Horas</th>
+          <th>RA principales</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1. Servicios de red (DNS/LDAP) [1.1–1.10]</td>
+          <td>4</td>
+          <td>8</td>
+          <td>RA1, RA4</td>
+        </tr>
+        <tr>
+          <td>2. Transferencia de archivos (FTP/SFTP) [2.1–2.8]</td>
+          <td>2</td>
+          <td>4</td>
+          <td>RA3, RA5</td>
+        </tr>
+        <tr>
+          <td>3. Implantación de arquitecturas web [3.1–3.9]</td>
+          <td>4</td>
+          <td>8</td>
+          <td>RA1, RA2</td>
+        </tr>
+        <tr>
+          <td>4. Administración de servidores web [4.1–4.8]</td>
+          <td>4</td>
+          <td>8</td>
+          <td>RA2, RA4, RA6</td>
+        </tr>
+        <tr>
+          <td>5. Servidores de aplicaciones [5.1–5.9]</td>
+          <td>3</td>
+          <td>6</td>
+          <td>RA2, RA4</td>
+        </tr>
+        <tr>
+          <td>6. Documentación y control de versiones [6.1–6.9]</td>
+          <td>3</td>
+          <td>6</td>
+          <td>RA5, RA6</td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr>
+          <th colspan="2" style="text-align:right;">Total</th>
+          <th>40</th>
+          <th>—</th>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <h2>8. Calendario de evaluaciones</h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Evaluación</th>
+          <th>Semana de exámenes</th>
+          <th>Sesión de evaluación</th>
+          <th>Alcance</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1.ª Evaluación</td>
+          <td>9 – 12 diciembre 2025</td>
+          <td>17 diciembre 2025</td>
+          <td>Bloques 1–3 (hasta donde alcance la temporización): DNS/LDAP, FTP/SFTP y arquitecturas web.</td>
+        </tr>
+        <tr>
+          <td>2.ª Evaluación (Final ordinaria)</td>
+          <td>2 – 6 marzo 2026</td>
+          <td>11 marzo 2026</td>
+          <td>Resto Bloque 3 y Bloques 4–6: servidor web avanzado, servidor de aplicaciones, documentación y VCS.</td>
+        </tr>
+        <tr>
+          <td>Extraordinaria</td>
+          <td> 	15 – 19 junio 2026</td>
+          <td>19 junio 2026</td>
+          <td>Recuperación de RA mínimos no acreditados; nota máxima 5.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>9. Correspondencia entre Contenidos, Resultados de Aprendizaje y Criterios de Evaluación</h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Bloque / Unidad</th>
+          <th>RA asociado(s)</th>
+          <th>Criterios de evaluación (síntesis)</th>
+          <th>Actividades propuestas</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1. Servicios de red (DNS/LDAP)</td>
+          <td>RA1, RA4</td>
+          <td>Zonas/registros DNS; instalación BIND9; consultas; instalación/organización LDAP; adaptación al despliegue.</td>
+          <td>Zona DNS con A/AAAA/CNAME/MX/TXT; laboratorio OpenLDAP; autenticación básica.</td>
+        </tr>
+        <tr>
+          <td>2. Transferencia de archivos</td>
+          <td>RA3, RA5</td>
+          <td>FTP/SFTP; permisos/cuotas; clientes; proFTPd; publicación segura.</td>
+          <td>Servidor proFTPd/SFTP; checklist de permisos; subida de artefactos.</td>
+        </tr>
+        <tr>
+          <td>3. Arquitecturas web</td>
+          <td>RA1, RA2</td>
+          <td>HTTP/HTTPS; servidores; Apache básico; estructura de apps.</td>
+          <td>Instalación Apache; sitio de prueba; análisis de estructura.</td>
+        </tr>
+        <tr>
+          <td>4. Servidor web (administración)</td>
+          <td>RA2, RA4, RA6</td>
+          <td>VHosts; módulos; autenticación; certificados; pruebas/monitorización.</td>
+          <td>VHosts múltiples; TLS con Certbot; pruebas con cURL/ab; análisis de logs.</td>
+        </tr>
+        <tr>
+          <td>5. Servidor de aplicaciones</td>
+          <td>RA2, RA4</td>
+          <td>Despliegue; sesiones; dominios de seguridad; filtros/logs; seguridad.</td>
+          <td>Despliegue WAR en Tomcat; sesiones persistentes; revisión de logs.</td>
+        </tr>
+        <tr>
+          <td>6. Documentación y VCS</td>
+          <td>RA5, RA6</td>
+          <td>Formatos/plantillas; colaboración; Git en Windows; seguridad y trazabilidad.</td>
+          <td>Repositorio Git con historia; plantilla de doc. operativa; gestión de credenciales.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>10. Procedimiento de evaluación</h2>
+  <ul>
+    <li>30%: Tareas y prácticas (laboratorio y documentación) en campus virtual.</li>
+    <li>10%: Asistencia, actitud y participación.</li>
+    <li>60%: Pruebas teórico-prácticas presenciales.</li>
+  </ul>
+  <p>Rúbricas por RA/CE, repositorios Git, demostraciones y checklist de verificación.</p>
+
+  <h3>10.1. Criterios de calificación</h3>
+  <ul>
+    <li>Evaluación continua referida a RA/CE (0–10 sin decimales en acta).</li>
+    <li>Se valora funcionalidad, seguridad, calidad técnica, evidencias y documentación.</li>
+    <li>Posible penalización por retrasos salvo causa justificada.</li>
+    <li>Nota final en la evaluación ordinaria global.</li>
+  </ul>
+
+  <h3>10.2. Proceso de recuperación</h3>
+  <ul>
+    <li>Actividades de refuerzo por criterio no alcanzado, con reentrega y defensa.</li>
+    <li>Pruebas de recuperación por RA en periodo ordinario.</li>
+    <li>Extraordinaria según calendario: acredita RA mínimos; nota máxima 5.</li>
+  </ul>
+
+  <h2>11. Metodología didáctica</h2>
+  <p>Metodología activa y práctica con laboratorios DNS, LDAP, FTP/SFTP, Apache y app server; configuración de TLS; documentación y VCS. Uso de VM/WSL. Revisión por pares y feedback continuo.</p>
+
+  <h3>11.1. Integración de la IA en la metodología didáctica</h3>
+  <p>Apoyo para ejemplos de configuración, diagnóstico de errores y propuestas de hardening. Validación manual obligatoria y autoría del alumnado.</p>
+
+  <h2>12. Atención a la diversidad</h2>
+  <ul>
+    <li>Ritmo más lento: guías paso a paso y plantillas; tiempo extra.</li>
+    <li>Altas capacidades: retos avanzados (DNSSEC opcional, vhosts complejos, dominios de seguridad, hardening).</li>
+    <li>Dificultades idiomáticas: glosarios y documentación visual; apoyo entre iguales.</li>
+  </ul>
+
+  <h2>13. Consideraciones finales</h2>
+  <p>La programación se alinea con los RA y CE oficiales del módulo 0614 y la normativa vigente, priorizando la práctica guiada y la verificación en entornos realistas.</p>
+</div>
+</body>
+</html>
