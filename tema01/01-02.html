@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema DNS | UT01 - Servicios de Red</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/vs2015.min.css">
+</head>
+
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">Servicios de Red</div>
+
+        </div>
+    </header>
+
+    <div class="container">
+
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <main class="main-content">
+            <div class="content-header">
+                <h1 class="content-title" id="page-title">Sistema de Nombre de Dominio</h1>
+                <p class="content-subtitle" id="page-subtitle">DNS: La base de Internet</p>
+            </div>
+
+            <div id="lesson-content">
+                <section class="lesson-section">
+                    <h2 class="section-title">1.2. Sistema de nombre de dominio</h2>
+
+                    <div class="text-content">
+                        <p>Es la forma en que los nombres de dominio se encuentran en Internet, que se traducen en
+                            direcciones del protocolo Internet (IP). Este nombre de dominio permite no tener que
+                            recordar la dirección IP de cada una de las páginas web que visitamos en Internet, de esta
+                            forma es más fácil recordar el nombre de una página que un número separado por puntos.</p>
+                    </div>
+
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span>Ejemplo de traducción DNS</span>
+                            <span class="language-badge">Ejemplo</span>
+                        </div>
+                        <div class="code-content">
+                            <button class="copy-button">Copiar</button>
+                            <pre><code>Nombre de dominio: www.tech.com
+Dirección IP: 192.168.1.100
+
+El usuario escribe: http://www.tech.com
+DNS traduce a: http://192.168.1.100</code></pre>
+                        </div>
+                    </div>
+
+                    <h3>1.2.1. Resolución</h3>
+                    <div class="text-content">
+                        <p>Casi la mayoría de la actividad de Internet se basa en los DNS, que permiten recuperar
+                            velozmente la información correspondiente para poderte conectar al servidor o host remoto.
+                        </p>
+                        <p>Existen básicamente dos formas para que el dispositivo resuelva el nombre de dominio
+                            requerido:</p>
+                    </div>
+
+                    <div class="info-box note">
+                        <div class="info-box-title">Métodos de Resolución</div>
+                        <p>1. Archivo hosts local (/etc/hosts en Linux o C:\Windows\System32\drivers\etc\hosts en
+                            Windows)<br>
+                            2. Servidores DNS configurados en la tarjeta de red</p>
+                    </div>
+
+                    <h3>1.2.2. Nombre de dominio</h3>
+                    <div class="text-content">
+                        <p>Se define como la dirección de una empresa, organización, asociación, persona o grupos de
+                            personas en Internet. Permite que su información, sus productos y/o servicios sean
+                            accesibles en todo el mundo a través de la Red de redes.</p>
+                    </div>
+
+                    <h3>1.2.3. Objetivos</h3>
+                    <div class="text-content">
+                        <p>En los inicios de la informática, se accedía a cualquier dispositivo tecleando la IP del host
+                            destino. Se observó que este procedimiento no era operativo y entonces se ideó el nombre de
+                            dominio con un doble objetivo:</p>
+                        <ul>
+                            <li><strong>Dirección de red:</strong> Es la forma más fácil, rápida y práctica para
+                                encontrar un sitio en Internet.</li>
+                            <li><strong>Identificación:</strong> Sirve para localizar sus productos o servicios en la
+                                Red.</li>
+                        </ul>
+                    </div>
+
+                    <h3>1.2.4. Niveles de dominio</h3>
+                    <div class="text-content">
+                        <p>Existen tres niveles de dominios en Internet:</p>
+                    </div>
+
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span>Niveles de Dominio</span>
+                            <span class="language-badge">Estructura</span>
+                        </div>
+                        <div class="code-content">
+                            <button class="copy-button">Copiar</button>
+                            <pre><code>PRIMER NIVEL (TLD)
+• .com, .org, .net, .gov
+• Asignados por ICANN
+• Sin restricciones especiales
+
+SEGUNDO NIVEL
+• Relacionados con países (.es, .uk, .fr)
+• En España: gestionados por Red.es
+• Ejemplos: arsys.es, ionos.es
+
+TERCER NIVEL
+• .com.es, .nom.es, .org.es, .gob.es, .edu.es
+• Verificación previa de cumplimiento legal
+• Normas de sintaxis específicas</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="info-box tip">
+                        <div class="info-box-title">Anatomía de una URL</div>
+                        <p>http://www.kali.org se compone de:<br>
+                            • <strong>http://</strong> - Protocolo<br>
+                            • <strong>www</strong> - Subdominio (tercer nivel)<br>
+                            • <strong>kali</strong> - Dominio principal<br>
+                            • <strong>org</strong> - Dominio de primer nivel (TLD)</p>
+                    </div>
+                </section>
+            </div>
+
+
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>

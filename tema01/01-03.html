@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zonas DNS | UT01 - Servicios de Red</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/vs2015.min.css">
+</head>
+
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">Servicios de Red</div>
+
+        </div>
+    </header>
+
+    <div class="container">
+
+
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <main class="main-content">
+            <div class="content-header">
+                <h1 class="content-title" id="page-title">Zonas de Búsqueda DNS y Registros</h1>
+                <p class="content-subtitle" id="page-subtitle">Tipos de servidores y configuración de zonas</p>
+            </div>
+
+            <div id="lesson-content">
+                <section class="lesson-section">
+                    <h2 class="section-title">1.3. Zonas de búsquedas, tipos de servidores DNS y registros</h2>
+
+                    <div class="text-content">
+                        <p>El servicio de DNS permite una ventaja fundamental de la que carece cualquier opción manual
+                            en un fichero, y es que cualquier cambio en la dirección IP o un nombre en cualquier
+                            dispositivo que esté en Internet o en una red se puede replicar a todos los servidores DNS
+                            que la configuración lo permita.</p>
+                    </div>
+
+                    <h3>1.3.1. Tipos de Zonas</h3>
+                    <div class="text-content">
+                        <p>Normalmente, los servidores DNS se componen de zonas que son las encargadas de contener los
+                            diferentes tipos de registros. Existen dos tipos principales de zonas:</p>
+                    </div>
+
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span>Zonas de Búsqueda</span>
+                            <span class="language-badge">DNS</span>
+                        </div>
+                        <div class="code-content">
+                            <button class="copy-button">Copiar</button>
+                            <pre><code>ZONA DE BÚSQUEDA DIRECTA
+→ Traduce: Nombre de dominio → Dirección IP
+→ Ejemplo: www.example.com → 192.168.1.10
+
+ZONA DE BÚSQUEDA INVERSA
+→ Traduce: Dirección IP → Nombre de dominio
+→ Ejemplo: 192.168.1.10 → www.example.com</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="text-content">
+                        <p>Las zonas, además de ser de búsqueda directa e inversa, pueden ser de tres tipos:</p>
+                    </div>
+
+                    <div class="info-box note">
+                        <div class="info-box-title">Tipos de Servidores DNS</div>
+                        <p><strong>Master:</strong> Crea sus propios registros. Contiene copia de lectura/escritura.
+                            Almacena registros en ficheros.<br><br>
+                            <strong>Slave:</strong> Tiene la misma información que el Master. Ofrece respaldo en caso de
+                            fallo. Reduce la carga administrativa.<br><br>
+                            <strong>Caché:</strong> Mantiene copias de resoluciones previas. No tiene archivos de zona
+                            propios. Consulta a servidores Master o Slave.
+                        </p>
+                    </div>
+
+                    <div class="info-box tip">
+                        <div class="info-box-title">Ventajas del DNS</div>
+                        <p>• No hay duplicidad de nombres<br>
+                            • Desaparece la carga excesiva en la red<br>
+                            • Coherencia de la información actualizada automáticamente</p>
+                    </div>
+
+                    <h3>1.3.2. Registros DNS</h3>
+                    <div class="text-content">
+                        <p>Las zonas que se encuentran definidas en cada uno de los servidores DNS están compuestas de
+                            registros, que se definen como archivos de mapeo que le indican al servidor DNS a qué
+                            dirección IP está asociado un nombre en particular o un dominio.</p>
+                    </div>
+
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span>Registros DNS Principales</span>
+                        </div>
+                        <div class="table-responsive">
+     <table border="1" cellpadding="6" cellspacing="0" width="100%">
+      <tr>
+        <th>Tipo de registro</th>
+        <th>Descripción</th>
+        <th>Sintaxis</th>
+      </tr>
+      <tr>
+        <td>A (Address)</td>
+        <td>Traduce nombres de dominio en direcciones IP.</td>
+        <td>new.com A xxx.xxx.xxx.xxx</td>
+      </tr>
+      <tr>
+        <td>PTR (Pointer)</td>
+        <td>Traduce direcciones IP en nombres de dominio.</td>
+        <td>3.0.0.20.in-addr.arpa PTR host.new.com</td>
+      </tr>
+      <tr>
+        <td>MX (Mail Exchanger)</td>
+        <td>Asocia un nombre de dominio a un servidor de correo. El número 10 indica preferencia; a menor número, mayor preferencia.</td>
+        <td>new.com MX 10 correo.new.com</td>
+      </tr>
+      <tr>
+        <td>CNAME</td>
+        <td>Es un alias que se le asigna a un host que tiene una dirección IP.</td>
+        <td>Alias.new.com CNAME nombre.new.com</td>
+      </tr>
+      <tr>
+        <td>NS</td>
+        <td>Define los servidores principales de un dominio; al menos debe haber uno.</td>
+        <td>new.com IN NS servidor1.new.com</td>
+      </tr>
+      <tr>
+        <td>SOA</td>
+        <td>Es el primer registro de la zona; solo puede haber uno configurado. Especifica el servidor DNS primario del dominio. Pieza clave del archivo de zona.</td>
+        <td>Es un tipo de registro que especifica información del DNS. Los campos se definen más adelante.</td>
+      </tr>
+      <tr>
+        <td>TXT</td>
+        <td>Ofrece información adicional a un dominio. También se usa como almacenamiento en claves de cifrado.</td>
+        <td>new.com TXT “Información adicional”</td>
+      </tr>
+      <tr>
+        <td>SPF</td>
+        <td>Es un registro de tipo texto que se crea en la zona directa del DNS. Se usa principalmente para evitar la suplantación de identidad.</td>
+        <td>new.com IN SPF “v=spf1 a:exchange.new.com –all”</td>
+      </tr>
+    </table>
+    </div>
+                    </div>
+
+                    <div class="info-box warning">
+                        <div class="info-box-title">Importante</div>
+                        <p>El registro SOA es el primer registro de la zona y solo puede haber uno configurado. Es la
+                            pieza clave del archivo de zona y especifica el servidor DNS primario del dominio.</p>
+                    </div>
+                </section>
+            </div>
+
+
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Funcionamiento DNS | UT01 - Servicios de Red</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/vs2015.min.css">
+</head>
+
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">Servicios de Red</div>
+
+        </div>
+    </header>
+
+    <div class="container">
+
+
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <main class="main-content">
+            <div class="content-header">
+                <h1 class="content-title" id="page-title">Funcionamiento del Servicio DNS</h1>
+                <p class="content-subtitle" id="page-subtitle">Tipos de consultas y proceso de resolución</p>
+            </div>
+
+            <div id="lesson-content">
+                <section class="lesson-section">
+                    <h2 class="section-title">1.4. Funcionamiento del servicio DNS y tipos de consultas</h2>
+
+                    <div class="text-content">
+                        <p>Cuando un dispositivo se conecta a una red local o Internet y hace alguna búsqueda de algún
+                            recurso (servidor), obligatoriamente debe usar para resolver la IP el servicio DNS y, por lo
+                            tanto, realizar una consulta que puede proceder de una aplicación que se ejecute en el
+                            cliente o del propio cliente.</p>
+                    </div>
+
+                    <div class="info-box note">
+                        <div class="info-box-title">Mensaje de Consulta DNS</div>
+                        <p>El cliente envía un mensaje que contiene:<br>
+                            • Nombre totalmente calificado (FQDN)<br>
+                            • Tipo de consulta<br>
+                            • Clase del nombre del dominio</p>
+                    </div>
+                            <img src="image01-01.png" alt="Funcionamiento del servicio DNS" class="responsive-image">
+
+                    <div class="text-content">
+                        <p>Las consultas DNS pueden seguir un flujo diferente, dependiendo de quién responda al mensaje.
+                            El proceso general es:</p>
+                    </div>
+
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span>Flujo de Consulta DNS</span>
+                            <span class="language-badge">Proceso</span>
+                        </div>
+                        <div class="code-content">
+                            <button class="copy-button">Copiar</button>
+                            <pre><code>1. CACHÉ LOCAL
+   → El cliente busca en su caché local
+   → Si encuentra la respuesta, termina el proceso
+
+2. SERVIDOR DNS
+   → Consulta al servidor DNS configurado
+   → Puede responder desde su caché
+
+3. ZONA DNS
+   → Si no está en caché, busca en su zona configurada
+   → Responde si tiene el registro
+
+4. RECURSIVIDAD
+   → El servidor DNS consulta a otros servidores
+   → Obtiene la respuesta y la devuelve al cliente
+
+5. ITERACIÓN
+   → El cliente realiza consultas a múltiples servidores
+   → Sigue las referencias hasta obtener la respuesta</code></pre>
+                        </div>
+                    </div>
+
+                    <h3>1.4.1. Consulta Recursiva</h3>
+                    <div class="text-content">
+                        <p>Es aquella a la que el servidor que alberga el servicio DNS dará la respuesta a la petición
+                            del PC o dispositivo. El servicio DNS no tiene la obligación de soportar este tipo de
+                            consultas, sino que es el dispositivo el que las negocia.</p>
+                    </div>
+
+                    <div class="info-box tip">
+                        <div class="info-box-title">Tipos de Respuesta Recursiva</div>
+                        <p>• <strong>NXDOMAIN:</strong> El dominio o equipo no existe<br>
+                            • <strong>Error temporal:</strong> Problemas de conectividad<br>
+                            • <strong>Respuesta exitosa:</strong> Dirección con registro A y CNAME si existe</p>
+                    </div>
+
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span>Ejemplo de Flujo Recursivo</span>
+                            <span class="language-badge">Paso a Paso</span>
+                        </div>
+                        <div class="code-content">
+                            <button class="copy-button">Copiar</button>
+                            <pre><code>EJEMPLO: Resolución de www.ptec.com
+
+1. Usuario escribe: http://www.ptec.com
+2. Navegador consulta al dispositivo la IP
+3. PC pregunta al DNS configurado
+4. DNS busca en caché local
+5. Si no encuentra, consulta servidor raíz
+6. Servidor raíz responde con servidores .com
+7. DNS consulta servidor .com
+8. Servidor .com responde con servidor ptec.com
+9. DNS consulta servidor ptec.com
+10. Obtiene registro A: www.ptec.com → IP
+11. DNS envía respuesta al PC
+12. PC recibe la IP y conecta</code></pre>
+                        </div>
+                    </div>
+<img src="image01-02.png" alt="Flujo de petición de IP" class="responsive-image">
+                    <h3>1.4.2. Consulta Iterativa</h3>
+                    <div class="text-content">
+                        <p>Es aquella a la que el servidor DNS responderá de forma parcial al cliente DNS del PC o
+                            dispositivo.</p>
+                    </div>
+
+                    <div class="info-box note">
+                        <div class="info-box-title">Características de Consulta Iterativa</div>
+                        <p>• El servidor DNS responde parcialmente<br>
+                            • Proporciona referencias a otros servidores<br>
+                            • Común en servidores raíz y TLD<br>
+                            • El cliente debe continuar la búsqueda</p>
+                    </div>
+
+                    <div class="text-content">
+                        <p>La respuesta a este tipo de consultas puede incluir:</p>
+                        <ul>
+                            <li>Un error NXDOMAIN si el dominio no existe</li>
+                            <li>Un error temporal por problemas de conectividad</li>
+                            <li>La respuesta con el registro A y CNAME si los tiene</li>
+                            <li>Una lista de servidores para continuar la búsqueda</li>
+                        </ul>
+                    </div>
+
+                    <h3>1.4.3. Consulta Inversa</h3>
+                    <div class="text-content">
+                        <p>Es una petición que se realiza cuando un PC o dispositivo quiere saber el nombre del dominio
+                            al que pertenece un registro en particular de cualquier tipo, por ejemplo, de tipo servidor
+                            de correo. Aunque este tipo de consultas se han convertido en obsoletas.</p>
+                    </div>
+
+                    <div class="info-box warning">
+                        <div class="info-box-title">Nota Importante</div>
+                        <p>No confundir las consultas inversas con el mapeo inverso o búsqueda inversa, que a partir de
+                            una IP se obtiene el nombre relacionado y que se localiza en las zonas con la opción
+                            in-addr.arpa.</p>
+                    </div>
+
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span>Comparación de Consultas</span>
+                            <span class="language-badge">Resumen</span>
+                        </div>
+                        <div class="code-content">
+                            <button class="copy-button">Copiar</button>
+                            <pre><code>CONSULTA RECURSIVA
+├── Servidor DNS hace todo el trabajo
+├── Devuelve respuesta completa
+└── Cliente espera resultado final
+
+CONSULTA ITERATIVA
+├── Servidor DNS da referencias
+├── Cliente continúa la búsqueda
+└── Múltiples consultas necesarias
+
+CONSULTA INVERSA
+├── IP → Nombre de dominio
+├── Usa zonas in-addr.arpa
+└── Menos común actualmente</code></pre>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>
