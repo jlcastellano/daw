@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuración de BIND para Red Interna</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/vs2015.min.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">Configuración de BIND</div>
+  
+        </div>
+    </header>
+
+
+    <div class="container">
+
+
+        <main class="main-content">
+            <div class="content-header">
+                <h1 class="content-title" id="page-title">BIND: Configuración para Red Interna</h1>
+                <p class="content-subtitle" id="page-subtitle">Configuración de servidor DNS para resolución de nombres en red local</p>
+            </div>
+
+            <div class="lesson-section" id="lesson-content">
+                <h2 class="section-title" id="introduccion">¿Qué es BIND?</h2>
+                
+                <p class="text-content">BIND (Berkeley Internet Name Domain) es el servidor DNS más utilizado en Internet. En este tutorial aprenderemos a configurar BIND para proporcionar servicios de resolución de nombres o direcciones para clientes en una red interna.</p>
+
+                <div class="info-box note">
+                    <div class="info-box-title">DNS - Sistema de Nombres de Dominio</div>
+                    <p>El DNS es fundamental para la navegación en Internet y redes locales, ya que traduce nombres de dominio legibles por humanos (como www.ejemplo.com) a direcciones IP que entienden las máquinas.</p>
+                </div>
+
+                <h3 class="section-title" id="prerequisitos">Prerrequisitos del ejemplo</h3>
+                
+                <div class="info-box warning">
+                    <div class="info-box-title">Configuración de ejemplo</div>
+                    <p>Este ejemplo utiliza la siguiente configuración. <strong>Adapta estos valores a tu entorno específico:</strong></p>
+                    <ul>
+                        <li><strong>Red local:</strong> 10.0.0.0/24</li>
+                        <li><strong>Nombre de dominio:</strong> dominio-daw.com</li>
+                        <li><strong>Servidor:</strong> Ubuntu/Debian con BIND 9</li>
+                    </ul>
+                </div>
+
+                <h2 class="section-title" id="instalacion">[1] Instalación de BIND</h2>
+                
+                <p class="text-content">Primero instalamos BIND y sus utilidades:</p>
+
+                <div class="code-container">
+                    <div class="code-header">
+                        <span>Instalación de BIND en Ubuntu/Debian</span>
+                        <span class="language-badge">Bash</span>
+                    </div>
+                    <div class="code-content">
+                        <button class="copy-button">Copiar</button>
+                        <pre><code class="language-bash">sudo apt -y install bind9 bind9utils</code></pre>
+                    </div>
+                </div>
+
+                <h2 class="section-title" id="configuracion-basica">[2] Configuración de BIND para Red Interna</h2>
+                
+                <p class="text-content">En este ejemplo configuraremos BIND para una red interna. El ejemplo que sigue es para el caso de que la red local sea [10.0.0.0/24] y el nombre de dominio sea [dominio-daw.com]. Reemplázalos por tu propio entorno.</p>
+
+                <h3>Configuración principal de BIND</h3>
+
+                <div class="code-container">
+                    <div class="code-header">
+                        <span>Editar /etc/bind/named.conf</span>
+                        <span class="language-badge">Config</span>
+                    </div>
+                    <div class="code-content">
+                        <button class="copy-button">Copiar</button>
+                        <pre><code>sudo nano /etc/bind/named.conf</code></pre>
+                    </div>
+                    <div class="code-content">
+                        <button class="copy-button">Copiar</button>
+                        <pre><code>include "/etc/bind/named.conf.options";
+include "/etc/bind/named.conf.local";
+include "/etc/bind/named.conf.default-zones";
+# agregar
+include "/etc/bind/named.conf.internal-zones";</code></pre>
+                    </div>
+                </div>
+
+                <h3 class="section-title" id="acl">Configuración de ACL y opciones</h3>
+
+                <div class="code-container">
+                    <div class="code-header">
+                        <span>Editar /etc/bind/named.conf.options</span>
+                        <span class="language-badge">Config</span>
+                    </div>
+                    <div class="code-content">
+                        <button class="copy-button">Copiar</button>
+                        <pre><code>sudo nano /etc/bind/named.conf.options</code></pre>
+                    </div>
+                                        <div class="code-content">
+                        <button class="copy-button">Copiar</button>
+                        <pre><code># agregar: establecer entrada ACL para red local
+acl internal-network {
+        192.168.1.0/24;
+};
+
+options {
+        directory "/var/cache/bind";
+
+.....
+.....
+
+        # agregar red local establecida en la sección [acl] anterior
+        # rango de red del cual permites recibir consultas de hosts
+        allow-query { localhost; internal-network; };
+        # rango de red al cual permites transferir archivos de zona a clientes
+        # agregar servidores DNS secundarios si existen
+        allow-transfer { localhost; };
+        # agregar: permitir recursión
+        recursion yes;
+
+        //=======================================================================
+        // Si BIND registra mensajes de error sobre la clave raíz expirada,
+        // necesitarás actualizar tus claves. Ver https://www.isc.org/bind-keys
+        //=======================================================================
+
+        dnssec-validation auto;
+
+        # si no escuchas IPv6, cambia [any] a [none]
+        listen-on-v6 { any; };
+};</code></pre>
+                    </div>
+                </div>
+
+                <div class="info-box tip">
+                    <div class="info-box-title">Explicación de parámetros importantes</div>
+                    <ul>
+                        <li><strong>acl internal-network:</strong> Define una lista de control de acceso para la red interna</li>
+                        <li><strong>allow-query:</strong> Especifica qué redes pueden hacer consultas DNS</li>
+                        <li><strong>allow-transfer:</strong> Define qué hosts pueden solicitar transferencias de zona</li>
+                        <li><strong>recursion yes:</strong> Permite que el servidor haga consultas recursivas</li>
+                    </ul>
+                </div>
+
+                <h3 class="section-title" id="zonas">Configuración de zonas internas</h3>
+
+                <div class="code-container">
+                    <div class="code-header">
+                        <span>Crear /etc/bind/named.conf.internal-zones</span>
+                        <span class="language-badge">Config</span>
+                    </div>
+                    <div class="code-content">
+                        <button class="copy-button">Copiar</button>
+                        <pre><code>sudo nano /etc/bind/named.conf.internal-zones</code></pre>
+                    </div>
+                                        <div class="code-content">
+                        <button class="copy-button">Copiar</button>
+                        <pre><code># crear nuevo
+# agregar zonas para tu red y nombre de dominio
+zone "dominio-daw.com" IN {
+        type master;
+        file "/etc/bind/dominio-daw.com.lan";
+        allow-update { none; };
+};
+zone "1.168.192.in-addr.arpa" IN {
+        type master;
+        file "/etc/bind/1.168.192.db";
+        allow-update { none; };
+};</code></pre>
+                    </div>
+                </div>
+
+                <div class="info-box note">
+                    <div class="info-box-title">Tipos de zonas configuradas</div>
+                    <ul>
+                        <li><strong>Zona directa (dominio-daw.com):</strong> Resuelve nombres de dominio a direcciones IP</li>
+                        <li><strong>Zona inversa (1.168.192.in-addr.arpa):</strong> Resuelve direcciones IP a nombres de dominio</li>
+                    </ul>
+                </div>
+
+                <h3 class="section-title" id="ipv4-only">Configuración solo para IPv4</h3>
+
+                <p class="text-content">Si no usas IPv6 y también quieres suprimir los logs relacionados con IPv6, es posible configurar BIND para usar solo IPv4:</p>
+
+                <div class="code-container">
+                    <div class="code-header">
+                        <span>Editar /etc/default/named</span>
+                        <span class="language-badge">Config</span>
+                    </div>
+                    <div class="code-content">
+                        <button class="copy-button">Copiar</button>
+                        <pre><code>sudo nano /etc/default/named</code></pre>
+                    </div>
+                                    <div class="code-content">
+                        <button class="copy-button">Copiar</button>
+                        <pre><code># agregar
+OPTIONS="-u bind -4"</code></pre>
+                    </div>
+                </div>
+
+                <h3 class="section-title" id="reverse-dns">Comprensión del DNS inverso</h3>
+
+                <p class="text-content">Para escribir la sección [*.*.*.*.in-addr.arpa], escribe tu dirección de red en orden inverso como se muestra a continuación:</p>
+
+                <div class="table-container">
+                    <h4 class="table-title">Ejemplos de configuración DNS inverso</h4>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Caso</th>
+                                <th>Dirección de red</th>
+                                <th>Rango de red</th>
+                                <th>Cómo escribir</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Caso 1</td>
+                                <td>10.0.0.0/24</td>
+                                <td>10.0.0.0 - 10.0.0.255</td>
+                                <td>0.0.10.in-addr.arpa</td>
+                            </tr>
+                            <tr>
+                                <td>Caso 2</td>
+                                <td>192.168.1.0/24</td>
+                                <td>192.168.1.0 - 192.168.1.255</td>
+                                <td>1.168.192.in-addr.arpa</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="info-box tip">
+                    <div class="info-box-title">Regla para DNS inverso</div>
+                    <p>Para crear la zona inversa, toma los primeros 3 octetos de tu red y escríbelos en orden inverso, seguido de .in-addr.arpa. Por ejemplo:</p>
+                    <ul>
+                        <li><strong>Red 10.0.0.0/24:</strong> → 0.0.10.in-addr.arpa</li>
+                        <li><strong>Red 192.168.1.0/24:</strong> → 1.168.192.in-addr.arpa</li>
+                        <li><strong>Red 172.16.10.0/24:</strong> → 10.16.172.in-addr.arpa</li>
+                    </ul>
+                </div>
+                <h2 class="section-title" id="archivos-zona">Configuración de Archivos de Zona</h2>
+                
+                <p class="text-content">Configura los archivos de zona para cada zona establecida en [named.conf]. Reemplaza la red o nombre de dominio en el ejemplo siguiente por tu propio entorno.</p>
+
+                <div class="info-box note">
+                    <div class="info-box-title">Archivos de zona requeridos</div>
+                    <p>Necesitamos crear dos tipos de archivos de zona:</p>
+                    <ul>
+                        <li><strong>Zona directa:</strong> Resuelve nombres de dominio a direcciones IP</li>
+                        <li><strong>Zona inversa:</strong> Resuelve direcciones IP a nombres de dominio</li>
+                    </ul>
+                </div>
+
+                <h3 class="section-title" id="zona-directa">[1] Crear archivos de zona que resuelven direcciones IP desde nombres de dominio</h3>
+                
+                <p class="text-content">El ejemplo siguiente usa la red interna [192.168.1.0/24] y el nombre de dominio [dominio-daw.com]. Reemplázalos por tu propio entorno.</p>
+
+                <div class="code-container">
+                    <div class="code-header">
+                        <span>Crear /etc/bind/dominio-daw.com.lan</span>
+                        <span class="language-badge">Config</span>
+                    </div>
+                    <div class="code-content">
+                        <button class="copy-button">Copiar</button>
+                        <pre><code>sudo nano /etc/bind/dominio-daw.com.lan</code></pre>
+                    </div>
+                </div>
+
+                <div class="code-container">
+                    <div class="code-header">
+                        <span>Contenido del archivo de zona directa</span>
+                        <span class="language-badge">DNS Zone</span>
+                    </div>
+                    <div class="code-content">
+                        <button class="copy-button">Copiar</button>
+                        <pre><code>$TTL 86400
+@   IN  SOA     servidor.dominio-daw.com. root.dominio-daw.com. (
+        ; cualquier valor numérico está bien para el número de serie pero
+        ; la recomendación es [YYYYMMDDnn] (fecha de actualización + número)
+        2020050301  ;Serial
+        3600        ;Refresh
+        1800        ;Retry
+        604800      ;Expire
+        86400       ;Minimum TTL
+)
+        ; definir Servidor de Nombres
+        IN  NS      servidor.dominio-daw.com.
+        ; definir dirección IP del Servidor de Nombres
+        IN  A       192.168.1.38
+        ; definir Servidor de Intercambio de Correo
+        IN  MX 10   servidor.dominio-daw.com.
+
+; definir cada dirección IP de un hostname
+servidor    IN  A       192.168.1.38
+www         IN  A       192.168.1.39
+ftp         IN  A       192.168.1.40
+mail        IN  A       192.168.1.41</code></pre>
+                    </div>
+                </div>
+
+                <div class="info-box tip">
+                    <div class="info-box-title">Explicación de registros DNS</div>
+                    <ul>
+                        <li><strong>$TTL:</strong> Tiempo de vida (Time To Live) en segundos</li>
+                        <li><strong>SOA:</strong> Start of Authority - información sobre la zona</li>
+                        <li><strong>NS:</strong> Name Server - servidor de nombres autoritativo</li>
+                        <li><strong>A:</strong> Address record - mapea nombre a IPv4</li>
+                        <li><strong>MX:</strong> Mail Exchange - servidor de correo</li>
+                        <li><strong>PTR:</strong> Pointer record - resolución inversa</li>
+                    </ul>
+                </div>
+
+                <h3 class="section-title" id="zona-inversa">[2] Crear archivos de zona que resuelven nombres de dominio desde direcciones IP</h3>
+                
+                <p class="text-content">El ejemplo siguiente usa la red interna [192.168.1.0/24] y el nombre de dominio [dominio-daw.com]. Reemplázalos por tu propio entorno.</p>
+
+                <div class="code-container">
+                    <div class="code-header">
+                        <span>Crear /etc/bind/1.168.192.db</span>
+                        <span class="language-badge">Config</span>
+                    </div>
+                    <div class="code-content">
+                        <button class="copy-button">Copiar</button>
+                        <pre><code>sudo nano /etc/bind/1.168.192.db</code></pre>
+                    </div>
+                </div>
+
+                <div class="code-container">
+                    <div class="code-header">
+                        <span>Contenido del archivo de zona inversa</span>
+                        <span class="language-badge">DNS Zone</span>
+                    </div>
+                    <div class="code-content">
+                        <button class="copy-button">Copiar</button>
+                        <pre><code>$TTL 86400
+@   IN  SOA     servidor.dominio-daw.com. root.dominio-daw.com. (
+        2020050301  ;Serial
+        3600        ;Refresh
+        1800        ;Retry
+        604800      ;Expire
+        86400       ;Minimum TTL
+)
+        ; definir Servidor de Nombres
+        IN  NS      servidor.dominio-daw.com.
+
+; definir cada hostname de una dirección IP
+38      IN  PTR     servidor.dominio-daw.com.
+39      IN  PTR     www.dominio-daw.com.
+40      IN  PTR     ftp.dominio-daw.com.
+41      IN  PTR     mail.dominio-daw.com.</code></pre>
+                    </div>
+                </div>
+
+                <div class="info-box warning">
+                    <div class="info-box-title">Importante: Correspondencia de IPs</div>
+                    <p>Los números en el archivo de zona inversa corresponden al último octeto de la dirección IP:</p>
+                    <ul>
+                        <li><strong>38</strong> → 192.168.1.38 (servidor.dominio-daw.com)</li>
+                        <li><strong>39</strong> → 192.168.1.39 (www.dominio-daw.com)</li>
+                        <li><strong>40</strong> → 192.168.1.40 (ftp.dominio-daw.com)</li>
+                        <li><strong>41</strong> → 192.168.1.41 (mail.dominio-daw.com)</li>
+                    </ul>
+                </div>
+
+                <h3 class="section-title" id="verificacion">Verificación de la configuración</h3>
+
+                <p class="text-content">Antes de reiniciar el servicio, es importante verificar que la configuración sea correcta:</p>
+
+                <div class="code-container">
+                    <div class="code-header">
+                        <span>Verificar configuración de BIND</span>
+                        <span class="language-badge">Bash</span>
+                    </div>
+                    <div class="code-content">
+                        <button class="copy-button">Copiar</button>
+                        <pre><code># Verificar configuración principal
+sudo named-checkconf
+
+# Verificar zona directa
+sudo named-checkzone dominio-daw.com /etc/bind/dominio-daw.com.lan
+
+# Verificar zona inversa
+sudo named-checkzone 1.168.192.in-addr.arpa /etc/bind/1.168.192.db</code></pre>
+                    </div>
+                </div>
+
+                <div class="info-box note">
+                    <div class="info-box-title">Salida esperada</div>
+                    <p>Si la configuración es correcta, deberías ver:</p>
+                    <ul>
+                        <li><strong>named-checkconf:</strong> No devuelve ningún mensaje (éxito silencioso)</li>
+                        <li><strong>named-checkzone:</strong> Muestra "zone dominio-daw.com/IN: loaded serial 2020050301" y "OK"</li>
+                    </ul>
+                </div>
+
+                <h3 class="section-title" id="reiniciar-servicio">Reiniciar y habilitar el servicio BIND</h3>
+
+                <div class="code-container">
+                    <div class="code-header">
+                        <span>Gestión del servicio BIND</span>
+                        <span class="language-badge">Bash</span>
+                    </div>
+                    <div class="code-content">
+                        <button class="copy-button">Copiar</button>
+                        <pre><code># Reiniciar el servicio
+sudo systemctl restart bind9
+sudo systemctl restart named
+
+# Verificar estado del servicio
+sudo systemctl status bind9
+sudo systemctl status named
+
+# Ver logs en tiempo real (opcional)
+sudo journalctl -u bind9 -f</code></pre>
+                    </div>
+                </div>
+
+                <h3 class="section-title" id="pruebas">Pruebas de funcionamiento</h3>
+
+                <p class="text-content">Una vez configurado y reiniciado el servicio, puedes probar el funcionamiento del DNS:</p>
+
+                <div class="code-container">
+                    <div class="code-header">
+                        <span>Pruebas de resolución DNS</span>
+                        <span class="language-badge">Bash</span>
+                    </div>
+                    <div class="code-content">
+                        <button class="copy-button">Copiar</button>
+                        <pre><code># Instalar herramientas de DNS (si no están instaladas)
+sudo apt install dnsutils
+
+# Probar resolución directa
+nslookup servidor.dominio-daw.com 192.168.1.38
+nslookup www.dominio-daw.com 192.168.1.38
+
+# Probar resolución inversa
+nslookup 192.168.1.38 192.168.1.38
+nslookup 192.168.1.39 192.168.1.38
+
+# Usar dig para más detalles
+dig @192.168.1.38 servidor.dominio-daw.com
+dig @192.168.1.38 -x 192.168.1.38</code></pre>
+                    </div>
+                </div>
+
+
+                <div class="info-box tip">
+                    <div class="info-box-title">Configuración de clientes</div>
+                    <p>Para que los clientes de tu red usen este servidor DNS, configura en sus interfaces de red:</p>
+                    <ul>
+                        <li><strong>DNS primario:</strong> 192.168.1.38</li>
+                        <li><strong>DNS secundario:</strong> 8.8.8.8 (Google DNS como respaldo)</li>
+                    </ul>
+                </div>
+              </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
