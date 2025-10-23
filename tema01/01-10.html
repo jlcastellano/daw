@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autenticación del Sistema mediante LDAP</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/vs2015.min.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">Servicios de Red</div>
+        </div>
+    </header>
+
+    <div class="container">
+        <main class="main-content">
+            <div class="content-header">
+                <h1 class="content-title">Autenticación del Sistema Operativo mediante LDAP</h1>
+            </div>
+
+            <section class="lesson-section">
+                <h2 class="section-title">Introducción</h2>
+                <p class="text-content">Una vez que se ha completado la instalación de LDAP en un sistema operativo Linux, se procederá a la autenticación por parte de una aplicación o del mismo sistema operativo en el servicio de directorio. La autenticación de LDAP es una de las funciones más importantes, ya sea en FTP, en páginas web o en cualquier otro servicio.</p>
+
+                <p class="text-content">Hasta ahora, el sistema operativo Linux autentica mediante los archivos clásicos /etc/passwd, /etc/group y /etc/shadow. Sin embargo, también se puede autenticar a través de otros métodos como NIS, LDAP, WINS, etc.</p>
+            </section>
+
+            <section class="lesson-section">
+                <h2 class="section-title">Datos de Configuración</h2>
+                <p class="text-content">Se va a proceder a instalar en la máquina DAW las librerías necesarias para autenticar a los usuarios mediante LDAP. Los datos de LDAP instalados serán los siguientes:</p>
+
+                <ul class="feature-list">
+                    <li><strong>Dirección:</strong> ldap://127.0.0.1:389</li>
+                    <li><strong>Base:</strong> dc=ejemplo,dc=com</li>
+                    <li><strong>Usuario:</strong> rrhh</li>
+                    <li><strong>Password:</strong> cat123</li>
+                </ul>
+
+                <p class="text-content">Se pueden crear todos los usuarios que deseemos e introducirlos en el directorio LDAP, lo cual permitirá la validación. Para esto, se sigue el siguiente procedimiento:</p>
+            </section>
+
+            <section class="lesson-section">
+                <h2 class="section-title">Paso 1: Instalación de Paquetes</h2>
+                <p class="text-content">Instalación y configuración de los paquetes libnss-ldapd y libpam-ldapd:</p>
+
+                <div class="code-block">
+                    <code># sudo apt install libpam-ldapd libnss-ldapd</code>
+                </div>
+            </section>
+
+            <section class="lesson-section">
+                <h2 class="section-title">Paso 2: Configuración del URI del Servidor LDAP</h2>
+                <p class="text-content">Después se visualizará una pantalla como:</p>
+
+                <img src="image01-10.png" alt="Configuración URI LDAP" class="responsive-image">
+
+                <p class="text-content">Y luego:</p>
+
+                <img src="image01-11.png" alt="Confirmación URI LDAP" class="responsive-image">
+            </section>
+
+            <section class="lesson-section">
+                <h2 class="section-title">Paso 3: Configuración del Dominio Base</h2>
+                <p class="text-content">Una vez completado el campo de LDAP con la IP del servidor de LDAP (en nuestro caso 127.0.0.1 y el puerto 389), es necesario completar el dominio por el cual accedemos al servicio de directorio (en nuestro caso dc=ejemplo,dc=com).</p>
+
+                <img src="image01-13.png" alt="Configuración dominio base" class="responsive-image">
+            </section>
+
+            <section class="lesson-section">
+                <h2 class="section-title">Paso 4: Selección de Servicios</h2>
+                <p class="text-content">El siguiente paso es elegir los servicios que se van a usar para la conexión (en nuestro caso sería password y group).</p>
+
+                <img src="image01-14.png" alt="Selección de servicios" class="responsive-image">
+            </section>
+
+            <section class="lesson-section">
+                <h2 class="section-title">Paso 5: Archivos de Configuración</h2>
+                <p class="text-content">Si por error se ha introducido algún parámetro incorrecto, siempre es posible modificar los archivos que intervienen en la configuración, que son nslcd.conf y nsswitch.conf. Lo importante en el archivo nslcd.conf es la ubicación del servidor LDAP. En el archivo nsswitch.conf se permite habilitar las opciones de group y passwd.</p>
+            </section>
+
+            <section class="lesson-section">
+                <h2 class="section-title">Paso 6: Iniciar el Servicio</h2>
+                <p class="text-content">A continuación, se debe iniciar el servicio nslcd para activar la validación de LDAP mediante el siguiente comando:</p>
+
+                <div class="code-block">
+                    <code># sudo service nslcd restart</code>
+                </div>
+            </section>
+
+            <section class="lesson-section">
+                <h2 class="section-title">Paso 7: Verificación de la Configuración</h2>
+                <p class="text-content">Por último, se verificará si la validación se ha configurado correctamente mediante el comando login. Debería validarse el usuario mencionado al principio (usuario: rrhh y password: cat123).</p>
+
+                <img src="image01-15.png" alt="Verificación de login" class="responsive-image">
+            </section>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

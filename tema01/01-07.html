@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estructura de Directorios y Protocolo LDAP</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/vs2015.min.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">Servicios de Red</div>
+
+        </div>
+    </header>
+
+    <div class="container">
+        <main class="main-content">
+            <div class="content-header">
+                <h1 class="content-title">Estructura de Directorios y Protocolo LDAP</h1>
+            </div>
+
+            <section class="lesson-section">
+                <h2 class="section-title">Estructura de los Directorios</h2>
+                <p class="text-content">La estructura de este tipo de directorios puede ser centralizada o distribuida dependiendo del diseño que se prefiera, por lo que se analizan ambas opciones:</p>
+
+                <div class="info-box note">
+                    <div class="info-box-title">Centralizado</div>
+                    <p class="text-content">Aquí todas las consultas se dirigen a un solo servidor, quien responde a todas ellas. La ventaja es que no es necesario sincronizarlo con otros servidores, pero el principal problema es que si falla, el sistema queda sin validación. Es esencial realizar al menos una copia de seguridad del servicio de directorio.</p>
+                </div>
+
+                <div class="info-box tip">
+                    <div class="info-box-title">Distribuido</div>
+                    <p class="text-content">Esta alternativa permite que la información esté repartida entre varios servidores que pueden responder a las consultas de los clientes. Los datos pueden estar divididos o replicados:</p>
+                    <ul>
+                        <li><strong>Información dividida:</strong> Los servidores involucrados en el servicio de directorio no contienen toda la información, sino una parte de ella.</li>
+                        <li><strong>Información replicada:</strong> Toda la información del directorio forma parte de todos los servidores que componen el conjunto del servicio de directorio.</li>
+                    </ul>
+                </div>
+
+                <div class="info-box warning">
+                    <p class="text-content"><strong>Configuración óptima:</strong> La opción más adecuada para configurar y proporcionar servicio de directorio es una combinación de las opciones anteriores, es decir, una parte de la información estará replicada y otra dividida. Esto sería lo ideal para compensar los inconvenientes de una u otra opción.</p>
+                </div>
+            </section>
+
+            <section class="lesson-section">
+                <h2 class="section-title">Protocolo LDAP</h2>
+                <p class="text-content">LDAP (Lightweight Directory Access Protocol) aparece como una alternativa a DAP. Se trata de una serie de estándares definidos por IETF, disponibles en varios RFC. Las características más destacadas que contribuyeron al éxito de LDAP son las siguientes:</p>
+
+                <ul class="feature-list">
+                    <li>LDAP utiliza TCP/IP en lugar de los protocolos teóricos del modelo OSI, que requiere menos recursos y es más accesible.</li>
+                    <li>LDAP representa la información mediante cadenas de caracteres en lugar de complejas estructuras ASN.1.</li>
+                    <li>El modelo funcional de LDAP es más sencillo y ha eliminado las opciones raras usadas en X.500, por lo que es más intuitivo de entender e implementar.</li>
+                    <li>LDAP define un protocolo para el contenido de los mensajes entre un cliente y el servidor propiamente dicho. Este protocolo permite acceder a las operaciones definidas por el cliente, las respuestas del servidor y los datos transportados en el mensaje.</li>
+                </ul>
+            </section>
+
+            <section class="lesson-section">
+                <h2 class="section-title">Implementación: OpenLDAP</h2>
+                <p class="text-content">La implementación de LDAP se realiza mediante OpenLDAP de código abierto desarrollado por OpenLDAP Project y cuenta con las siguientes características:</p>
+
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <h3>Multiplataforma</h3>
+                        <p class="text-content">Compatible con múltiples sistemas operativos</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Código libre</h3>
+                        <p class="text-content">Licencia de código abierto</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Basado en X.500</h3>
+                        <p class="text-content">Implementa el estándar X.500</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Estructura DIT</h3>
+                        <p class="text-content">Estructura de árbol denominada DIT</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Soporta IPv3 y LDAPv3</h3>
+                        <p class="text-content">Esquema distribuido compatible</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Internacionalización</h3>
+                        <p class="text-content">Uso de caracteres UTF-8</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Integración Linux</h3>
+                        <p class="text-content">Excelente integración con aplicaciones Linux</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Búsqueda avanzada</h3>
+                        <p class="text-content">Mecanismos de búsqueda potentes</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="lesson-section">
+                <h2 class="section-title">Modelos del Estándar LDAP</h2>
+                <p class="text-content">Profundizando, se va a analizar el estándar LDAP desde diferentes perspectivas que componen el servicio de directorio:</p>
+
+                <div class="info-box note">
+                    <div class="info-box-title">Modelo de Información</div>
+                    <p class="text-content">Este modelo nos permite dar forma a la estructura de la información almacenada en LDAP. El dato básico en el directorio es una entrada que corresponde con un objeto del mundo real. Una entrada se compone de un conjunto de atributos, cada uno con un tipo y sus valores.</p>
+                    <p class="text-content">El tipo, como en cualquier lenguaje de programación, define la información a almacenar y los valores son la información en sí. Todos los atributos tienen un identificador llamado OID y una sintaxis que permite definir qué valores puede tener.</p>
+                    <p class="text-content">Se asemeja a la forma de almacenar la información en Windows Server 2012, que también se basa en LDAP.</p>
+                <div class="info-box note">
+                    <div class="info-box-title">Conceptos Básicos</div>
+                    <ul>
+                        <li><strong>Entrada:</strong> Representa un objeto del mundo real (un usuario, un ordenador, un grupo, etc.)</li>
+                        <li><strong>Atributos:</strong> Cada entrada tiene atributos (nombre, apellido, correo, teléfono, etc.)</li>
+                        <li><strong>Tipo:</strong> Define qué clase de información puede almacenar el atributo</li>
+                        <li><strong>Valores:</strong> Los datos reales almacenados</li>
+                        <li><strong>OID:</strong> Identificador único para cada tipo de atributo</li>
+                    </ul>
+                </div>
+
+                <div class="info-box tip">
+                    <div class="info-box-title">Ejemplo Práctico</div>
+                    <p class="text-content">Un usuario "Juan Pérez" sería una entrada con atributos como:</p>
+                    <ul>
+                        <li>cn (Common Name): Juan Pérez</li>
+                        <li>mail: juan.perez@empresa.com</li>
+                        <li>telephoneNumber: 912345678</li>
+                        <li>department: Ventas</li>
+                    </ul>
+                    <div class="code-block">
+                        <code>dn: cn=Juan Pérez,dc=empresa,dc=com</code>
+                    </div>
+                    <p class="text-content">El "dn" (Distinguished Name) es la dirección única de esta entrada en el directorio.</p>
+                </div>
+                </div>
+
+                <div class="info-box tip">
+                    <div class="info-box-title">Modelo de Referencia</div>
+                    <p class="text-content">Al momento de nombrar los datos LDAP se define cómo se organizan y referencian estos. Primero se definen las estructuras de cómo se organizan las entradas y luego se indica cómo referenciar o acceder a las mismas.</p>
+                </div>
+            </section>
+                       <section class="lesson-section">
+                <h2 class="section-title">Aplicaciones Prácticas</h2>
+                <p class="text-content">Los servicios de directorio están presentes en muchísimas situaciones cotidianas:</p>
+
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <h3>Inicio de Sesión</h3>
+                        <p class="text-content">Autenticación de usuarios en redes corporativas</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Correo Electrónico</h3>
+                        <p class="text-content">Búsqueda de direcciones de correo corporativas</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Control de Acceso</h3>
+                        <p class="text-content">Gestión de permisos a edificios y recursos</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>DNS</h3>
+                        <p class="text-content">El sistema de nombres de dominio es un servicio de directorio distribuido</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Aplicaciones Web</h3>
+                        <p class="text-content">Single Sign-On (iniciar sesión una vez para acceder a múltiples servicios)</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>VPN</h3>
+                        <p class="text-content">Autenticación de usuarios remotos</p>
+                    </div>
+                </div>
+
+         
+            </section>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
+

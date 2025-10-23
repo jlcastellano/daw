@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instalación y Configuración de OpenLDAP en Linux</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/vs2015.min.css">
+</head>
+
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">Servicios de Red</div>
+        </div>
+    </header>
+
+    <div class="container">
+        <main class="main-content">
+            <div class="content-header">
+                <h1 class="content-title">Instalación y Configuración de OpenLDAP</h1>
+                <p class="content-subtitle">Servidor slapd en Debian/Kali Linux</p>
+            </div>
+
+            <section class="lesson-section">
+                <h2 class="section-title">Introducción</h2>
+                <p class="text-content">La instalación que se va a llevar a cabo es del servidor OpenLDAP, llamado
+                    slapd, y sus utilidades, que actúan como servicio DNS para sistemas operativos Linux bajo la versión
+                    de Debian, específicamente Kali Linux. La instalación se puede realizar en una máquina virtual que
+                    tenga una imagen de este sistema operativo o en una máquina física.</p>
+            </section>
+
+            <section class="lesson-section">
+                <h2 class="section-title">Paso 1: Instalación del Servidor</h2>
+                <p class="text-content">Para empezar, es necesario tener conexión a Internet y haber actualizado los
+                    repositorios de la máquina virtual o física donde se instalará el servicio de directorio LDAP,
+                    además de asignar una dirección IP fija para evitar problemas de conexión más adelante. Una vez que
+                    se han realizado todas estas acciones (comentadas en el servicio de DNS) se puede ejecutar la
+                    siguiente sentencia:</p>
+
+                <div class="code-block">
+                    <code># sudo apt install slapd ldap-utils</code>
+                </div>
+
+                <img src="image01-03.png"
+                    class="responsive-image" alt="Instalación de slapd y ldap-utils">
+
+                <p class="text-content">El servicio solicitará una contraseña de administrador; se escribirá 'admin' dos
+                    veces (la segunda para confirmación), aunque se puede elegir otra si se desea.</p>
+
+            </section>
+
+            <section class="lesson-section">
+                <h2 class="section-title">Paso 2: Configuración de slapd</h2>
+                <p class="text-content">A continuación, se configurará slapd con el siguiente comando. Se verá la
+                    ventana de configuración siguiente, donde se dejará seleccionada la opción por defecto (No):</p>
+
+                <div class="code-block">
+                    <code># sudo dpkg-reconfigure slapd</code>
+                </div>
+
+                <img src="image01-04.png"
+                    class="responsive-image" alt="Configuración inicial de slapd">
+
+                <h3 class="subsection-title">2.1. Nombre del dominio DNS</h3>
+                <p class="text-content">Cuando se pulse esta opción, aparecerá otra pantalla donde habrá que escribir el
+                    dominio que será necesario instalar en el servicio de directorio, en nuestro caso
+                    <strong>ejemplo.com</strong>.</p>
+
+                <img src="image01-05.png"
+                    class="responsive-image" alt="Configuración del dominio DNS">
+
+                <h3 class="subsection-title">2.2. Nombre de la organización</h3>
+                <p class="text-content">Después, se ingresará el nombre de la organización, que será
+                    <strong>ejemplo</strong>, siguiendo la nomenclatura anterior.</p>
+
+                <img src="image01-06.png"
+                    class="responsive-image" alt="Configuración del nombre de la organización">
+
+                <h3 class="subsection-title">2.3. Contraseña de administrador</h3>
+                <p class="text-content">El siguiente paso es ingresar nuevamente la contraseña de administrador dos
+                    veces, que en nuestro caso sería 'admin'.</p>
+
+
+                <h3 class="subsection-title">2.4. Purgar la base de datos</h3>
+                <p class="text-content">Por último, la configuración preguntará si se desea purgar la base de datos; la
+                    respuesta más adecuada es que SÍ.</p>
+
+                <img src="image01-07.png"
+                    class="responsive-image" alt="Purgar base de datos">
+
+                <h3 class="subsection-title">2.5. Mover base de datos anterior</h3>
+                <p class="text-content">Luego, preguntará si se desea mover la base de datos de LDAP anterior; la
+                    respuesta es SÍ.</p>
+
+                <img src="image01-08.png"
+                    class="responsive-image" alt="Mover base de datos anterior">
+            </section>
+
+            <section class="lesson-section">
+                <h2 class="section-title">Gestión del Servicio LDAP</h2>
+                <p class="text-content">Ya se tiene instalado el servicio de directorio LDAP, por lo que lo único que
+                    nos queda es iniciar y detener el servicio. Esto se realiza con los siguientes comandos:</p>
+
+                <div class="code-block">
+                    <code># sudo service slapd start
+# sudo service slapd stop</code>
+                </div>
+
+                <p class="text-content">Una vez que levantamos el servicio, el servidor LDAP estará escuchando por el
+                    puerto 389 de TCP y UDP. Para conexiones seguras mediante SSL, se utilizará el puerto 636.</p>
+
+                <h3 class="subsection-title">Otros comandos de gestión</h3>
+                <p class="text-content">Otros comandos que nos permiten gestionar LDAP son los siguientes:</p>
+
+                <ul class="feature-list">
+                    <li><code># service slapd reload</code> → permite recargar la configuración del servicio sin
+                        reiniciarlo.</li>
+                    <li><code># service slapd restart</code> → reinicia el servicio.</li>
+                    <li><code># service slapd force-reload</code> → fuerza la recarga de la configuración del servicio.
+                    </li>
+                    <li><code># service slapd status</code> → comprueba si el servicio está activo o inactivo.</li>
+                </ul>
+            </section>
+
+            <section class="lesson-section">
+                <h2 class="section-title">Paso 3: Herramientas del Servidor LDAP</h2>
+                <p class="text-content">Se van a detallar algunas herramientas del servidor LDAP. Para mostrar la
+                    información que tenemos, se debe teclear el siguiente comando:</p>
+
+                <div class="code-block">
+                    <code># sudo slapcat</code>
+                </div>
+
+
+                <p class="text-content">Y mostrará una salida, teniendo en cuenta nuestro dominio
+                    <strong>ejemplo.com</strong>, como la siguiente:</p>
+
+                <img src="image01-09.png"
+                    class="responsive-image" alt="Salida del comando slapcat">
+
+                <h3 class="subsection-title">Otras herramientas del servidor</h3>
+                <ul class="feature-list">
+                    <li><strong>#slapdd:</strong> permite insertar entradas desde un fichero LDIF.</li>
+                    <li><strong>#slapindex:</strong> regenera los índices.</li>
+                    <li><strong>#slappasswd:</strong> sirve para obtener una contraseña encriptada.</li>
+                </ul>
+            </section>
+
+            <section class="lesson-section">
+                <h2 class="section-title">Comandos de Cliente LDAP</h2>
+                <p class="text-content">Por último, veremos algunos comandos para agregar información al servicio de
+                    directorio LDAP desde el punto de vista del cliente, como son los siguientes:</p>
+
+                <h3 class="subsection-title">ldapsearch</h3>
+                <p class="text-content">Para seleccionar los objetos de un directorio a partir de cierta raíz del árbol
+                    de directorio. Un ejemplo de sentencia sería la siguiente (buscaría todos los objetos dentro de
+                    nuestro dominio ejemplo.com):</p>
+
+                <div class="code-block">
+                    <code># ldapsearch -x -D "cn=admin,dc=ejemplo,dc=com" -w admin -b "dc=ejemplo,dc=com" "(objectclass=*)"</code>
+                </div>
+
+                <br>
+
+                <h3 class="subsection-title">ldapmodify</h3>
+                <p class="text-content">Para modificar los objetos de un directorio a partir de cierta raíz del servicio
+                    de directorio. Un ejemplo sería:</p>
+
+                <div class="code-block">
+                    <code># sudo ldapmodify -D cn=admin,dc=ejemplo,dc=com -w admin -f Modify.ldif -c</code>
+                </div>
+
+                <p class="text-content">La línea anterior permite conectarnos como administrador (admin) a nuestro
+                    dominio ejemplo.com y modificar en el servicio de directorio la información contenida en el fichero
+                    Modify.ldif. La opción -c permite reportar los errores.</p>
+
+                <h3 class="subsection-title">ldapadd</h3>
+                <p class="text-content">Para añadir objetos a nuestro servicio de directorio.</p>
+
+                <div class="code-block">
+                    <code># sudo ldapadd -D cn=admin,dc=ejemplo,dc=com -w admin -f Add.ldif -c</code>
+                </div>
+
+                <p class="text-content">La línea anterior permite conectarnos como administrador (admin) a nuestro
+                    dominio ejemplo.com e introducir en el servicio de directorio el fichero Add.ldif. La opción -c
+                    permite reportar los errores.</p>
+
+                <h3 class="subsection-title">ldapdelete</h3>
+                <p class="text-content">Para borrar entradas de nuestro servicio de directorio.</p>
+
+                <div class="code-block">
+                    <code># sudo ldapdelete -D "cn=root,dc=ejemplo,dc=com" cn=Juan Muñoz, ou=usuarios, dc=ejemplo,dc=com</code>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>
