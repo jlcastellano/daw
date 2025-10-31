@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Árbol de Estructura LDAP</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/vs2015.min.css">
+</head>
+
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">Servicios de Red</div>
+        </div>
+    </header>
+
+    <div class="container">
+        <main class="main-content">
+            <div class="content-header">
+                <h1 class="content-title">Árbol de Estructura LDAP - Visualización Jerárquica</h1>
+            </div>
+
+            <section class="lesson-section">
+                <h2 class="section-title">Visualización Jerárquica Completa</h2>
+                
+                <div class="code-container">
+                    <div class="code-header">
+                        <span>Árbol LDAP</span>
+                        <span class="language-badge">estructura</span>
+                    </div>
+                    <div class="code-content">
+                        <button class="copy-button">Copiar</button>
+                        <pre><code>dc=ejemplo,dc=com (Raíz)
+    |
+    ou=Departamentos
+        |
+        |_____ ou=Informatica
+        |         |
+        |         |_____ ou=Usuarios
+        |                   |
+        |                   |_____ uid=tecnico1
+        |                            ├─ cn: Tecnico Sistemas
+        |                            ├─ sn: Sistemas
+        |                            ├─ givenName: Tecnico
+        |                            ├─ mail: tecnico1@ejemplo.com
+        |                            ├─ uidNumber: 2001
+        |                            ├─ gidNumber: 2001
+        |                            ├─ homeDirectory: /home/tecnico1
+        |                            ├─ loginShell: /bin/bash
+        |                            └─ userPassword: {SSHA}SCegANg1AeWNEBen3b5aFmIX2HFssiuJ
+        |
+        |_____ ou=Contabilidad
+        |         |
+        |         |_____ ou=Usuarios
+        |                   |
+        |                   |_____ uid=contador1
+        |                            ├─ cn: Contador Principal
+        |                            ├─ sn: Principal
+        |                            ├─ givenName: Contador
+        |                            ├─ mail: contador1@ejemplo.com
+        |                            ├─ uidNumber: 2002
+        |                            ├─ gidNumber: 2002
+        |                            ├─ homeDirectory: /home/contador1
+        |                            ├─ loginShell: /bin/bash
+        |                            └─ userPassword: {SSHA}SCegANg1AeWNEBen3b5aFmIX2HFssiuJ
+        |
+        |_____ ou=RecursosHumanos
+                  |
+                  |_____ ou=Usuarios
+                            |
+                            |_____ uid=rrhh
+                                     ├─ cn: Recursos Humanos
+                                     ├─ sn: Humanos
+                                     ├─ givenName: Recursos
+                                     ├─ mail: rrhh@ejemplo.com
+                                     ├─ uidNumber: 2003
+                                     ├─ gidNumber: 2003
+                                     ├─ homeDirectory: /home/rrhh
+                                     ├─ loginShell: /bin/bash
+                                     └─ userPassword: {SSHA}QzuDFkzdFz7XuX8saEf12hdM24FjVdRl</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section class="lesson-section">
+                <h2 class="section-title">Estructura Detallada por Niveles</h2>
+
+                <p class="text-content"><strong>Nivel 1: Dominio Base</strong></p>
+                <div class="code-block">
+                    <code>dc=ejemplo,dc=com</code>
+                </div>
+                <p class="text-content">Es la raíz del árbol LDAP. Representa el dominio de la organización.</p>
+
+                <p class="text-content"><strong>Nivel 2: Unidad Organizativa Principal</strong></p>
+                <div class="code-block">
+                    <code>ou=Departamentos,dc=ejemplo,dc=com</code>
+                </div>
+                <p class="text-content">Contiene todos los departamentos de la empresa. Es el contenedor principal para la estructura organizativa.</p>
+
+                <p class="text-content"><strong>Nivel 3: Departamentos Individuales</strong></p>
+                <p class="text-content">Se crean tres departamentos:</p>
+                
+                <div class="code-container">
+                    <div class="code-header">
+                        <span>Departamento de Informática</span>
+                        <span class="language-badge">LDAP</span>
+                    </div>
+                    <div class="code-content">
+                        <button class="copy-button">Copiar</button>
+                        <pre><code>ou=Informatica,ou=Departamentos,dc=ejemplo,dc=com
+    ├─ objectClass: organizationalUnit, top
+    ├─ ou: Informatica
+    └─ description: Departamento de Informatica</code></pre>
+                    </div>
+                </div>
+
+                <div class="code-container">
+                    <div class="code-header">
+                        <span>Departamento de Contabilidad</span>
+                        <span class="language-badge">LDAP</span>
+                    </div>
+                    <div class="code-content">
+                        <button class="copy-button">Copiar</button>
+                        <pre><code>ou=Contabilidad,ou=Departamentos,dc=ejemplo,dc=com
+    ├─ objectClass: organizationalUnit, top
+    ├─ ou: Contabilidad
+    └─ description: Departamento de Contabilidad</code></pre>
+                    </div>
+                </div>
+
+                <div class="code-container">
+                    <div class="code-header">
+                        <span>Departamento de Recursos Humanos</span>
+                        <span class="language-badge">LDAP</span>
+                    </div>
+                    <div class="code-content">
+                        <button class="copy-button">Copiar</button>
+                        <pre><code>ou=RecursosHumanos,ou=Departamentos,dc=ejemplo,dc=com
+    ├─ objectClass: organizationalUnit, top
+    ├─ ou: RecursosHumanos
+    └─ description: Departamento de Recursos Humanos</code></pre>
+                    </div>
+                </div>
+
+                <p class="text-content"><strong>Nivel 4: Contenedores de Usuarios</strong></p>
+                <p class="text-content">Cada departamento tiene su propio contenedor de usuarios:</p>
+
+                <div class="code-block">
+                    <code>ou=Usuarios,ou=Informatica,ou=Departamentos,dc=ejemplo,dc=com</code>
+                </div>
+                <div class="code-block">
+                    <code>ou=Usuarios,ou=Contabilidad,ou=Departamentos,dc=ejemplo,dc=com</code>
+                </div>
+                <div class="code-block">
+                    <code>ou=Usuarios,ou=RecursosHumanos,ou=Departamentos,dc=ejemplo,dc=com</code>
+                </div>
+            </section>
+
+            <section class="lesson-section">
+                <h2 class="section-title">Usuarios Individuales (Nivel 5)</h2>
+
+                <p class="text-content"><strong>Usuario 1: Técnico de Sistemas</strong></p>
+                <div class="code-container">
+                    <div class="code-header">
+                        <span>uid=tecnico1</span>
+                        <span class="language-badge">inetOrgPerson</span>
+                    </div>
+                    <div class="code-content">
+                        <button class="copy-button">Copiar</button>
+                        <pre><code>DN: uid=tecnico1,ou=Usuarios,ou=Informatica,ou=Departamentos,dc=ejemplo,dc=com
+
+Atributos:
+├─ objectClass: inetOrgPerson, posixAccount, shadowAccount
+├─ uid: tecnico1
+├─ cn: Tecnico Sistemas (Nombre Completo)
+├─ sn: Sistemas (Apellido)
+├─ givenName: Tecnico (Nombre)
+├─ mail: tecnico1@ejemplo.com
+├─ uidNumber: 2001 (ID de usuario Unix)
+├─ gidNumber: 2001 (ID de grupo Unix)
+├─ homeDirectory: /home/tecnico1
+├─ loginShell: /bin/bash
+└─ userPassword: [Encriptada con SSHA]</code></pre>
+                    </div>
+                </div>
+
+                <p class="text-content"><strong>Usuario 2: Contador Principal</strong></p>
+                <div class="code-container">
+                    <div class="code-header">
+                        <span>uid=contador1</span>
+                        <span class="language-badge">inetOrgPerson</span>
+                    </div>
+                    <div class="code-content">
+                        <button class="copy-button">Copiar</button>
+                        <pre><code>DN: uid=contador1,ou=Usuarios,ou=Contabilidad,ou=Departamentos,dc=ejemplo,dc=com
+
+Atributos:
+├─ objectClass: inetOrgPerson, posixAccount, shadowAccount
+├─ uid: contador1
+├─ cn: Contador Principal
+├─ sn: Principal
+├─ givenName: Contador
+├─ mail: contador1@ejemplo.com
+├─ uidNumber: 2002
+├─ gidNumber: 2002
+├─ homeDirectory: /home/contador1
+├─ loginShell: /bin/bash
+└─ userPassword: [Encriptada con SSHA]</code></pre>
+                    </div>
+                </div>
+
+                <p class="text-content"><strong>Usuario 3: Recursos Humanos</strong></p>
+                <div class="code-container">
+                    <div class="code-header">
+                        <span>uid=rrhh</span>
+                        <span class="language-badge">inetOrgPerson</span>
+                    </div>
+                    <div class="code-content">
+                        <button class="copy-button">Copiar</button>
+                        <pre><code>DN: uid=rrhh,ou=Usuarios,ou=RecursosHumanos,ou=Departamentos,dc=ejemplo,dc=com
+
+Atributos:
+├─ objectClass: inetOrgPerson, posixAccount, shadowAccount
+├─ uid: rrhh
+├─ cn: Recursos Humanos
+├─ sn: Humanos
+├─ givenName: Recursos
+├─ mail: rrhh@ejemplo.com
+├─ uidNumber: 2003
+├─ gidNumber: 2003
+├─ homeDirectory: /home/rrhh
+├─ loginShell: /bin/bash
+└─ userPassword: [Encriptada con SSHA]</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section class="lesson-section">
+                <h2 class="section-title">Explicación de los ObjectClass Utilizados</h2>
+
+                <p class="text-content"><strong>organizationalUnit (top)</strong></p>
+                <p class="text-content">Define unidades organizativas (contenedores). Se usa para crear la estructura de departamentos y contenedores de usuarios.</p>
+
+                <p class="text-content"><strong>inetOrgPerson</strong></p>
+                <p class="text-content">Proporciona información personal y de contacto de los usuarios. Incluye atributos como cn (nombre completo), sn (apellido), givenName (nombre) y mail (correo electrónico).</p>
+
+                <p class="text-content"><strong>posixAccount</strong></p>
+                <p class="text-content">Proporciona información de cuenta Unix/Linux. Incluye atributos como uid, uidNumber, gidNumber, homeDirectory y loginShell. Permite la autenticación de usuarios en sistemas Unix.</p>
+
+                <p class="text-content"><strong>shadowAccount</strong></p>
+                <p class="text-content">Proporciona información de contraseña y políticas de expiración (Unix). Incluye el atributo userPassword que almacena la contraseña encriptada.</p>
+            </section>
+
+            <section class="lesson-section">
+                <h2 class="section-title">Resumen de la Estructura</h2>
+
+                <div class="code-container">
+                    <div class="code-header">
+                        <span>Estadísticas del Directorio LDAP</span>
+                        <span class="language-badge">resumen</span>
+                    </div>
+                    <div class="code-content">
+                        <button class="copy-button">Copiar</button>
+                        <pre><code>Nivel 1: 1 Dominio (dc=ejemplo,dc=com)
+Nivel 2: 1 OU Principal (ou=Departamentos)
+Nivel 3: 3 Departamentos (Informatica, Contabilidad, RecursosHumanos)
+Nivel 4: 3 Contenedores de Usuarios
+Nivel 5: 3 Usuarios (tecnico1, contador1, rrhh)
+
+Total de entradas LDAP: 11
+
+Distribución:
+- Departamento de Informática: 1 usuario
+- Departamento de Contabilidad: 1 usuario
+- Departamento de Recursos Humanos: 1 usuario</code></pre>
+                    </div>
+                </div>
+
+                <p class="text-content">Esta estructura es típica para empresas pequeñas que necesitan organizar usuarios por departamentos con autenticación Unix/Linux integrada. La jerarquía permite una gestión centralizada de usuarios y facilita la aplicación de políticas de acceso por departamento.</p>
+            </section>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>
