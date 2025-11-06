@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servicio de Transferencia de Ficheros - Comandos FTP</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/vs2015.min.css">
+</head>
+
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">Servidores FTP</div>
+        </div>
+    </header>
+
+    <div class="container">
+        <main class="main-content">
+            <div class="content-header">
+                <h1 class="content-title">Comandos FTP</h1>
+                <p class="content-subtitle">Comandos comunes en la consola FTP</p>
+            </div>
+
+            <section class="lesson-section">
+                <h2 class="section-title">1.8. Comandos FTP</h2>
+                <p class="text-content">En la consola ftp pueden estar disponibles múltiples comandos, algunos de los
+                    más empleados son los recogidos en la siguiente tabla:</p>
+
+                <p class="text-content"><strong>Comandos FTP</strong></p>
+
+                <p class="text-content"><strong>ABRIR/CERRAR CONEXIÓN</strong></p>
+
+                <table class="comparison-table">
+                    <tr>
+                        <th>COMANDO/S Y ARGUMENTOS</th>
+                        <th>EXPLICACIÓN</th>
+                    </tr>
+                    <tr>
+                        <td>open servidor</td>
+                        <td>Inicia conexión remota con un servidor ftp.</td>
+                    </tr>
+                    <tr>
+                        <td>close / disconnect</td>
+                        <td>Finalizan la sesión ftp sin cerrar la consola ftp.</td>
+                    </tr>
+                    <tr>
+                        <td>bye / quit / exit</td>
+                        <td>Terminan la sesión ftp y salen de la consola ftp.</td>
+                    </tr>
+                    <tr>
+                        <td>!</td>
+                        <td>Sale a línea de comandos del sistema operativo temporalmente sin cortar la conexión. Para
+                            volver, teclea exit en la línea de comandos.</td>
+                    </tr>
+                </table>
+
+                <p class="text-content"><strong>AYUDA</strong></p>
+
+                <table class="comparison-table">
+                    <tr>
+                        <th>COMANDO/S Y ARGUMENTOS</th>
+                        <th>EXPLICACIÓN</th>
+                    </tr>
+                    <tr>
+                        <td>? / help</td>
+                        <td>Muestra una lista de los comandos disponibles.</td>
+                    </tr>
+                    <tr>
+                        <td>? comando / help comando</td>
+                        <td>Muestra la información relativa al comando.</td>
+                    </tr>
+                </table>
+
+                <p class="text-content"><strong>TRABAJAR CON DIRECTORIOS</strong></p>
+
+                <table class="comparison-table">
+                    <tr>
+                        <th>COMANDO/S Y ARGUMENTOS</th>
+                        <th>EXPLICACIÓN</th>
+                    </tr>
+                    <tr>
+                        <td>cd directorio</td>
+                        <td>Cambia de directorio en el servidor remoto.</td>
+                    </tr>
+                    <tr>
+                        <td>lcd directorio</td>
+                        <td>Cambiarse de directorio en el equipo local (cliente ftp).</td>
+                    </tr>
+                    <tr>
+                        <td>dir directorio / ls directorio</td>
+                        <td>Listan el contenido del directorio remoto actual.</td>
+                    </tr>
+                    <tr>
+                        <td>pwd</td>
+                        <td>Muestra el directorio activo en el servidor.</td>
+                    </tr>
+                    <tr>
+                        <td>lpwd</td>
+                        <td>Muestra el directorio activo en el equipo local (cliente ftp).</td>
+                    </tr>
+                    <tr>
+                        <td>rmdir directorio</td>
+                        <td>Elimina un directorio vacío en el servidor.</td>
+                    </tr>
+                    <tr>
+                        <td>mkdir directorio</td>
+                        <td>Crea un directorio en el servidor.</td>
+                    </tr>
+                </table>
+
+                <p class="text-content"><strong>TRABAJAR CON FICHEROS</strong></p>
+
+                <table class="comparison-table">
+                    <tr>
+                        <th>COMANDO/S Y ARGUMENTOS</th>
+                        <th>EXPLICACIÓN</th>
+                    </tr>
+                    <tr>
+                        <td>delete archivo</td>
+                        <td>Borrar un archivo en el servidor remoto.</td>
+                    </tr>
+                    <tr>
+                        <td>mdelete patrón</td>
+                        <td>Borrar varios archivos según un patrón.</td>
+                    </tr>
+                    <tr>
+                        <td>get archivo</td>
+                        <td>Obtiene archivo en el equipo cliente desde el servidor remoto.</td>
+                    </tr>
+                    <tr>
+                        <td>mget archivos</td>
+                        <td>Obtiene varios archivos desde el servidor remoto.</td>
+                    </tr>
+                    <tr>
+                        <td>put archivo</td>
+                        <td>Envía un archivo al servidor remoto.</td>
+                    </tr>
+                    <tr>
+                        <td>mput archivos</td>
+                        <td>Envía varios archivos al servidor remoto.</td>
+                    </tr>
+                    <tr>
+                        <td>rename archivo</td>
+                        <td>Cambia el nombre a un archivo en el servidor.</td>
+                    </tr>
+                    <tr>
+                        <td>ascii</td>
+                        <td>Para configurar y transferir archivos tipo ascii.</td>
+                    </tr>
+                    <tr>
+                        <td>binary</td>
+                        <td>Para configurar y transferir archivos tipo binario.</td>
+                    </tr>
+                    <tr>
+                        <td>less archivo</td>
+                        <td>Leer contenido de archivo mediante el comando less.</td>
+                    </tr>
+                </table>
+
+                <p class="text-content"><strong>TRABAJAR CON PERMISOS</strong></p>
+
+                <table class="comparison-table">
+                    <tr>
+                        <th>COMANDO/S Y ARGUMENTOS</th>
+                        <th>EXPLICACIÓN</th>
+                    </tr>
+                    <tr>
+                        <td>chmod</td>
+                        <td>Cambio de permisos en el servidor remoto.</td>
+                    </tr>
+                    <tr>
+                        <td>umask</td>
+                        <td>Configura el sistema de permisos en el lado remoto.</td>
+                    </tr>
+                </table>
+            </section>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>

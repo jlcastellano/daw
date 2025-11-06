@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servicio de Transferencia de Ficheros - Introducción</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/vs2015.min.css">
+</head>
+
+<body>
+    <header>
+        <div class="header">
+            <div class="header-content">
+                <div class="logo">Servidores FTP</div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <main class="main-content">
+            <div class="content-header">
+                <h1 class="content-title">Servicio de Transferencia de Ficheros</h1>
+                <p class="content-subtitle">Introducción al protocolo FTP</p>
+            </div>
+
+            <section class="lesson-section">
+                <h2 class="section-title">1. Servicio de transferencia de ficheros</h2>
+                <p class="text-content">Normalmente para subir archivos en Internet, ya sean de texto, imágenes,
+                    vídeo... hubo que emplear algún método de transferencia de archivos para ubicarlos.</p>
+
+                <p class="text-content">Uno de los métodos más empleados como servicio de transferencia de archivos se
+                    realiza mediante el servicio ftp. Éste utiliza el protocolo FTP empleando la arquitectura
+                    cliente-servidor. Así el servidor ftp esperará peticiones para transferir los archivos y el cliente
+                    ftp, ya sea por terminal o de modo gráfico, realizará esas peticiones.</p>
+
+                <p class="text-content">Uno de los principales problemas, a pesar de ser uno de los métodos más
+                    utilizados del protocolo FTP es la no seguridad de la información, esto es, la transferencia tiene
+                    lugar sin cifrar la información transferida. Este no sólo es un problema del protocolo FTP sino de
+                    muchos de los protocolos utilizados en Internet, puesto que en el comienzo de Internet no se preveía
+                    su expansión actual y no se pensaba en asegurar la información mediante cifrado, sino simplemente
+                    asegurar el buen funcionamiento. Hoy en día existen extensiones sobre el protocolo FTP que aseguran
+                    el cifrado en la transferencia, como FTPS (File Transfer Protocol Secure.), empleando el cifrado
+                    SSL/TLS.</p>
+
+                <p class="text-content">Protocolos criptográficos que proporcionan comunicaciones seguras por una red,
+                    comúnmente Internet.</p>
+
+                <p class="text-content">No confundir FTPS con SFTP (Secure File Transport Protocol.), ya que este último
+                    es implementado con otro servicio, el servicio SSH (Secure Shell.), y es utilizado para conexiones
+                    remotas seguras a través de un terminal de comandos.</p>
+            </section>
+
+            <section class="lesson-section">
+                <h2 class="section-title">1.1. ¿Cómo funciona?</h2>
+                <p class="text-content">El protocolo FTP emplea una arquitectura cliente/servidor, siendo el cliente ftp
+                    quien solicita la transferencia de archivos y el servidor ftp quien ofrece los archivos. Pertenece a
+                    la familia de protocolos de red TCP y por lo tanto es un protocolo orientado a conexión, esto es, el
+                    cliente ftp necesita establecer una conexión con el servidor para empezar la transferencia de
+                    ficheros. Si no se establece la conexión ésta no tiene lugar.</p>
+
+                <p class="text-content">Puesto que FTP es un protocolo que no utiliza una autenticación de usuarios y
+                    contraseña cifrada, se considera un protocolo inseguro y no se debería utilizar a menos que sea
+                    absolutamente necesario. Verás que existen otras alternativas al FTP, como por ejemplo el protocolo
+                    FTPS, para mantener comunicaciones cifradas. Aún así, el protocolo FTP está muy extendido en
+                    Internet ya que a menudo los usuarios necesitan transferir archivos entre máquinas sin importar la
+                    seguridad.</p>
+
+                <p class="text-content">El protocolo FTP requiere de dos puertos TCP en el servidor para su
+                    funcionamiento, a diferencia de la mayoría de los protocolos utilizados en Internet que solamente
+                    requieren un puerto en el servidor. Un puerto es necesario para establecer el control de la conexión
+                    y otro se utiliza para el control de la transmisión, es decir, un puerto se utiliza para establecer
+                    la conexión entre el cliente y el servidor y otro para la transferencia de datos.</p>
+
+                <p class="text-content">Los puertos TCP del servidor en cuestión, suelen ser el 21 para el control de la
+                    conexión y otro a determinar según el modo de conexión: podría ser el 20 o incluso uno mayor de
+                    1024. Hay que tener en cuenta que estos puertos pueden ser modificados en la configuración del
+                    servidor, así no es obligatorio que los puertos 21 y 20 sean los asignados al servidor FTP, pero sí
+                    son los que éste maneja por defecto. El puerto 21 también es conocido como puerto de comandos y el
+                    puerto 20 como puerto de datos.</p>
+
+                <p class="text-content">La ventaja que supone utilizar el protocolo FTP se basa en su alto rendimiento y
+                    sencillez, que lo hacen una opción conveniente para la transferencia de archivos a través de
+                    Internet.</p>
+            </section>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>

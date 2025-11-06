@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servicio de Transferencia de Ficheros - Tipos de Usuarios</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/vs2015.min.css">
+</head>
+
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">Servidores FTP</div>
+        </div>
+    </header>
+
+    <div class="container">
+        <main class="main-content">
+            <div class="content-header">
+                <h1 class="content-title">Tipos de Usuarios en FTP</h1>
+                <p class="content-subtitle">Usuarios anónimos, del sistema y virtuales</p>
+            </div>
+
+            <section class="lesson-section">
+                <h2 class="section-title">1.3. Tipos de usuarios</h2>
+                <p class="text-content">¿Qué usuarios se pueden conectar al servidor ftp? ¿cualquiera? ¿sólo los
+                    usuarios del sistema?</p>
+
+                <p class="text-content">Bien, típicamente existen dos tipos de usuarios:</p>
+
+                <ul class="feature-list">
+                    <li><strong>Usuarios anónimos:</strong> usuarios que tienen acceso y permisos limitados por el
+                        sistema de archivos. Al conectarse al servidor FTP sólo deben introducir una contraseña
+                        simbólica, normalmente cualquier dirección de correo -real o ficticia-, por ejemplo: a@ .</li>
+                    <li><strong>Usuarios del sistema:</strong> aquellos que disponen de una cuenta en la máquina que
+                        ofrece el servicio FTP. Al conectarse al servidor FTP deben introducir su contraseña de sistema.
+                    </li>
+                </ul>
+
+                <p class="text-content">Pero en ciertos servidores, como el servidor ProFTPD, existe una tercera
+                    posibilidad muy interesante: usuarios virtuales. Los usuarios virtuales poseen acceso y permisos al
+                    servidor FTP sin necesidad de ser usuarios del sistema, por lo tanto si un usuario virtual quisiera
+                    acceder al sistema operativo como si fuese un usuario del sistema, ya sea de forma local o remota no
+                    podría, pues su cuenta de usuario no existe en el sistema.</p>
+
+                <p class="text-content">Los usuarios virtuales tienen definida una contraseña propia y pueden estar
+                    definidos en ficheros de autenticación (de texto) con el mismo formato que los del sistema operativo
+                    GNU/Linux /etc/passwd, directorios LDAP, bases de datos SQL y servidores RADIUS.</p>
+
+                <p class="text-content">Dependiendo del servidor ftp, podrás tener unos métodos de autenticación de
+                    usuarios u otros, por ejemplo en el servidor ftp ProFTPD se permite los siguientes métodos:</p>
+
+                <ul class="feature-list">
+                    <li>Ficheros de autenticación del sistema operativo: /etc/passwd y /etc/shadow: Para ello usa las
+                        directivas AuthUserFile y AuthGroupFile.</li>
+                    <li>Usuarios virtuales definidos mediante ficheros de autenticación (de texto) propios, distintos de
+                        los del sistema operativo: para ello también usa las directivas AuthUserFile y AuthGroupFile.
+                    </li>
+                    <li>Autenticación PAM: Es necesario establecer la directiva AuthPAMAuthorative a 'on'.</li>
+                    <li>Bases de datos SQL, tales como MySQL o Postgres. Para ello emplea el módulo mod_sql.</li>
+                    <li>LDAP: Para ello emplea el módulo mod_ldap.</li>
+                    <li>RADIUS: Para ello emplea el módulo mod_radius.</li>
+                </ul>
+            </section>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>

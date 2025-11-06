@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servicio de Transferencia de Ficheros - Tipos de Transferencia</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/vs2015.min.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">Servidores FTP</div>
+        </div>
+    </header>
+
+    <div class="container">
+        <main class="main-content">
+            <div class="content-header">
+                <h1 class="content-title">Tipos de Transferencia de Archivos</h1>
+                <p class="content-subtitle">ASCII y Binario</p>
+            </div>
+
+            <section class="lesson-section">
+                <h2 class="section-title">1.5. Tipos de transferencia de archivos</h2>
+                <p class="text-content">Desde el punto de vista de FTP, los archivos se agrupan en dos tipos:</p>
+
+                <ul class="feature-list">
+                    <li><strong>Archivos ASCII:</strong> son archivos de texto plano (.txt, .ps, .html...)</li>
+                    <li><strong>Archivos binarios:</strong> todo lo que no son archivos de texto: ejecutables (.exe), imágenes (.jpg, .png ...), archivos de audio (.mp3, .wav ...), vídeo (.avi, .mov …) , etcétera.</li>
+                </ul>
+
+                <p class="text-content">Es muy importante saber con qué tipo de archivos estás trabajando en la transferencia ya que si no utilizas las opciones adecuadas puedes destruir la información del archivo. El servidor ftp permite configurar la transferencia de archivos según el tipo del mismo, es por eso que al ejecutar el cliente FTP, antes de transferir un archivo, debes utilizar uno de los siguientes comandos o poner la correspondiente opción en un programa con interfaz gráfica:</p>
+
+                <ul class="feature-list">
+                    <li>ascii para tipos de archivos ascii.</li>
+                    <li>binary para tipos de archivos binarios.</li>
+                </ul>
+            </section>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

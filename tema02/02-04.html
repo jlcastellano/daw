@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servicio de Transferencia de Ficheros - Modos de Conexión</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/vs2015.min.css">
+</head>
+
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">Servidores FTP</div>
+        </div>
+    </header>
+
+    <div class="container">
+        <main class="main-content">
+            <div class="content-header">
+                <h1 class="content-title">Modos de Conexión del Cliente FTP</h1>
+                <p class="content-subtitle">Modo activo y pasivo</p>
+            </div>
+
+            <section class="lesson-section">
+                <h2 class="section-title">1.4. Modos de conexión del cliente</h2>
+                <p class="text-content">Ya se ha comentado que el servidor FTP a diferencia de otros servidores necesita
+                    dos puertos TCP para hacer posible la transferencia de archivos. Ahora bien, ¿son estos puertos
+                    siempre los mismos o no? ¿son independientes del tipo de cliente y servidor o no? Pues, básicamente
+                    depende de dos factores: del modo de conexión del cliente ftp y de la configuración del servidor
+                    ftp.</p>
+
+                <p class="text-content">A priori, si no modificamos la configuración del servidor ftp esté otorgará
+                    siempre el puerto TCP 21 para el canal de conexión de control. Es el puerto del canal de transmisión
+                    de datos, el que varía, ¿cómo?, pues según el modo de conexión del cliente ftp, que puede ser activo
+                    o pasivo.</p>
+
+                <p class="text-content">Cuando una aplicación cliente FTP inicia una conexión a un servidor FTP, abre el
+                    puerto 21 en el servidor. Se utiliza este puerto para arrojar todos los comandos al servidor.
+                    Cualquier petición de datos desde el servidor se devuelve al cliente a través de otro puerto TCP del
+                    servidor dependiendo del modo de conexión del cliente. Así:</p>
+
+                <ul class="feature-list">
+                    <li><strong>El modo activo</strong> es el método original utilizado por el protocolo FTP para la
+                        transferencia de datos a la aplicación cliente. Cuando el cliente FTP inicia una transferencia
+                        de datos, el servidor abre una conexión desde el puerto 20 en el servidor para la dirección IP y
+                        un puerto aleatorio sin privilegios (mayor que 1024) especificado por el cliente. Este arreglo
+                        implica que la máquina cliente debe poder aceptar conexiones en cualquier puerto superior al
+                        1024. Con el crecimiento de las redes inseguras, tales como Internet, es muy común el uso de
+                        cortafuegos para proteger las máquinas cliente. Debido a que estos cortafuegos en el lado del
+                        cliente normalmente rechazan las conexiones entrantes desde servidores FTP en modo activo, se
+                        creó el modo pasivo.</li>
+                    <li><strong>La aplicación FTP cliente</strong> es la que inicia el modo pasivo, de la misma forma
+                        que el modo activo. El cliente FTP indica que desea acceder a los datos en modo pasivo y el
+                        servidor proporciona la dirección IP y el puerto aleatorio, sin privilegios (mayor que 1024) en
+                        el servidor. Luego, el cliente se conecta al puerto en el servidor y descarga la información
+                        requerida.</li>
+                </ul>
+
+                <p class="text-content">A continuación puedes ver una imagen que muestra el funcionamiento de los dos
+                    modos: el activo y el pasivo.</p>
+<img src="imagen02-01.png" alt="Modos de conexión FTP" class="responsive-image">
+                <p class="text-content">En sistemas GNU/Linux es típico encontrar el archivo /etc/services que contiene
+                    una lista de puertos TCP/UDP relacionado con los servicios estándar que trabajan en los mismos.
+                    Ejecuta el comando cat /etc/services | grep ftp y encontrarás todos los puertos y servidores
+                    relacionados con la cadena ftp.</p>
+            </section>
+        </main>
+    </div>
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servicio de Transferencia de Ficheros - Modo Texto</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/vs2015.min.css">
+</head>
+
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">Servidores FTP</div>
+        </div>
+    </header>
+
+    <div class="container">
+        <main class="main-content">
+            <div class="content-header">
+                <h1 class="content-title">Servicio de Transferencia de Archivos en Modo Texto</h1>
+                <p class="content-subtitle">Clientes FTP en terminal</p>
+            </div>
+
+            <section class="lesson-section">
+                <h2 class="section-title">1.7. Servicio de transferencia de archivos en modo texto</h2>
+                <p class="text-content">Como se comentó anteriormente, existen varios tipos de clientes ftp, entre los
+                    cuales los clientes en modo texto desde siempre estuvieron incorporados en las distribuciones
+                    GNU/Linux.</p>
+
+                <p class="text-content">De entre los clientes tipo texto cabe destacar dos: el cliente en modo texto ftp
+                    y el cliente en modo texto lftp. En GNU/Linux Debian se dispone del cliente modo ftp en una
+                    instalación básica. Para poder utilizarlo en el sistema simplemente hay que ejecutarlo como comando:
+                    el comando ftp.</p>
+
+                <p class="text-content">Vamos a ver, a continuación, el comportamiento del cliente en modo texto ftp en
+                    la conexión al servidor ftp ftp.rediris.es:</p>
+
+                <ol>
+                    <li>Básicamente la sintaxis es la siguiente:</li>
+                </ol>
+
+                <div class="code-block">
+                    <code>ftp [-pinegvd] [host [port]]</code>
+                </div>
+
+                <p class="text-content">donde</p>
+
+                <ul class="feature-list">
+                    <li>host identifica el servidor ftp</li>
+                    <li>port identifica el puerto, por defecto 21, por lo cual si conectas a un servidor ftp configurado
+                        en ese puerto no es necesario escribirlo, ya se considera.</li>
+                </ul>
+
+                <p class="text-content">Puedes ver la ayuda del comando ftp mediante: man ftp ó info ftp .</p>
+
+                <ol start="2">
+                    <li>Al ejecutar el comando se abrirá una consola propia de ftp en la cual puedes introducir comandos
+                        ftp para: abrir conexión, moverse por rutas, descargar archivos …</li>
+                </ol>
+
+                <p class="text-content">Es muy típico ejecutarlo con el parámetro host, esto es, con el servidor ftp al
+                    cual quieres conectar:</p>
+
+                <div class="code-block">
+                    <code># ftp ftp.rediris.es</code>
+                </div>
+
+                <p class="text-content">También puedes ejecutar el comando sin parámetros, de esta forma abrirás
+                    directamente la consola ftp y deberás actuar con ella a través de los comandos de la misma:</p>
+
+                <div class="code-block">
+                    <code># ftp
+ftp> o
+(to) ftp.rediris.es</code>
+                </div>
+
+                <ol start="3">
+                    <li>A continuación se pedirá usuario y contraseña para establecer la conexión. En el caso del
+                        servidor de rediris puedes conectar mediante un usuario cualquiera y una contraseña cualquiera.
+                        Es muy típico en servidores ftp que exista un usuario anónimo, cuya contraseña sea cualquier
+                        dirección de correo -real o ficticia-, por ejemplo: a@ .</li>
+                </ol>
+
+                <ol start="4">
+                    <li>Ahora en la consola ftp puedes ejecutar comandos, ¿cuales? Pues los que estén habilitados, y
+                        ¿cuales están habilitados? Lo puedes saber ejecutando el comando help.</li>
+                </ol>
+
+                <p class="text-content">En la siguiente imagen puedes ver el ejemplo de conexión ftp mediante el cliente
+                    en modo texto ftp al servidor ftp.rediris.es:</p>
+                    <img src="imagen02-02.png" alt="Conexión FTP modo texto" class="responsive-image">
+            </section>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>

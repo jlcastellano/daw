@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servicio de Transferencia de Ficheros - Despliegue Web</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/vs2015.min.css">
+</head>
+
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">Servidores FTP</div>
+        </div>
+    </header>
+
+    <div class="container">
+        <main class="main-content">
+            <div class="content-header">
+                <h1 class="content-title">El Servicio de Transferencia de Archivos en el Proceso de Despliegue de una
+                    Aplicación Web</h1>
+                <p class="content-subtitle">Uso de FTP en despliegue web</p>
+            </div>
+
+            <section class="lesson-section">
+                <h2 class="section-title">1.12. El servicio de transferencia de archivos en el proceso de despliegue de
+                    una aplicación Web</h2>
+                <p class="text-content">Suele ser típico que cualquier aplicación web en Internet disponga de la
+                    posibilidad de subir archivos mediante una configuración del código fuente de la misma, una
+                    aplicación propia o una aplicación de terceros, como los paneles de administración web.</p>
+
+                <p class="text-content">Si empleas una aplicación web para subir archivos debes tener en cuenta cuánto
+                    tiempo puedes mantener la conexión abierta con el servicio web y cuál es el tamaño máximo de subida
+                    de un archivo. Estas cuestiones suelen ser típicas de la configuración del servidor web. Por la
+                    contra, si empleas un servidor ftp dependerá de éste las cuestiones anteriores.</p>
+
+                <p class="text-content">Se suele configurar el servidor web con unos parámetros: tiempo de conexión y
+                    tamaño máximo de subidas de archivos diferentes del servidor ftp, de tal forma que para archivos de
+                    tamaño no muy grandes se puedan emplear aplicaciones web y no se sufra un corte en la subida de
+                    archivos y, para archivos grandes, se emplee el servidor ftp.</p>
+
+                <p class="text-content">Normalmente las empresas de alojamiento web (hosting) permiten la subida de
+                    archivos mediante un servidor ftp y poseen documentos sobre cómo operar con éste, esto es,
+                    documentación que explica cómo conectarse a sus servidores ftp a través de algún cliente ftp, como
+                    por ejemplo: FileZilla, Cute FTP, Fetch o Transmit. También suelen permitir usar SCP o SFTP para
+                    transferir ficheros de forma segura mediante un canal cifrado. Por ejemplo en Filezilla se puede
+                    establecer la conexión de forma cifrada directamente, sólo con indicar como puerto TCP el número del
+                    servidor SSH, por defecto, 22.</p>
+
+                <p class="text-content">También debes saber que muchos editores web permiten subir tu aplicación web al
+                    servidor con el protocolo FTP, esto te puede resultar más sencillo que el uso de una aplicación de
+                    FTP independiente.</p>
+
+                <p class="text-content">Eso si, sea cual sea el método ftp que utilices para subir archivos y actualizar
+                    tu web, se desaconseja el uso de aplicaciones no actualizadas que podrían comprometer la seguridad
+                    de tu web.</p>
+
+                <p class="text-content">A continuación puedes ver errores típicos , junto con sus soluciones, que puedes
+                    encontrar al subir tu aplicación mediante un servidor FTP:</p>
+
+                <ul class="feature-list">
+                    <li>Tu cliente FTP muestra el error access denied, o similar, cuando subes o borras ficheros y
+                        carpetas: Comprueba que tu usuario FTP tenga permisos suficientes sobre la carpeta o fichero en
+                        la que deseas subir o que deseas borrar.</li>
+                    <li>Tus páginas no son reconocidas de forma automática al acceder a tu dominio: Los servidores
+                        GNU/Linux son sensibles a mayúsculas y minúsculas por lo que verifica el nombre de tus archivos.
+                    </li>
+                    <li>El cliente de FTP te muestra el mensaje too many connections from your IP address: Esto quiere
+                        decir que existen más conexiones abiertas con el servidor FTP desde la misma dirección IP de las
+                        permitidas. En ese caso, asegúrate que no exista ninguna aplicación, como un cortafuegos, que
+                        pueda estar bloqueando las conexiones abiertas, y provocando, de esta forma, que se establezcan
+                        más intentos de conexión de los necesarios.</li>
+                </ul>
+            </section>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>

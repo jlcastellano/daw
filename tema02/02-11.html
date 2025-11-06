@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servicio de Transferencia de Ficheros - Seguridad</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/vs2015.min.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">Servidores FTP</div>
+        </div>
+    </header>
+
+    <div class="container">
+        <main class="main-content">
+            <div class="content-header">
+                <h1 class="content-title">Asegurando el Servicio de Transferencia de Archivos</h1>
+                <p class="content-subtitle">FTPS y SFTP para cifrado</p>
+            </div>
+
+            <section class="lesson-section">
+                <h2 class="section-title">1.11. Asegurando el servicio de transferencia de archivos</h2>
+                <p class="text-content">Bien, pero ¿qué pasa con los datos en la transferencia? ¿viajan cifrados? ¿no? Pues empleando el protocolo ftp cualquiera que tenga acceso al canal de transmisión podrá ver en texto claro todo lo que se transmite, esto es, los datos no se cifran. Esto puede carecer de importancia, o no, según el contexto de la transmisión. Así, puede que a un organismo público no le importe compartir información a través de ftp y que los datos en la transferencia viajen sin cifrar y, sin embargo, a una empresa si le interese que los datos viajen cifrados.</p>
+
+                <p class="text-content">Entonces, cuando interese asegurar el servicio de transferencia de archivos debes descartar el protocolo ftp y empezar a pensar en otras alternativas, como: ftps o sftp.</p>
+
+                <p class="text-content">FTPS es una extensión del protocolo FTP que asegura el cifrado en la transferencia mediante los protocolos SSL/TLS. Permite tres tipos de funcionamiento:</p>
+
+                <ul class="feature-list">
+                    <li><strong>SSL Implícito:</strong>
+                        <ul>
+                            <li>Como conexiones HTTPS.</li>
+                            <li>Usa los puertos 990 y 989.</li>
+                        </ul>
+                    </li>
+                    <li><strong>SSL Explícito</strong>
+                        <ul>
+                            <li>El cliente usa los mismos puertos estándar FTP: 20 y 21 pero se efectúa el cifrado en ellos.</li>
+                            <li>Usa AUTH SSL (Authentication/Security Mechanism.).</li>
+                        </ul>
+                    </li>
+                    <li><strong>TLS Explícito:</strong>
+                        <ul>
+                            <li>Similar a SSL Explícito pero usa AUTH TLS (FTPS Explicito.).</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <p class="text-content">El cifrado al que nos referimos es el cifrado de clave pública o asimétrico: clave pública (kpub (Key Public.)) y clave privada (kpriv (Key Private.)). La kpub interesa publicarla para que llegue a ser conocida por cualquiera, la kpriv no interesa que nadie la posea, solo el propietario de la misma. Ambas son necesarias para que la comunicación sea posible, una sin la otra no tienen sentido, así una información cifrada mediante la kpub solamente puede ser descifrada mediante la kpriv y una información cifrada mediante la kpriv sólo puede ser descifrada mediante la kpub.</p>
+
+                <p class="text-content">En el cifrado asimétrico podemos estar hablando de individuos o de máquinas, en nuestro caso hablamos de máquinas y de flujo de información entre el cliente ftp (A) y el servidor ftp (B). Ver la siguiente tabla como ejemplo de funcionamiento del cifrado asimétrico:</p>
+
+                <p class="text-content"><strong>Funcionamiento del cifrado asimétrico.</strong></p>
+                <img src="imagen02-06.png" alt="Funcionamiento del cifrado asimétrico" class="responsive-image"">
+                <table class="comparison-table">
+                    <tr>
+                        <th>Funcionamiento del cifrado asimétrico</th>
+                        <th></th>
+                    </tr>
+                    <tr>
+                        <td>A(inf) → inf cifrada → B [descifrar inf] → B(inf) = A(inf)</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>A(inf) → inf cifrada = [(inf)]kpubB → B [inf. cifrada]kprivB → B(inf) = A(inf)</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>Identificación</th>
+                        <th></th>
+                    </tr>
+                    <tr>
+                        <td>A Cliente ftp.</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>Funcionamiento del cifrado asimétrico</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>inf cifrada = [(inf)]kpubB Información cifrada mediante la clave pública de B obtenida a través de un certificado digital.</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>[inf. cifrada]kprivB Información descifrada mediante la clave privada de B.</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>B Servidor ftp.</td>
+                        <td></td>
+                    </tr>
+                </table>
+                <img src="imagen02-07.png" alt="Esquema de cifrado asimétrico" class="responsive-image"">
+            </section>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servicio de Transferencia de Ficheros - Permisos</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/vs2015.min.css">
+</head>
+
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">Servidores FTP</div>
+        </div>
+    </header>
+
+    <div class="container">
+        <main class="main-content">
+            <div class="content-header">
+                <h1 class="content-title">Establecer Permisos en FTP</h1>
+                <p class="content-subtitle">Permisos UNIX en entornos FTP</p>
+            </div>
+
+            <section class="lesson-section">
+                <h2 class="section-title">1.6. Establecer permisos en ftp</h2>
+                <p class="text-content">El protocolo FTP sigue los permisos establecidos en entornos de tipo UNIX y sus
+                    similares GNU/Linux, con lo cual existen tres grupos de permisos en el siguiente orden: propietario,
+                    grupo y otros:</p>
+
+                <ul class="feature-list">
+                    <li><strong>Propietario(user=u):</strong> El creador o el que ha subido el archivo al servidor FTP.
+                    </li>
+                    <li><strong>Grupo(group=g):</strong> Se refiere a un grupo de usuarios que posee la propiedad del
+                        archivo, al que probablemente pertenece el propietario.</li>
+                    <li><strong>Otros(others=o):</strong> Son el resto de usuarios no propietarios o que no pertenecen
+                        al grupo indicado. Son el resto del mundo.</li>
+                </ul>
+
+                <p class="text-content">Cada grupo a su vez puede tener tres permisos en el siguiente orden: lectura,
+                    escritura y ejecución identificados respectivamente por una 'r', una 'w' y una 'x'. La ausencia de
+                    permiso es identificada con el carácter '-'. Cada permiso tiene un equivalente numérico, así: r=4,
+                    w=2, x=1 y -=0. Por ejemplo: rw- identifica permiso de lectura y escritura o lo que es lo mismo
+                    4+2+0=6</p>
+
+                <p class="text-content">En un sistema operativo tipo GNU/Linux mediante el comando 'ls -l' puedes ver
+                    los permisos asignados a ficheros y directorios, por ejemplo si la salida del anterior comando es:
+                </p>
+
+                <div class="code-block">
+                    <code>-rw-r--r-- 1 alumno clase 0 jun 20 01:15 prueba1.txt</code>
+                </div>
+
+                <p class="text-content">significa que,</p>
+
+                <ul class="feature-list">
+                    <li>prueba1.txt es un fichero ya que -rw-r--r-- comienza con '-', si fuese un directorio aparecería
+                        un 'd'</li>
+                    <li>rw-r--r-- identifica los permisos del fichero prueba1.txt, que divididos 3 a 3 representan de
+                        izquierda a derecha: propietario, grupo, otros.</li>
+                    <li>rw- identifican los permisos del usuario propietario, en este caso alumno. Por lo tanto alumno
+                        posee los permisos de lectura y escritura sobre el fichero prueba1.txt o lo que es lo mismo
+                        4+2+0=6</li>
+                    <li>r-- identifican los permisos del grupo propietario, en este caso clase. Por lo tanto clase posee
+                        solamente el permiso de lectura o lo que es lo mismo 4+0+0=4</li>
+                    <li>r-- identifican los permisos de los otros (resto del mundo). Por lo tanto todos los usuarios que
+                        no son alumno y aquellos que no pertenecen al grupo clase poseen solamente el permiso de lectura
+                        o lo que es lo mismo 4+0+0=4</li>
+                </ul>
+
+                <p class="text-content">Por lo tanto los permisos rw-r--r-- equivalen a 644.</p>
+            </section>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servicio de Transferencia de Ficheros - Desde el Navegador</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/vs2015.min.css">
+</head>
+
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">Servidores FTP</div>
+        </div>
+    </header>
+
+    <div class="container">
+        <main class="main-content">
+            <div class="content-header">
+                <h1 class="content-title">Servicio de Transferencia de Archivos desde el Navegador</h1>
+                <p class="content-subtitle">Uso del navegador como cliente FTP</p>
+            </div>
+
+            <section class="lesson-section">
+                <h2 class="section-title">1.10. Servicio de transferencia de archivos desde el navegador</h2>
+                <p class="text-content">El navegador web también puede ejercer de cliente ftp y, puesto que la mayoría
+                    de los sistemas operativos cuentan con un navegador en su instalación, es una de las herramientas
+                    más usadas para transferencia de archivos.</p>
+
+                <p class="text-content">Para poder usar el navegador como cliente ftp solamente debes escribir en la
+                    barra de dirección una dirección URL tipo, como la siguiente:</p>
+
+                <div class="code-block">
+                    <code>ftp://nombre_servidor_ftp:puerto</code>
+                </div>
+
+                <p class="text-content">donde,</p>
+
+                <ul class="feature-list">
+                    <li>ftp:// indica que el protocolo que deseas que interprete el navegador sea el ftp.</li>
+                    <li>nombre_servidor_ftp representa el nombre o la IP del servidor ftp.</li>
+                    <li>puerto indica el puerto TCP, por defecto 21. Puedes omitirlo siempre y cuando sea el 21.</li>
+                </ul>
+
+                <p class="text-content">Si el servidor ftp permite la conexión a un usuario anónimo, al ejecutar
+                    ftp://nombre_servidor_ftp:puerto entrarás directamente al servidor ftp, esto es, el navegador no
+                    preguntará qué usuario y contraseña necesitas para establecer la conexión.</p>
+
+                <p class="text-content">En la siguiente imagen puedes ver como puedes acceder al servidor ftp de rediris
+                    utilizando el navegador:</p>
+                <img src="imagen02-05.png" alt="Acceso al servidor ftp de rediris desde el navegador"
+                    class="responsive-image">
+                <p class="text-content">Así, lo único que tienes que hacer es escribir en la dirección URL:
+                    ftp://ftp.rediris.es y pulsar Enter, con lo cual, automáticamente, conectas con el servidor ftp,
+                    pudiendo visitar las carpetas y ver los ficheros como si de un explorador de archivos se tratará.
+                </p>
+
+                <p class="text-content">Para descargar las carpetas o archivos simplemente debes pulsar con el botón
+                    derecho del ratón sobre ellos y elegir la opción Guardar enlace como… -que aparece en Firefox y es
+                    similar en otros navegadores-.</p>
+
+                <p class="text-content">Pero no todo van a ser ventajas al utilizar el navegador como cliente ftp,
+                    puesto que otros clientes tienen la posibilidad de continuar las descargas cuando estás sufrieron
+                    algún tipo de interrupción, cosa que no pasa con el cliente ftp del navegador, como por ejemplo el
+                    cliente gráfico FileZilla que soporta y reanuda la transferencia de archivos de gran tamaño(> 4 GB).
+                </p>
+            </section>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>

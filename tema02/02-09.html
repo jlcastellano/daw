@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servicio de Transferencia de Ficheros - Modo Gráfico</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/vs2015.min.css">
+</head>
+
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">Servidores FTP</div>
+        </div>
+    </header>
+
+    <div class="container">
+        <main class="main-content">
+            <div class="content-header">
+                <h1 class="content-title">Servicio de Transferencia de Archivos en Modo Gráfico</h1>
+                <p class="content-subtitle">Clientes gráficos como gftp y FileZilla</p>
+            </div>
+
+            <section class="lesson-section">
+                <h2 class="section-title">1.9. Servicio de transferencia de archivos en modo gráfico</h2>
+                <p class="text-content">El servicio de transferencia de ficheros está bien, pero obliga a entender el
+                    funcionamiento de un servidor ftp mediante el uso de sus comandos. La verdad, es que no es muy
+                    interactivo, ¿entonces..., no existe la posibilidad de trabajar de otro modo más interactivo? Pues
+                    si, mediante clientes ftp de modo gráfico o mediante el navegador, ya que éste incorpora su propio
+                    cliente ftp.</p>
+
+                <p class="text-content">Típicamente los clientes gráficos se comportan todos igual, esto es, tienen una
+                    interfaz parecida, básicamente presentan una ventana partida en dos secciones: la de la izquierda
+                    suele representar el equipo cliente ftp -desde donde se intenta establecer la conexión- y la de la
+                    derecha suele representar el equipo servidor ftp -quién recibe la conexión-. Luego suelen existir,
+                    en alguna zona determinada de la ventana: en el centro entre las dos secciones, arriba de las dos
+                    secciones, etc una serie de botones, usualmente representados como flechas que indican la
+                    posibilidad de subir o descargar archivos. Incluso dependiendo del cliente en modo gráfico es
+                    posible guardar los datos de las conexiones como plantillas, de tal forma que la próxima vez que
+                    intentes establecer la conexión con un mismo servidor ftp en vez de tener que rellenar los campos
+                    referentes a la conexión puedes hacerlo a través de la plantilla que ya posee el valor de esos
+                    campos.</p>
+
+                <p class="text-content">Dentro de los clientes ftp en modo gráfico cabe destacar dos: gftp y filezilla.
+                    A continuación puedes ver un ejemplo de como utilizarlos para establecer una conexión con un
+                    servidor ftp, el servidor ftp.rediris.es :</p>
+
+                <p class="text-content"><strong>1. Cliente en modo gráfico gftp.</strong></p>
+
+                <ul class="feature-list">
+                    <li>Servidor: Escribe aquí el nombre o IP del servidor FTP: ftp.rediris.es</li>
+                    <li>Puerto: Escribe aquí el puerto TCP de la conexión de control, por defecto: 21. Puedes omitirlo
+                        siempre y cuando sea el 21.</li>
+                    <li>Usuario: Escribe aquí el usuario con permisos de conexión en el servidor ftp. En la imagen
+                        puedes ver que no se ha escrito nada, esto es debido que el servidor ftp.rediris.es permite la
+                        entrada a cualquier usuario y el cliente gráfico gftp al intentar conectar te pedirá un usuario
+                        que tenga permisos para la conexión. Pulsas en cancelar y gftp cubrirá los campos usuario y
+                        contraseña, entrando al servidor ftp.</li>
+                    <li>Contraseña: Escribe aquí la contraseña del usuario con permisos de conexión en el servidor ftp.
+                        En la imagen puedes ver que no se ha escrito nada, esto es debido a la misma causa que en el
+                        campo Usuario.</li>
+                </ul>
+                <img src="imagen02-03.png" alt="Cliente gráfico gftp estableciendo conexión FTP"
+                    class="responsive-image">
+                <p class="text-content"><strong>Cliente en modo gráfico filezilla.</strong></p>
+
+                <ul class="feature-list">
+                    <li>Servidor: Escribe aquí el nombre o IP del servidor FTP: ftp.rediris.es</li>
+                    <li>Nombre de usuario: Escribe aquí el usuario con permisos de conexión en el servidor ftp.
+                        Filezilla, al contrario que gftp, no cubre los datos usuario y contraseña si tú no escribes nada
+                        en los campos, entonces debes escribir un nombre de usuario, por ejemplo anonymous, y una
+                        contraseña -cualquier secuencia de caracteres-.</li>
+                    <li>Contraseña: Escribe aquí la contraseña del usuario con permisos de conexión en el servidor ftp.
+                        En la imagen puedes ver que se ha escrito una secuencia de caracteres punto, lo que significa
+                        que a la hora de escribir caracteres en ese campo no se muestra su valor por seguridad. Es
+                        necesario escribir una contraseña por lo comentado en el campo anterior: Nombre de usuario.</li>
+                    <li>Puerto: Escribe aquí el puerto TCP de la conexión de control, por defecto: 21. Puedes omitirlo
+                        siempre y cuando sea el 21.</li>
+                </ul>
+            </section>
+            <img src="imagen02-04.png" alt="Cliente gráfico FileZilla estableciendo conexión FTP"
+                class="responsive-image">
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>
