@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificados Digitales con OpenSSL - Introducción y Preparación</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div>Certificados Digitales con OpenSSL</div>
+    </header>
+
+    <section class="contenido-didactico">
+        <h1>Introducción a la Criptografía Asimétrica</h1>
+        
+        <p>La criptografía asimétrica, también conocida como criptografía de clave pública, es un sistema criptográfico que utiliza un par de claves matemáticamente relacionadas:</p>
+
+        <dl>
+            <dt>Clave Privada</dt>
+            <dd>Se mantiene en secreto y nunca debe compartirse. Se utiliza para descifrar mensajes y firmar digitalmente documentos.</dd>
+
+            <dt>Clave Pública</dt>
+            <dd>Puede distribuirse libremente. Se utiliza para cifrar mensajes destinados al propietario de la clave privada y para verificar firmas digitales.</dd>
+        </dl>
+
+        <h2>Principios Fundamentales</h2>
+
+        <p>El sistema funciona mediante funciones matemáticas unidireccionales. Lo que se cifra con la clave pública solo puede descifrarse con la clave privada correspondiente, y viceversa. Esta propiedad permite dos funcionalidades principales:</p>
+
+        <dl>
+            <dt>Confidencialidad</dt>
+            <dd>Si Alice quiere enviar un mensaje secreto a Bob, cifra el mensaje con la clave pública de Bob. Solo Bob, con su clave privada, puede descifrar el mensaje.</dd>
+
+            <dt>Autenticación y No Repudio</dt>
+            <dd>Si Bob firma un documento con su clave privada, cualquiera con su clave pública puede verificar que realmente fue Bob quien lo firmó, y Bob no puede negar haberlo hecho.</dd>
+        </dl>
+
+        <h3>Algoritmos Comunes</h3>
+
+        <p>Los algoritmos más utilizados son <strong>RSA</strong> (Rivest-Shamir-Adleman), que se basa en la dificultad de factorizar números primos grandes, y <strong>ECC</strong> (Elliptic Curve Cryptography), que ofrece seguridad equivalente con claves más cortas. En este manual nos enfocaremos principalmente en RSA por su amplia adopción.</p>
+
+        <h3>Certificados Digitales</h3>
+
+        <p>Un certificado digital es un documento electrónico que vincula una clave pública con una identidad. Contiene información como el nombre del propietario, la clave pública, el emisor del certificado, el período de validez y una firma digital de la Autoridad Certificadora (CA) que lo emitió. Los certificados siguen el estándar X.509 y permiten establecer confianza en entornos donde las partes no se conocen previamente.</p>
+
+        <h2>1. Preparación del Entorno</h2>
+
+        <h3>1.1 Crear Estructura de Directorios</h3>
+
+        <p>Primero crearemos una estructura organizada para nuestra infraestructura de CA:</p>
+
+        <pre><code class="language-bash"># Crear directorios para la CA raíz
+mkdir -p ca/root-ca/{private,certs,newcerts,crl,csr}
+chmod 700 ca/root-ca/private
+
+# Crear directorios para la CA intermedia
+mkdir -p ca/intermediate-ca/{private,certs,newcerts,crl,csr}
+chmod 700 ca/intermediate-ca/private
+
+# Crear directorio para certificados de servidor y cliente
+mkdir -p ca/{server,client}/{private,certs,csr}
+chmod 700 ca/server/private ca/client/private</code></pre>
+
+        <p><strong>Explicación de los directorios</strong>:</p>
+        <ul>
+            <li><code>private</code>: Almacena las claves privadas (permisos restringidos)</li>
+            <li><code>certs</code>: Almacena los certificados públicos</li>
+            <li><code>newcerts</code>: Base de datos de certificados emitidos</li>
+            <li><code>crl</code>: Listas de revocación de certificados</li>
+            <li><code>csr</code>: Solicitudes de firma de certificados</li>
+        </ul>
+
+        <h3>1.2 Inicializar Archivos de Base de Datos</h3>
+
+        <pre><code class="language-bash"># Para la CA raíz
+cd ca/root-ca
+touch index.txt
+echo 1000 > serial
+echo 1000 > crlnumber
+
+# Para la CA intermedia
+cd ../intermediate-ca
+touch index.txt
+echo 1000 > serial
+echo 1000 > crlnumber
+cd ../..</code></pre>
+
+        <p><strong>Explicación</strong>:</p>
+        <ul>
+            <li><code>index.txt</code>: Base de datos de certificados emitidos</li>
+            <li><code>serial</code>: Número de serie para el próximo certificado</li>
+            <li><code>crlnumber</code>: Número de serie para la próxima CRL</li>
+        </ul>
+    </section>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

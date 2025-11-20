@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firmar Certificados de Servidor</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div>Firmar Certificados de Servidor</div>
+    </header>
+
+    <section class="contenido-didactico">
+        <h1>5. Firmar Certificados de Servidor</h1>
+
+        <h2>5.1 Generar Clave Privada del Servidor</h2>
+
+        <pre><code class="language-bash">openssl genrsa -aes256 -out ca/server/private/servidor.miempresa.com.key.pem 2048</code></pre>
+
+        <p>Explicación: Generamos una clave de 2048 bits (suficiente para servidores). Puedes usar 4096 bits para mayor seguridad.</p>
+
+        <p>Para uso en producción sin solicitar contraseña en cada reinicio (menos seguro pero práctico):</p>
+
+        <pre><code class="language-bash"># Generar sin cifrado
+openssl genrsa -out ca/server/private/servidor.miempresa.com.key.pem 2048
+
+# O remover cifrado de clave existente
+openssl rsa -in ca/server/private/servidor.miempresa.com.key.pem \
+  -out ca/server/private/servidor.miempresa.com.key.pem</code></pre>
+
+        <pre><code class="language-bash">chmod 400 ca/server/private/servidor.miempresa.com.key.pem</code></pre>
+
+        <h2>5.2 Crear CSR del Servidor</h2>
+
+        <pre><code class="language-bash">openssl req -config ca/intermediate-ca/openssl.cnf \
+  -key ca/server/private/servidor.miempresa.com.key.pem \
+  -new -sha256 \
+  -out ca/server/csr/servidor.miempresa.com.csr.pem</code></pre>
+
+        <p>Importante al llenar el CSR:</p>
+
+        <ul>
+            <li><strong>Common Name (CN)</strong>: Debe ser el nombre de dominio del servidor (ej: servidor.miempresa.com)</li>
+            <li>Para certificados wildcard, usa <code>*.miempresa.com</code></li>
+            <li>La información debe coincidir con la política de la CA</li>
+        </ul>
+
+        <h2>5.3 Modificar Nombres Alternativos del Sujeto (SAN)</h2>
+
+        <p>Antes de firmar, edita <code>ca/intermediate-ca/openssl.cnf</code> en la sección <code>[ alt_names ]</code>:</p>
+
+        <pre><code class="language-ini">[ alt_names ]
+DNS.1 = servidor.miempresa.com
+DNS.2 = www.miempresa.com
+DNS.3 = miempresa.com
+DNS.4 = *.miempresa.com
+IP.1 = 192.168.1.100
+IP.2 = 10.0.0.50</code></pre>
+
+        <p>Explicación: Los navegadores modernos requieren que el nombre del servidor esté en SAN. Aquí defines todos los nombres DNS y direcciones IP que el certificado debe cubrir.</p>
+
+        <h2>5.4 Firmar el Certificado del Servidor</h2>
+
+        <pre><code class="language-bash">openssl ca -config ca/intermediate-ca/openssl.cnf \
+  -extensions server_cert \
+  -days 375 -notext -md sha256 \
+  -in ca/server/csr/servidor.miempresa.com.csr.pem \
+  -out ca/server/certs/servidor.miempresa.com.cert.pem</code></pre>
+
+        <p>Explicación:</p>
+
+        <ul>
+            <li><strong>-extensions server_cert</strong>: Aplica extensiones específicas para servidores</li>
+            <li><strong>-days 375</strong>: Validez de 375 días (certificados TLS/SSL modernos recomiendan &lt; 398 días)</li>
+            <li>Usamos la configuración de la CA intermedia</li>
+        </ul>
+
+        <h2>5.5 Verificar el Certificado del Servidor</h2>
+
+        <pre><code class="language-bash"># Ver el certificado
+openssl x509 -noout -text \
+  -in ca/server/certs/servidor.miempresa.com.cert.pem
+
+# Verificar contra la cadena
+openssl verify -CAfile ca/intermediate-ca/certs/ca-chain.cert.pem \
+  ca/server/certs/servidor.miempresa.com.cert.pem</code></pre>
+
+        <p>Puntos a verificar:</p>
+
+        <ul>
+            <li>CN coincide con el nombre del servidor</li>
+            <li>SAN contiene todos los nombres necesarios</li>
+            <li>Extended Key Usage incluye TLS Web Server Authentication</li>
+            <li>Issuer es la CA intermedia</li>
+        </ul>
+
+        <h2>5.6 Crear Bundle del Servidor</h2>
+
+        <pre><code class="language-bash">cat ca/server/certs/servidor.miempresa.com.cert.pem \
+    ca/intermediate-ca/certs/ca-chain.cert.pem > \
+    ca/server/certs/servidor.miempresa.com.bundle.pem</code></pre>
+
+        <p>Explicación: Este bundle contiene el certificado del servidor y toda la cadena de CAs. Es útil para configurar servidores web.</p>
+
+    </section>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creación de la CA Raíz</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div>Creación de la CA Raíz</div>
+    </header>
+
+    <section class="contenido-didactico">
+        <h1>3. Creación de la CA Raíz</h1>
+
+        <h2>3.1 Generar Clave Privada de la CA Raíz</h2>
+
+        <pre><code class="language-bash">openssl genrsa -aes256 -out ca/root-ca/private/ca.key.pem 4096
+chmod 400 ca/root-ca/private/ca.key.pem</code></pre>
+
+        <p>Explicación del comando:</p>
+
+        <ul>
+            <li><strong>genrsa</strong>: Genera una clave privada RSA</li>
+            <li><strong>-aes256</strong>: Cifra la clave privada con AES-256 (se pedirá contraseña)</li>
+            <li><strong>-out</strong>: Archivo de salida para la clave</li>
+            <li><strong>4096</strong>: Longitud de la clave en bits (mayor seguridad)</li>
+            <li><strong>chmod 400</strong>: Establece permisos de solo lectura para el propietario</li>
+        </ul>
+
+        <blockquote>
+            <strong>Importante:</strong> Guarda la contraseña en un lugar seguro. Sin ella, no podrás usar la clave privada.
+        </blockquote>
+
+        <h2>3.2 Crear Certificado Autofirmado de la CA Raíz</h2>
+
+        <pre><code class="language-bash">openssl req -config ca/root-ca/openssl.cnf \
+  -key ca/root-ca/private/ca.key.pem \
+  -new -x509 -days 7300 -sha256 \
+  -extensions v3_ca \
+  -out ca/root-ca/certs/ca.cert.pem</code></pre>
+
+        <p>Explicación del comando:</p>
+
+        <ul>
+            <li><strong>req</strong>: Gestión de solicitudes de certificado</li>
+            <li><strong>-config</strong>: Archivo de configuración a usar</li>
+            <li><strong>-key</strong>: Clave privada para firmar</li>
+            <li><strong>-new</strong>: Crear nueva solicitud</li>
+            <li><strong>-x509</strong>: Crear certificado autofirmado en lugar de CSR</li>
+            <li><strong>-days 7300</strong>: Validez del certificado (20 años)</li>
+            <li><strong>-sha256</strong>: Algoritmo de hash a usar</li>
+            <li><strong>-extensions v3_ca</strong>: Extensiones X.509 v3 para CA</li>
+            <li><strong>-out</strong>: Archivo de salida del certificado</li>
+        </ul>
+
+        <p>Durante este proceso se te pedirá:</p>
+
+        <ul>
+            <li>La contraseña de la clave privada</li>
+            <li>Información del Distinguished Name (DN): país, estado, organización, nombre común, etc.</li>
+        </ul>
+
+        <h2>3.3 Verificar el Certificado de la CA Raíz</h2>
+
+        <pre><code class="language-bash">openssl x509 -noout -text -in ca/root-ca/certs/ca.cert.pem</code></pre>
+
+        <p>Explicación:</p>
+
+        <ul>
+            <li><strong>x509</strong>: Utilidad para certificados X.509</li>
+            <li><strong>-noout</strong>: No mostrar el certificado codificado</li>
+            <li><strong>-text</strong>: Mostrar el certificado en formato texto legible</li>
+            <li><strong>-in</strong>: Archivo de certificado a leer</li>
+        </ul>
+
+        <p>Información importante a verificar:</p>
+
+        <ul>
+            <li>Subject y Issuer deben ser idénticos (autofirmado)</li>
+            <li>CA:TRUE en Basic Constraints</li>
+            <li>Key Usage debe incluir Certificate Sign y CRL Sign</li>
+            <li>Fechas de validez</li>
+        </ul>
+
+    </section>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

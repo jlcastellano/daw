@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creación de la CA Intermedia</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div>Creación de la CA Intermedia</div>
+    </header>
+
+    <section class="contenido-didactico">
+        <h1>4. Creación de la CA Intermedia</h1>
+
+        <h2>4.1 Generar Clave Privada de la CA Intermedia</h2>
+
+        <pre><code class="language-bash">openssl genrsa -aes256 -out ca/intermediate-ca/private/intermediate.key.pem 4096
+chmod 400 ca/intermediate-ca/private/intermediate.key.pem</code></pre>
+
+        <p>Explicación: Igual que la CA raíz, generamos una clave privada protegida con contraseña.</p>
+
+        <h2>4.2 Crear CSR (Certificate Signing Request) de la CA Intermedia</h2>
+
+        <pre><code class="language-bash">openssl req -config ca/intermediate-ca/openssl.cnf \
+  -new -sha256 \
+  -key ca/intermediate-ca/private/intermediate.key.pem \
+  -out ca/intermediate-ca/csr/intermediate.csr.pem</code></pre>
+
+        <p>Explicación del comando:</p>
+
+        <ul>
+            <li><strong>-new</strong>: Crear nueva solicitud de certificado</li>
+            <li><strong>-sha256</strong>: Algoritmo de hash</li>
+            <li><strong>-key</strong>: Clave privada para la solicitud</li>
+            <li><strong>-out</strong>: Archivo CSR de salida</li>
+        </ul>
+
+        <p><strong>Nota:</strong> Esta vez NO usamos <code>-x509</code> porque queremos que la CA raíz firme este certificado.</p>
+
+        <p>Al completar la información, asegúrate de que:</p>
+
+        <ul>
+            <li>El Common Name (CN) sea diferente al de la CA raíz</li>
+            <li>El resto de la información puede coincidir con la CA raíz</li>
+        </ul>
+
+        <h2>4.3 Firmar el CSR con la CA Raíz</h2>
+
+        <pre><code class="language-bash">openssl ca -config ca/root-ca/openssl.cnf \
+  -extensions v3_intermediate_ca \
+  -days 3650 -notext -md sha256 \
+  -in ca/intermediate-ca/csr/intermediate.csr.pem \
+  -out ca/intermediate-ca/certs/intermediate.cert.pem</code></pre>
+
+        <p>Explicación del comando:</p>
+
+        <ul>
+            <li><strong>ca</strong>: Utilidad de Autoridad Certificadora</li>
+            <li><strong>-config</strong>: Configuración de la CA raíz</li>
+            <li><strong>-extensions v3_intermediate_ca</strong>: Extensiones para CA intermedia</li>
+            <li><strong>-days 3650</strong>: Validez de 10 años (menor que la CA raíz)</li>
+            <li><strong>-notext</strong>: No incluir versión texto del certificado</li>
+            <li><strong>-md sha256</strong>: Algoritmo de hash</li>
+            <li><strong>-in</strong>: CSR a firmar</li>
+            <li><strong>-out</strong>: Certificado firmado de salida</li>
+        </ul>
+
+        <p>Se te pedirá:</p>
+
+        <ul>
+            <li>Contraseña de la clave privada de la CA raíz</li>
+            <li>Confirmación para firmar el certificado</li>
+        </ul>
+
+        <h2>4.4 Verificar el Certificado Intermedio</h2>
+
+        <pre><code class="language-bash"># Ver el certificado
+openssl x509 -noout -text -in ca/intermediate-ca/certs/intermediate.cert.pem
+
+# Verificar la cadena de certificados
+openssl verify -CAfile ca/root-ca/certs/ca.cert.pem \
+  ca/intermediate-ca/certs/intermediate.cert.pem</code></pre>
+
+        <p>Explicación del comando verify:</p>
+
+        <ul>
+            <li><strong>verify</strong>: Verifica certificados</li>
+            <li><strong>-CAfile</strong>: Certificado de la CA de confianza</li>
+            <li>El último argumento es el certificado a verificar</li>
+        </ul>
+
+        <p>Resultado esperado: <code>intermediate.cert.pem: OK</code></p>
+
+        <h2>4.5 Crear Cadena de Certificados</h2>
+
+        <pre><code class="language-bash">cat ca/intermediate-ca/certs/intermediate.cert.pem \
+    ca/root-ca/certs/ca.cert.pem > \
+    ca/intermediate-ca/certs/ca-chain.cert.pem
+
+chmod 444 ca/intermediate-ca/certs/ca-chain.cert.pem</code></pre>
+
+        <p>Explicación: La cadena de certificados contiene el certificado intermedio seguido del certificado raíz. Esta cadena permite a los clientes verificar toda la jerarquía de confianza. El orden es importante: primero el certificado más específico (intermedio) y luego el raíz.</p>
+
+    </section>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

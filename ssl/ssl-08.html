@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Protocolo de Estado de Certificados en Línea (OCSP)</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div>Protocolo de Estado de Certificados en Línea (OCSP)</div>
+    </header>
+
+    <section class="contenido-didactico">
+        <h1>8. Protocolo de Estado de Certificados en Línea (OCSP)</h1>
+
+        <p>OCSP es una alternativa más eficiente a CRL que permite verificar el estado de un certificado en tiempo real.</p>
+
+        <h2>8.1 Crear Certificado para el Respondedor OCSP</h2>
+
+        <h3>8.1.1 Generar Clave Privada</h3>
+
+        <pre><code class="language-bash">openssl genrsa -aes256 \
+  -out ca/intermediate-ca/private/ocsp.miempresa.com.key.pem 4096
+chmod 400 ca/intermediate-ca/private/ocsp.miempresa.com.key.pem</code></pre>
+
+        <h3>8.1.2 Crear CSR para OCSP</h3>
+
+        <pre><code class="language-bash">openssl req -config ca/intermediate-ca/openssl.cnf \
+  -new -sha256 \
+  -key ca/intermediate-ca/private/ocsp.miempresa.com.key.pem \
+  -out ca/intermediate-ca/csr/ocsp.miempresa.com.csr.pem</code></pre>
+
+        <p><strong>Common Name:</strong> Debe ser el dominio del respondedor OCSP (ej: ocsp.miempresa.com)</p>
+
+        <h3>8.1.3 Firmar el Certificado OCSP</h3>
+
+        <pre><code class="language-bash">openssl ca -config ca/intermediate-ca/openssl.cnf \
+  -extensions ocsp \
+  -days 375 -notext -md sha256 \
+  -in ca/intermediate-ca/csr/ocsp.miempresa.com.csr.pem \
+  -out ca/intermediate-ca/certs/ocsp.miempresa.com.cert.pem</code></pre>
+
+        <p>Explicación: Las extensiones <code>ocsp</code> incluyen OCSPSigning en Extended Key Usage, lo cual es obligatorio para respondedores OCSP.</p>
+
+        <h2>8.2 Verificar el Certificado OCSP</h2>
+
+        <pre><code class="language-bash">openssl x509 -noout -text \
+  -in ca/intermediate-ca/certs/ocsp.miempresa.com.cert.pem</code></pre>
+
+        <p>Verificar que contenga:</p>
+
+        <ul>
+            <li>Extended Key Usage: OCSP Signing</li>
+        </ul>
+
+        <h2>8.3 Iniciar el Respondedor OCSP de Prueba</h2>
+
+        <p>OpenSSL incluye un respondedor OCSP básico para pruebas:</p>
+
+        <pre><code class="language-bash">openssl ocsp -port 8080 -text \
+  -CA ca/intermediate-ca/certs/ca-chain.cert.pem \
+  -index ca/intermediate-ca/index.txt \
+  -rkey ca/intermediate-ca/private/ocsp.miempresa.com.key.pem \
+  -rsigner ca/intermediate-ca/certs/ocsp.miempresa.com.cert.pem \
+  -nrequest 1</code></pre>
+
+        <p>Explicación del comando:</p>
+
+        <ul>
+            <li><strong>-port 8080</strong>: Puerto donde escucha el respondedor</li>
+            <li><strong>-text</strong>: Muestra información detallada</li>
+            <li><strong>-CA</strong>: Cadena de certificados CA</li>
+            <li><strong>-index</strong>: Base de datos de certificados</li>
+            <li><strong>-rkey</strong>: Clave privada del respondedor OCSP</li>
+            <li><strong>-rsigner</strong>: Certificado del respondedor OCSP</li>
+            <li><strong>-nrequest 1</strong>: Responde a una solicitud y termina (útil para pruebas)</li>
+        </ul>
+
+        <p>Para modo continuo (producción), omite <code>-nrequest 1</code>:</p>
+
+        <pre><code class="language-bash">openssl ocsp -port 8080 \
+  -CA ca/intermediate-ca/certs/ca-chain.cert.pem \
+  -index ca/intermediate-ca/index.txt \
+  -rkey ca/intermediate-ca/private/ocsp.miempresa.com.key.pem \
+  -rsigner ca/intermediate-ca/certs/ocsp.miempresa.com.cert.pem</code></pre>
+
+        <h2>8.4 Consultar el Estado de un Certificado vía OCSP</h2>
+
+        <p>Desde otra terminal, consulta el estado:</p>
+
+        <pre><code class="language-bash">openssl ocsp -CAfile ca/intermediate-ca/certs/ca-chain.cert.pem \
+  -url http://127.0.0.1:8080 \
+  -resp_text \
+  -issuer ca/intermediate-ca/certs/intermediate.cert.pem \
+  -cert ca/server/certs/servidor.miempresa.com.cert.pem</code></pre>
+
+        <p>Explicación:</p>
+
+        <ul>
+            <li><strong>-CAfile</strong>: Cadena de confianza</li>
+            <li><strong>-url</strong>: URL del respondedor OCSP</li>
+            <li><strong>-resp_text</strong>: Muestra la respuesta en texto</li>
+            <li><strong>-issuer</strong>: Certificado de la CA emisora</li>
+            <li><strong>-cert</strong>: Certificado a verificar</li>
+        </ul>
+
+        <p>Respuestas posibles:</p>
+
+        <ul>
+            <li><strong>Cert Status: good</strong>: Certificado válido</li>
+            <li><strong>Cert Status: revoked</strong>: Certificado revocado</li>
+            <li><strong>Cert Status: unknown</strong>: Estado desconocido</li>
+        </ul>
+
+        <h2>8.5 Verificar Certificado con OCSP Stapling</h2>
+
+        <p>OCSP Stapling permite al servidor obtener la respuesta OCSP y adjuntarla en la negociación TLS:</p>
+
+        <pre><code class="language-bash"># Obtener respuesta OCSP
+openssl ocsp -CAfile ca/intermediate-ca/certs/ca-chain.cert.pem \
+  -url http://127.0.0.1:8080 \
+  -issuer ca/intermediate-ca/certs/intermediate.cert.pem \
+  -cert ca/server/certs/servidor.miempresa.com.cert.pem \
+  -respout ca/server/certs/ocsp-response.der</code></pre>
+
+        <p>Explicación:</p>
+
+        <ul>
+            <li><strong>-respout</strong>: Guarda la respuesta OCSP en formato DER</li>
+            <li>Este archivo puede ser usado por el servidor web para stapling</li>
+        </ul>
+
+        <h2>8.6 Probar OCSP con Certificado Revocado</h2>
+
+        <p>Primero revoca un certificado:</p>
+
+        <pre><code class="language-bash">openssl ca -config ca/intermediate-ca/openssl.cnf \
+  -revoke ca/server/certs/servidor.miempresa.com.cert.pem \
+  -crl_reason keyCompromise</code></pre>
+
+        <p>Reinicia el respondedor OCSP (necesario para que lea el índice actualizado):</p>
+
+        <pre><code class="language-bash"># Detener el respondedor anterior (Ctrl+C)
+# Reiniciar
+openssl ocsp -port 8080 \
+  -CA ca/intermediate-ca/certs/ca-chain.cert.pem \
+  -index ca/intermediate-ca/index.txt \
+  -rkey ca/intermediate-ca/private/ocsp.miempresa.com.key.pem \
+  -rsigner ca/intermediate-ca/certs/ocsp.miempresa.com.cert.pem</code></pre>
+
+        <p>Consulta de nuevo:</p>
+
+        <pre><code class="language-bash">openssl ocsp -CAfile ca/intermediate-ca/certs/ca-chain.cert.pem \
+  -url http://127.0.0.1:8080 \
+  -resp_text \
+  -issuer ca/intermediate-ca/certs/intermediate.cert.pem \
+  -cert ca/server/certs/servidor.miempresa.com.cert.pem</code></pre>
+
+        <p>Ahora debe mostrar: <code>Cert Status: revoked</code></p>
+
+        <h2>8.7 Implementación de OCSP en Producción</h2>
+
+        <p>Para producción, se recomienda usar respondedores OCSP dedicados como:</p>
+
+        <p>OCSP Responder (OpenCA):</p>
+
+        <pre><code class="language-bash"># Instalación en sistemas basados en Debian
+apt-get install ocspd</code></pre>
+
+        <p>Configurar Nginx como proxy OCSP:</p>
+
+        <pre><code class="language-nginx">server {
+    listen 80;
+    server_name ocsp.miempresa.com;
+    
+    location / {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host $host;
+    }
+}</code></pre>
+
+        <p>Configurar Apache como proxy OCSP:</p>
+
+        <pre><code class="language-apache">&lt;VirtualHost *:80&gt;
+    ServerName ocsp.miempresa.com
+    ProxyPass / http://127.0.0.1:8080/
+    ProxyPassReverse / http://127.0.0.1:8080/
+&lt;/VirtualHost&gt;</code></pre>
+
+    </section>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

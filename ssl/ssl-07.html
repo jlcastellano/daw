@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Listas de Revocación de Certificados (CRL)</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div>Listas de Revocación de Certificados (CRL)</div>
+    </header>
+
+    <section class="contenido-didactico">
+        <h1>7. Listas de Revocación de Certificados (CRL)</h1>
+
+        <p>Las CRL son listas publicadas por las CAs que contienen certificados revocados antes de su fecha de expiración.</p>
+
+        <h2>7.1 Revocar un Certificado</h2>
+
+        <p>Para revocar el certificado de un servidor comprometido:</p>
+
+        <pre><code class="language-bash">openssl ca -config ca/intermediate-ca/openssl.cnf \
+  -revoke ca/server/certs/servidor.miempresa.com.cert.pem</code></pre>
+
+        <p>Explicación:</p>
+
+        <ul>
+            <li><strong>-revoke</strong>: Marca el certificado como revocado</li>
+            <li>Se agregará una entrada en index.txt con estado 'R' (Revoked)</li>
+        </ul>
+
+        <p>Razones comunes de revocación:</p>
+
+        <ul>
+            <li>Clave privada comprometida</li>
+            <li>Cambio de información del certificado</li>
+            <li>Fin de uso del servicio</li>
+            <li>Error en la emisión</li>
+        </ul>
+
+        <p>Para especificar una razón de revocación:</p>
+
+        <pre><code class="language-bash">openssl ca -config ca/intermediate-ca/openssl.cnf \
+  -revoke ca/server/certs/servidor.miempresa.com.cert.pem \
+  -crl_reason keyCompromise</code></pre>
+
+        <p>Razones válidas:</p>
+
+        <ul>
+            <li><strong>unspecified</strong>: No especificada</li>
+            <li><strong>keyCompromise</strong>: Clave comprometida</li>
+            <li><strong>CACompromise</strong>: CA comprometida</li>
+            <li><strong>affiliationChanged</strong>: Cambio de afiliación</li>
+            <li><strong>superseded</strong>: Reemplazado</li>
+            <li><strong>cessationOfOperation</strong>: Cese de operaciones</li>
+            <li><strong>certificateHold</strong>: Suspensión temporal</li>
+        </ul>
+
+        <h2>7.2 Generar la Lista de Revocación (CRL)</h2>
+
+        <pre><code class="language-bash">openssl ca -config ca/intermediate-ca/openssl.cnf \
+  -gencrl \
+  -out ca/intermediate-ca/crl/intermediate.crl.pem</code></pre>
+
+        <p>Explicación:</p>
+
+        <ul>
+            <li><strong>-gencrl</strong>: Genera una nueva CRL</li>
+            <li>La CRL contendrá todos los certificados revocados</li>
+        </ul>
+
+        <h2>7.3 Verificar la CRL</h2>
+
+        <pre><code class="language-bash">openssl crl -in ca/intermediate-ca/crl/intermediate.crl.pem \
+  -noout -text</code></pre>
+
+        <p>Información mostrada:</p>
+
+        <ul>
+            <li>Emisor de la CRL</li>
+            <li>Última actualización</li>
+            <li>Próxima actualización</li>
+            <li>Lista de certificados revocados con números de serie</li>
+        </ul>
+
+        <h2>7.4 Convertir CRL a Formato DER</h2>
+
+        <p>Algunos sistemas requieren CRL en formato DER (binario):</p>
+
+        <pre><code class="language-bash">openssl crl -in ca/intermediate-ca/crl/intermediate.crl.pem \
+  -outform DER \
+  -out ca/intermediate-ca/crl/intermediate.crl</code></pre>
+
+        <h2>7.5 Verificar un Certificado contra la CRL</h2>
+
+        <pre><code class="language-bash">openssl verify -crl_check \
+  -CAfile ca/intermediate-ca/certs/ca-chain.cert.pem \
+  -CRLfile ca/intermediate-ca/crl/intermediate.crl.pem \
+  ca/server/certs/servidor.miempresa.com.cert.pem</code></pre>
+
+        <p>Explicación:</p>
+
+        <ul>
+            <li><strong>-crl_check</strong>: Habilita verificación contra CRL</li>
+            <li><strong>-CRLfile</strong>: Archivo CRL a usar</li>
+        </ul>
+
+        <p>Resultado:</p>
+
+        <ul>
+            <li>Si está revocado: error "certificate revoked"</li>
+            <li>Si está válido: "OK"</li>
+        </ul>
+
+        <h2>7.6 Publicar la CRL</h2>
+
+        <p>La CRL debe estar accesible mediante HTTP para que los clientes puedan descargarla:</p>
+
+        <pre><code class="language-bash"># Copiar a directorio web
+cp ca/intermediate-ca/crl/intermediate.crl.pem /var/www/html/crl/
+
+# O en formato DER
+cp ca/intermediate-ca/crl/intermediate.crl /var/www/html/crl/</code></pre>
+
+        <p>URL de ejemplo: <code>http://crl.miempresa.com/intermediate.crl</code></p>
+
+        <p>Esta URL debe estar especificada en los certificados (CRL Distribution Points).</p>
+
+        <h2>7.7 Automatizar Actualización de CRL</h2>
+
+        <p>Crear un script <code>update-crl.sh</code>:</p>
+
+        <pre><code class="language-bash">#!/bin/bash
+cd /ruta/a/ca
+openssl ca -config intermediate-ca/openssl.cnf -gencrl \
+  -out intermediate-ca/crl/intermediate.crl.pem
+cp intermediate-ca/crl/intermediate.crl.pem /var/www/html/crl/</code></pre>
+
+        <p>Programar con cron para ejecutar diariamente:</p>
+
+        <pre><code class="language-bash">0 2 * * * /ruta/update-crl.sh</code></pre>
+
+    </section>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

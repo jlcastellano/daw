@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuración de OpenSSL</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div>Configuración de OpenSSL</div>
+    </header>
+
+    <section class="contenido-didactico">
+        <h1>2. Configuración de OpenSSL</h1>
+
+        <h2>2.1 Archivo de Configuración para CA Raíz</h2>
+        
+        <p>Crear el archivo <kbd>ca/root-ca/openssl.cnf</kbd>:</p>
+
+        <pre><code class="language-ini">[ ca ]
+default_ca = CA_default
+
+[ CA_default ]
+dir               = ./ca/root-ca
+certs             = $dir/certs
+crl_dir           = $dir/crl
+new_certs_dir     = $dir/newcerts
+database          = $dir/index.txt
+serial            = $dir/serial
+RANDFILE          = $dir/private/.rand
+private_key       = $dir/private/ca.key.pem
+certificate       = $dir/certs/ca.cert.pem
+crlnumber         = $dir/crlnumber
+crl               = $dir/crl/ca.crl.pem
+crl_extensions    = crl_ext
+default_crl_days  = 30
+default_md        = sha256
+name_opt          = ca_default
+cert_opt          = ca_default
+default_days      = 3650
+preserve          = no
+policy            = policy_strict
+
+[ policy_strict ]
+countryName             = match
+stateOrProvinceName     = match
+organizationName        = match
+organizationalUnitName  = optional
+commonName              = supplied
+emailAddress            = optional
+
+[ policy_loose ]
+countryName             = optional
+stateOrProvinceName     = optional
+localityName            = optional
+organizationName        = optional
+organizationalUnitName  = optional
+commonName              = supplied
+emailAddress            = optional
+
+[ req ]
+default_bits        = 4096
+distinguished_name  = req_distinguished_name
+string_mask         = utf8only
+default_md          = sha256
+x509_extensions     = v3_ca
+
+[ req_distinguished_name ]
+countryName                     = País (código de 2 letras)
+stateOrProvinceName             = Estado o Provincia
+localityName                    = Ciudad
+0.organizationName              = Organización
+organizationalUnitName          = Unidad Organizacional
+commonName                      = Nombre Común
+emailAddress                    = Correo Electrónico
+
+countryName_default             = ES
+stateOrProvinceName_default     = Madrid
+localityName_default            = Madrid
+0.organizationName_default      = Mi Empresa CA
+organizationalUnitName_default  = Departamento TI
+emailAddress_default            = ca@miempresa.com
+
+[ v3_ca ]
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid:always,issuer
+basicConstraints = critical, CA:true
+keyUsage = critical, digitalSignature, cRLSign, keyCertSign
+
+[ v3_intermediate_ca ]
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid:always,issuer
+basicConstraints = critical, CA:true, pathlen:0
+keyUsage = critical, digitalSignature, cRLSign, keyCertSign
+
+[ usr_cert ]
+basicConstraints = CA:FALSE
+nsCertType = client, email
+nsComment = "Certificado de Cliente OpenSSL"
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid,issuer
+keyUsage = critical, nonRepudiation, digitalSignature, keyEncipherment
+extendedKeyUsage = clientAuth, emailProtection
+
+[ server_cert ]
+basicConstraints = CA:FALSE
+nsCertType = server
+nsComment = "Certificado de Servidor OpenSSL"
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid,issuer:always
+keyUsage = critical, digitalSignature, keyEncipherment
+extendedKeyUsage = serverAuth
+subjectAltName = @alt_names
+
+[ alt_names ]
+DNS.1 = localhost
+DNS.2 = *.miempresa.com
+IP.1 = 127.0.0.1
+
+[ crl_ext ]
+authorityKeyIdentifier=keyid:always
+
+[ ocsp ]
+basicConstraints = CA:FALSE
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid,issuer
+keyUsage = critical, digitalSignature
+extendedKeyUsage = critical, OCSPSigning</code></pre>
+
+        <p>Explicación de secciones importantes:</p>
+
+        <ul>
+            <li><strong>[ CA_default ]</strong>: Configuración general de la CA</li>
+            <li><strong>[ policy_strict ]</strong>: Política estricta que requiere coincidencia en país, estado y organización</li>
+            <li><strong>[ v3_ca ]</strong>: Extensiones para certificados de CA raíz</li>
+            <li><strong>[ v3_intermediate_ca ]</strong>: Extensiones para CA intermedia con pathlen:0 (no puede firmar otras CAs)</li>
+            <li><strong>[ server_cert ]</strong>: Extensiones para certificados de servidor</li>
+            <li><strong>[ usr_cert ]</strong>: Extensiones para certificados de cliente</li>
+        </ul>
+
+        <h2>2.2 Archivo de Configuración para CA Intermedia</h2>
+
+        <p>Crear el archivo <kbd>ca/intermediate-ca/openssl.cnf</kbd>:</p>
+
+        <pre><code class="language-ini">[ ca ]
+default_ca = CA_default
+
+[ CA_default ]
+dir               = ./ca/intermediate-ca
+certs             = $dir/certs
+crl_dir           = $dir/crl
+new_certs_dir     = $dir/newcerts
+database          = $dir/index.txt
+serial            = $dir/serial
+RANDFILE          = $dir/private/.rand
+private_key       = $dir/private/intermediate.key.pem
+certificate       = $dir/certs/intermediate.cert.pem
+crlnumber         = $dir/crlnumber
+crl               = $dir/crl/intermediate.crl.pem
+crl_extensions    = crl_ext
+default_crl_days  = 30
+default_md        = sha256
+name_opt          = ca_default
+cert_opt          = ca_default
+default_days      = 375
+preserve          = no
+policy            = policy_loose
+
+[ policy_strict ]
+countryName             = match
+stateOrProvinceName     = match
+organizationName        = match
+organizationalUnitName  = optional
+commonName              = supplied
+emailAddress            = optional
+
+[ policy_loose ]
+countryName             = optional
+stateOrProvinceName     = optional
+localityName            = optional
+organizationName        = optional
+organizationalUnitName  = optional
+commonName              = supplied
+emailAddress            = optional
+
+[ req ]
+default_bits        = 2048
+distinguished_name  = req_distinguished_name
+string_mask         = utf8only
+default_md          = sha256
+x509_extensions     = v3_ca
+
+[ req_distinguished_name ]
+countryName                     = País (código de 2 letras)
+stateOrProvinceName             = Estado o Provincia
+localityName                    = Ciudad
+0.organizationName              = Organización
+organizationalUnitName          = Unidad Organizacional
+commonName                      = Nombre Común
+emailAddress                    = Correo Electrónico
+
+countryName_default             = ES
+stateOrProvinceName_default     = Madrid
+localityName_default            = Madrid
+0.organizationName_default      = Mi Empresa CA
+organizationalUnitName_default  = Departamento TI
+emailAddress_default            = ca@miempresa.com
+
+[ v3_ca ]
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid:always,issuer
+basicConstraints = critical, CA:true
+keyUsage = critical, digitalSignature, cRLSign, keyCertSign
+
+[ v3_intermediate_ca ]
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid:always,issuer
+basicConstraints = critical, CA:true, pathlen:0
+keyUsage = critical, digitalSignature, cRLSign, keyCertSign
+
+[ usr_cert ]
+basicConstraints = CA:FALSE
+nsCertType = client, email
+nsComment = "Certificado de Cliente OpenSSL"
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid,issuer
+keyUsage = critical, nonRepudiation, digitalSignature, keyEncipherment
+extendedKeyUsage = clientAuth, emailProtection
+
+[ server_cert ]
+basicConstraints = CA:FALSE
+nsCertType = server
+nsComment = "Certificado de Servidor OpenSSL"
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid,issuer:always
+keyUsage = critical, digitalSignature, keyEncipherment
+extendedKeyUsage = serverAuth
+subjectAltName = @alt_names
+
+[ alt_names ]
+DNS.1 = localhost
+DNS.2 = servidor.miempresa.com
+DNS.3 = *.miempresa.com
+IP.1 = 127.0.0.1
+IP.2 = 192.168.1.100
+
+[ crl_ext ]
+authorityKeyIdentifier=keyid:always
+
+[ ocsp ]
+basicConstraints = CA:FALSE
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid,issuer
+keyUsage = critical, digitalSignature
+extendedKeyUsage = critical, OCSPSigning</code></pre>
+
+    </section>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

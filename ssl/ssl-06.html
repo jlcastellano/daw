@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firmar Certificados de Cliente</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div>Firmar Certificados de Cliente</div>
+    </header>
+
+    <section class="contenido-didactico">
+        <h1>6. Firmar Certificados de Cliente</h1>
+
+        <h2>6.1 Generar Clave Privada del Cliente</h2>
+
+        <pre><code class="language-bash">openssl genrsa -aes256 -out ca/client/private/usuario@miempresa.com.key.pem 2048
+chmod 400 ca/client/private/usuario@miempresa.com.key.pem</code></pre>
+
+        <p>Explicación: Similar al servidor, pero para clientes es recomendable siempre proteger con contraseña.</p>
+
+        <h2>6.2 Crear CSR del Cliente</h2>
+
+        <pre><code class="language-bash">openssl req -config ca/intermediate-ca/openssl.cnf \
+  -key ca/client/private/usuario@miempresa.com.key.pem \
+  -new -sha256 \
+  -out ca/client/csr/usuario@miempresa.com.csr.pem</code></pre>
+
+        <p>Para el Common Name del cliente:</p>
+
+        <ul>
+            <li>Puede ser el nombre del usuario o su email</li>
+            <li>Ejemplo: "Juan Pérez" o "usuario@miempresa.com"</li>
+        </ul>
+
+        <h2>6.3 Firmar el Certificado del Cliente</h2>
+
+        <pre><code class="language-bash">openssl ca -config ca/intermediate-ca/openssl.cnf \
+  -extensions usr_cert \
+  -days 375 -notext -md sha256 \
+  -in ca/client/csr/usuario@miempresa.com.csr.pem \
+  -out ca/client/certs/usuario@miempresa.com.cert.pem</code></pre>
+
+        <p>Explicación:</p>
+
+        <ul>
+            <li><strong>-extensions usr_cert</strong>: Extensiones específicas para clientes</li>
+            <li>Incluye Client Authentication en Extended Key Usage</li>
+        </ul>
+
+        <h2>6.4 Verificar el Certificado del Cliente</h2>
+
+        <pre><code class="language-bash">openssl x509 -noout -text \
+  -in ca/client/certs/usuario@miempresa.com.cert.pem
+
+openssl verify -CAfile ca/intermediate-ca/certs/ca-chain.cert.pem \
+  ca/client/certs/usuario@miempresa.com.cert.pem</code></pre>
+
+        <h2>6.5 Crear Archivo PKCS#12 para el Cliente</h2>
+
+        <pre><code class="language-bash">openssl pkcs12 -export \
+  -out ca/client/certs/usuario@miempresa.com.p12 \
+  -inkey ca/client/private/usuario@miempresa.com.key.pem \
+  -in ca/client/certs/usuario@miempresa.com.cert.pem \
+  -certfile ca/intermediate-ca/certs/ca-chain.cert.pem</code></pre>
+
+        <p>Explicación del comando:</p>
+
+        <ul>
+            <li><strong>pkcs12</strong>: Formato que combina certificado, clave privada y cadena</li>
+            <li><strong>-export</strong>: Crear archivo PKCS#12</li>
+            <li><strong>-out</strong>: Archivo de salida .p12 o .pfx</li>
+            <li><strong>-inkey</strong>: Clave privada del cliente</li>
+            <li><strong>-in</strong>: Certificado del cliente</li>
+            <li><strong>-certfile</strong>: Cadena de certificados CA</li>
+        </ul>
+
+        <p>Se te pedirá:</p>
+
+        <ul>
+            <li>Contraseña de la clave privada</li>
+            <li>Nueva contraseña para proteger el archivo .p12</li>
+        </ul>
+
+        <p><strong>Uso:</strong> Este archivo .p12 puede importarse directamente en navegadores, clientes de email, etc.</p>
+
+    </section>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
