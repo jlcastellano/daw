@@ -89,6 +89,30 @@ header div {
     font-size: 1.05rem;
 }
 
+/* 1. Contenedor de la imagen (figure) */
+.contenido-didactico figure {
+    margin: 2rem 0;          /* Espacio arriba y abajo */
+    padding: 0;              /* Resetea padding por defecto */
+    text-align: center;      /* Centra la imagen y el texto */
+    display: block;
+}
+
+/* 2. La imagen en sí (img) */
+.contenido-didactico img {
+    max-width: 100%;         /* Responsive: nunca más ancha que el contenedor */
+    height: auto;            /* Mantiene proporciones */
+    border-radius: 8px;      /* Estética: bordes suaves */
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1); /* Sombra ligera */
+}
+
+/* 3. El pie de foto (figcaption) */
+.contenido-didactico figcaption {
+    margin-top: 10px;
+    font-size: 0.9rem;
+    color: #666;
+    font-style: italic;
+}
+
 /* --- ELEMENTOS DE TEXTO INLINE --- */
 .contenido-didactico code:not([class*="language-"]) {
     /* Estilo para código inline (no bloques) */
