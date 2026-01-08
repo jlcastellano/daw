@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servidores Web</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header>
+        <div>Servidores Web</div>
+    </header>
+
+    <section class="contenido-didactico">
+        <h1>2. Implantación de arquitecturas web</h1>
+
+        <p>Cuando hablamos de <strong>arquitectura web</strong>, nos referimos a cómo organizamos y estructuramos los
+            diferentes componentes que forman un sistema web. De forma general, podemos describir la arquitectura web
+            como un modelo de <strong>tres capas principales</strong>:</p>
+
+        <ul>
+            <li><strong>Capa de datos (Base de datos):</strong> aquí se almacenan todos los datos que la aplicación web
+                necesita gestionar. Estos datos pueden incluir información de usuarios, productos, publicaciones,
+                configuraciones, y cualquier otra información que la aplicación deba persistir. Las tecnologías comunes
+                en esta capa incluyen sistemas de gestión de bases de datos como MySQL, PostgreSQL, MongoDB, Microsoft
+                SQL Server, y Oracle, entre otros.</li>
+            <li><strong>Capa de aplicación (Servidor de aplicaciones):</strong> en esta capa se ejecuta la lógica de
+                negocio de nuestra aplicación. Aquí es donde procesamos peticiones, aplicamos reglas de negocio,
+                interactuamos con la base de datos, y generamos las respuestas apropiadas. Las tecnologías típicas
+                incluyen servidores web como Apache, Nginx, Microsoft IIS, y servidores de aplicaciones como Tomcat,
+                Node.js, y .NET, entre otros.</li>
+            <li><strong>Capa de presentación (Cliente web):</strong> es la interfaz con la que interactúan los usuarios
+                finales. Generalmente consiste en un navegador web (Chrome, Firefox, Safari, Edge) que recibe y
+                renderiza el contenido HTML, CSS y JavaScript. En aplicaciones modernas, también puede incluir
+                aplicaciones móviles nativas o Progressive Web Apps (PWAs).</li>
+        </ul>
+
+        <p>Esta separación en capas proporciona numerosas ventajas: facilita el mantenimiento (puedes modificar una capa
+            sin afectar a las demás), permite la escalabilidad (puedes añadir más servidores en la capa que necesite más
+            recursos), mejora la seguridad (cada capa puede tener sus propias medidas de protección), y simplifica el
+            desarrollo (diferentes equipos pueden trabajar en diferentes capas simultáneamente).</p>
+
+    </section>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>

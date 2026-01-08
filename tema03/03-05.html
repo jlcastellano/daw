@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servidores Web</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header>
+        <div>Servidores Web</div>
+    </header>
+
+    <section class="contenido-didactico">
+
+        <h2>1.4. Uso del servicio HTTP</h2>
+
+        <p>Ahora que comprendemos los fundamentos de HTTP, profundicemos en los <strong>métodos</strong> (también
+            llamados "verbos HTTP") que se utilizan para interactuar con los servidores web.</p>
+
+        <h3>Método GET</h3>
+
+        <p>Se utiliza para <strong>obtener o recuperar</strong> un recurso del servidor. Es el método que se usa cuando
+            escribes una URL en el navegador o haces clic en un enlace. Las características importantes de GET son:</p>
+
+        <ul>
+            <li>No debería modificar datos en el servidor (es un método "seguro" e "idempotente").</li>
+            <li>Los datos que enviamos al servidor van incluidos en la propia URL, mediante lo que se conoce como
+                <strong>cadena de consulta</strong> o <em>query string</em>.</li>
+            <li>Las peticiones GET pueden guardarse en el historial del navegador y en marcadores.</li>
+        </ul>
+
+        <p>Ejemplos:</p>
+        <ul>
+            <li><code>http://www.ejemplo.com/productos.php</code> — solicita la lista de productos.</li>
+            <li><code>http://www.ejemplo.com/buscar.php?termino=zapatos&amp;color=negro</code> — envía parámetros de
+                búsqueda. La parte después del símbolo "?" es la cadena de consulta, donde <code>termino=zapatos</code>
+                y <code>color=negro</code> son parámetros que la aplicación web procesará.</li>
+        </ul>
+
+        <h3>Método POST</h3>
+
+        <p>Se utiliza para <strong>enviar datos al servidor</strong> que normalmente modificarán algo en el sistema
+            (como crear un nuevo registro, procesar un formulario, subir un archivo). Las características de POST son:
+        </p>
+
+        <ul>
+            <li>Los datos se envían en el <strong>cuerpo de la petición</strong>, no en la URL, por lo que no son
+                visibles directamente para el usuario.</li>
+            <li>No hay límite práctico en la cantidad de datos que se pueden enviar.</li>
+            <li>Las peticiones POST no se guardan en el historial del navegador.</li>
+            <li>Es apropiado para operaciones que modifican datos en el servidor.</li>
+        </ul>
+
+        <p>Por ejemplo, cuando llenas un formulario de registro y lo envías, normalmente se usa POST para que tus datos
+            (nombre, email, contraseña) viajen de forma más segura y privada.</p>
+
+        <h3>Método HEAD</h3>
+
+        <p>Permite obtener únicamente las <strong>cabeceras de respuesta</strong> de un recurso, sin que el servidor
+            envíe el contenido completo. Esto es útil para:</p>
+
+        <ul>
+            <li>Verificar si un recurso existe sin descargarlo.</li>
+            <li>Obtener metadatos sobre un recurso (tamaño, fecha de última modificación, tipo de contenido).</li>
+            <li>Mantener cachés actualizadas eficientemente.</li>
+        </ul>
+
+        <p>Por ejemplo, un navegador puede usar HEAD para verificar si una imagen ha cambiado desde la última vez que la
+            descargó, sin necesidad de descargarla completamente.</p>
+
+        <h3>Más allá de la navegación web tradicional</h3>
+
+        <p>Hoy en día, HTTP se utiliza extensamente en lo que conocemos como <strong>servicios web</strong> o
+            <strong>APIs web</strong>. Un servicio web es una interfaz que permite a diferentes aplicaciones comunicarse
+            entre sí a través de internet.</p>
+
+        <p>Por ejemplo, si desarrollas una aplicación móvil que publica contenido en Instagram, tu aplicación utilizará
+            la API de Instagram mediante peticiones HTTP. No necesitas un navegador; tu código se comunica directamente
+            con los servidores de Instagram usando HTTP.</p>
+
+        <p>En el contexto de servicios web <strong>RESTful</strong> (que es el estilo arquitectónico más popular en
+            2025), los métodos HTTP adquieren significados específicos:</p>
+
+        <ul>
+            <li><strong>GET:</strong> se utiliza para <em>recuperar o leer</em> información. Por ejemplo, obtener los
+                datos de un usuario específico o listar todos los productos de una categoría.</li>
+            <li><strong>POST:</strong> se utiliza para <em>crear</em> nuevos recursos. Por ejemplo, publicar un nuevo
+                mensaje en una red social o crear un nuevo producto en una tienda online.</li>
+            <li><strong>PUT:</strong> se utiliza para <em>actualizar o reemplazar completamente</em> un recurso
+                existente. Por ejemplo, actualizar todos los datos de perfil de un usuario.</li>
+            <li><strong>PATCH:</strong> se utiliza para <em>actualizar parcialmente</em> un recurso existente. Por
+                ejemplo, cambiar solo el email de un usuario sin tocar el resto de sus datos.</li>
+            <li><strong>DELETE:</strong> se utiliza para <em>eliminar</em> un recurso. Por ejemplo, borrar una
+                publicación o eliminar un producto del catálogo.</li>
+        </ul>
+        <h3>Códigos de estado de respuesta HTTP</h3>
+
+        <p>Después de realizar cualquier petición HTTP, el servidor genera una respuesta que incluye un <strong>código
+                de estado</strong>. Estos códigos nos informan sobre el resultado de la operación. Se organizan en cinco
+            categorías:</p>
+
+        <h4>Códigos 1XX — Respuestas informativas</h4>
+
+        <p>Indican que la petición se recibió y el proceso continúa. Son poco comunes en la navegación web cotidiana.
+        </p>
+
+        <ul>
+            <li><strong>100 Continue:</strong> indica que todo va bien hasta ahora y que el cliente puede continuar con
+                la petición o ignorar esta respuesta si la petición ya se completó.</li>
+        </ul>
+
+        <h4>Códigos 2XX — Respuestas de éxito</h4>
+
+        <p>Indican que la petición fue recibida, comprendida y procesada correctamente.</p>
+
+        <ul>
+            <li><strong>200 OK:</strong> la petición fue exitosa. Este es el código que verás en la mayoría de las
+                navegaciones web normales. El servidor devuelve el contenido solicitado.</li>
+            <li><strong>201 Created:</strong> la petición fue exitosa y se creó un nuevo recurso como resultado. Común
+                en APIs cuando se crea algo nuevo (por ejemplo, un nuevo usuario).</li>
+            <li><strong>204 No Content:</strong> la petición fue exitosa pero no hay contenido para enviar en la
+                respuesta. Útil cuando se elimina algo o se actualiza sin necesidad de devolver datos.</li>
+        </ul>
+
+        <h4>Códigos 3XX — Redirecciones</h4>
+
+        <p>Indican que se necesita realizar una acción adicional para completar la petición, normalmente porque el
+            recurso se ha movido a otra ubicación.</p>
+
+        <ul>
+            <li><strong>301 Moved Permanently:</strong> el recurso se ha movido permanentemente a una nueva ubicación.
+                El servidor incluye la nueva dirección en una cabecera llamada <code>Location</code>. Los navegadores y
+                buscadores actualizarán sus referencias a esta nueva ubicación.</li>
+            <li><strong>302 Found:</strong> el recurso se ha movido temporalmente a otra ubicación. Similar al 301, pero
+                indica que el cambio es temporal.</li>
+            <li><strong>304 Not Modified:</strong> el recurso no ha cambiado desde la última vez que se solicitó. Esto
+                permite al navegador usar su versión en caché, ahorrando ancho de banda y tiempo de carga.</li>
+        </ul>
+
+        <p>Otros códigos de redirección incluyen <code>303 See Other</code>, <code>307 Temporary Redirect</code> y
+            <code>308 Permanent Redirect</code>, cada uno con matices específicos en cuanto a cómo debe manejarse la
+            redirección.</p>
+
+        <h4>Códigos 4XX — Errores del cliente</h4>
+
+        <p>Indican que hubo un problema con la petición enviada por el cliente.</p>
+
+        <ul>
+            <li><strong>400 Bad Request:</strong> la petición está mal formada o contiene errores que el servidor no
+                puede procesar. Por ejemplo, datos JSON inválidos en una API.</li>
+            <li><strong>401 Unauthorized:</strong> se requiere autenticación para acceder al recurso, y las credenciales
+                proporcionadas son inválidas o no se proporcionaron. A pesar del nombre, realmente se refiere a "no
+                autenticado".</li>
+            <li><strong>403 Forbidden:</strong> el servidor entendió la petición, pero se niega a autorizarla. El
+                usuario puede estar autenticado, pero no tiene permisos para acceder a ese recurso específico.</li>
+            <li><strong>404 Not Found:</strong> probablemente el código de error más famoso. El servidor no puede
+                encontrar el recurso solicitado. Esto puede ocurrir porque el recurso fue eliminado, la URL contiene un
+                error, o nunca existió.</li>
+            <li><strong>405 Method Not Allowed:</strong> el método HTTP usado no está permitido para ese recurso. Por
+                ejemplo, intentar hacer POST en un endpoint que solo acepta GET.</li>
+            <li><strong>429 Too Many Requests:</strong> el cliente ha enviado demasiadas peticiones en un período de
+                tiempo determinado. Es un mecanismo de protección contra abusos.</li>
+        </ul>
+
+        <h4>Códigos 5XX — Errores del servidor</h4>
+
+        <p>Indican que el servidor encontró un error al procesar una petición válida.</p>
+
+        <ul>
+            <li><strong>500 Internal Server Error:</strong> el servidor encontró una situación inesperada que le impidió
+                completar la petición. Es un error genérico cuando algo salió mal en el servidor pero no se puede ser
+                más específico.</li>
+            <li><strong>502 Bad Gateway:</strong> el servidor está actuando como puerta de enlace o proxy hacia otro
+                servidor, y recibió una respuesta inválida de ese servidor.</li>
+            <li><strong>503 Service Unavailable:</strong> el servidor no está disponible temporalmente, generalmente
+                debido a mantenimiento o sobrecarga. El servidor puede incluir una cabecera <code>Retry-After</code>
+                indicando cuándo intentar de nuevo.</li>
+            <li><strong>504 Gateway Timeout:</strong> similar al 502, pero específicamente indica que el servidor
+                upstream no respondió a tiempo.</li>
+        </ul>
+    </section>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>

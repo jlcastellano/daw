@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servidores Web</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header>
+        <div>Servidores Web</div>
+    </header>
+
+    <section class="contenido-didactico">
+        <h2>1.1. Aspectos generales de arquitecturas web</h2>
+
+        <p>La arquitectura <strong>World Wide Web (WWW)</strong> de internet nos proporciona un modelo de programación
+            extremadamente poderoso y flexible. Funciona de la siguiente manera: las aplicaciones y contenidos se
+            presentan en formatos de datos estandarizados, y son localizados y mostrados por aplicaciones cliente (los
+            navegadores web), que solicitan recursos específicos a un servidor. El servidor responde enviando los datos
+            codificados según formatos estándar que el navegador puede interpretar y mostrar.</p>
+
+        <p>Los estándares web definen muchos de los mecanismos necesarios para construir un entorno de aplicaciones de
+            propósito general. Estos incluyen:</p>
+
+        <ul>
+            <li><strong>Modelo estándar de nombres:</strong> todos los servidores y contenidos de la web se identifican
+                mediante un <strong>Localizador Uniforme de Recursos (URL)</strong>. Esto permite localizar cualquier
+                recurso en internet de manera única e inequívoca.</li>
+            <li><strong>Tipificación de contenido:</strong> a todos los contenidos en la web se les asigna un tipo
+                específico (por ejemplo, imagen JPEG, documento PDF, vídeo MP4), lo que permite que los navegadores los
+                interpreten y muestren correctamente.</li>
+            <li><strong>Formatos de contenido estándar:</strong> todos los navegadores modernos soportan un conjunto
+                común de formatos y tecnologías estándar. Entre los más importantes encontramos <strong>HTML</strong>
+                (el lenguaje que estructura las páginas web), <strong>JavaScript</strong> (que añade interactividad),
+                <strong>CSS</strong> (que define la apariencia visual), y formatos multimedia como MP4 para vídeo o JPEG
+                y PNG para imágenes.</li>
+            <li><strong>Protocolos estándar:</strong> estos protocolos garantizan que cualquier navegador pueda
+                comunicarse con cualquier servidor web, independientemente del fabricante o sistema operativo. El
+                protocolo más utilizado en la web es <strong>HTTP</strong> (Protocolo de Transferencia de Hipertexto),
+                que opera sobre la arquitectura de protocolos <strong>TCP/IP</strong> (Protocolo de Control de
+                Transmisión/Protocolo de Internet), que es la base de las comunicaciones en internet.</li>
+        </ul>
+
+        <p>Esta infraestructura estandarizada permite a los usuarios acceder a una cantidad prácticamente ilimitada de
+            aplicaciones y servicios desarrollados por terceros. Al mismo tiempo, facilita a los desarrolladores crear
+            aplicaciones y servicios que pueden ser utilizados por una comunidad global de usuarios, sin preocuparse por
+            incompatibilidades técnicas.</p>
+
+        <p>Los aspectos clave que debemos considerar al diseñar una arquitectura web son:</p>
+
+        <ul>
+            <li><strong>Escalabilidad:</strong> la capacidad del sistema para crecer y manejar un mayor número de
+                usuarios o mayor volumen de datos sin perder rendimiento.</li>
+            <li><strong>Separación de responsabilidades:</strong> dividir la aplicación en capas o módulos
+                independientes, donde cada uno tiene una función específica y bien definida.</li>
+            <li><strong>Portabilidad:</strong> la capacidad de que la aplicación funcione en diferentes plataformas y
+                dispositivos sin requerir modificaciones significativas.</li>
+            <li><strong>Utilización de componentes en los servicios de infraestructura:</strong> usar módulos
+                reutilizables que simplifiquen el desarrollo y mantenimiento.</li>
+            <li><strong>Gestión de las sesiones del usuario:</strong> mantener el contexto y estado de cada usuario
+                mientras navega por la aplicación.</li>
+            <li><strong>Aplicación de patrones de diseño:</strong> utilizar soluciones probadas y estandarizadas para
+                problemas comunes de desarrollo.</li>
+        </ul>
+
+        <p>El funcionamiento de los servicios web modernos requiere de tres elementos fundamentales:</p>
+
+        <ul>
+            <li><strong>Proveedor del servicio web:</strong> es quien diseña, desarrolla e implementa el servicio, y lo
+                pone a disposición de otros, ya sea dentro de la misma organización o públicamente en internet.</li>
+            <li><strong>Consumidor del servicio:</strong> es quien accede al servicio para utilizar las funcionalidades
+                que este ofrece. Puede ser un usuario final a través de un navegador, o bien otra aplicación.</li>
+            <li><strong>Agente del servicio:</strong> actúa como intermediario entre proveedor y consumidor, facilitando
+                la publicación, búsqueda y localización de servicios disponibles.</li>
+        </ul>
+    </section>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>

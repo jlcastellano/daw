@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servidores Web</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header>
+        <div>Servidores Web</div>
+    </header>
+
+    <section class="contenido-didactico">
+
+        <h2>2.3. Tipos de aplicaciones web</h2>
+
+        <p>Las aplicaciones web abarcan un espectro muy amplio de funcionalidades y complejidad. Desde simples páginas
+            informativas hasta complejas plataformas de comercio electrónico, reservas, redes sociales, o herramientas
+            de productividad. Establecer una clasificación precisa es complejo debido a la enorme variedad existente,
+            pero podemos organizarlas según diferentes criterios:</p>
+
+        <h3>Según su naturaleza de contenido y tecnología</h3>
+
+        <h4>Sitios web estáticos</h4>
+        <ul>
+            <li>Contenido fijo que no cambia sin intervención manual.</li>
+            <li>Implementados en HTML, CSS, y posiblemente JavaScript básico.</li>
+            <li>Pueden incluir elementos dinámicos visuales (animaciones CSS, JavaScript) pero el contenido en sí no
+                cambia.</li>
+            <li>Ejemplos: páginas de presentación de pequeñas empresas, portfolios personales, sitios informativos
+                básicos.</li>
+            <li><strong>Ventajas:</strong> muy rápidos, económicos de hospedar, seguros (menos vectores de ataque).</li>
+            <li><strong>Desventajas:</strong> difíciles de actualizar sin conocimientos técnicos.</li>
+            <li>En 2025, los generadores de sitios estáticos (Gatsby, Next.js en modo estático, Hugo) han revitalizado
+                este enfoque, combinando las ventajas de lo estático con herramientas modernas de desarrollo.</li>
+        </ul>
+
+        <h4>Sitios web dinámicos</h4>
+        <ul>
+            <li>Contenido generado en tiempo real según la petición del usuario.</li>
+            <li>Interactúan con bases de datos para recuperar y presentar información.</li>
+            <li>Implementados con tecnologías del servidor (PHP, ASP.NET, Node.js, etc.).</li>
+            <li>Permiten personalización según el usuario.</li>
+            <li>Ejemplos: blogs, sitios de noticias, buscadores, plataformas educativas.</li>
+            <li>Se actualizan fácilmente mediante paneles de administración.</li>
+        </ul>
+
+        <h4>Aplicaciones web de una sola página (SPA)</h4>
+        <ul>
+            <li>Cargan una única página HTML y actualizan dinámicamente el contenido sin recargar.</li>
+            <li>Implementadas con frameworks JavaScript (React, Vue, Angular).</li>
+            <li>Experiencia de usuario fluida, similar a aplicaciones nativas.</li>
+            <li>Se comunican con el servidor mediante APIs (generalmente REST o GraphQL).</li>
+            <li>Ejemplos: Gmail, Google Maps, Facebook, Twitter/X.</li>
+            <li>Requieren JavaScript habilitado en el navegador.</li>
+        </ul>
+
+        <h4>Aplicaciones web progresivas (PWA)</h4>
+        <ul>
+            <li>Combinan características de web y aplicaciones móviles nativas.</li>
+            <li>Funcionan offline, se pueden instalar, envían notificaciones.</li>
+            <li>Responsivas y adaptables a cualquier dispositivo.</li>
+            <li>Ejemplos: Twitter Lite, Starbucks, Uber.</li>
+            <li>En 2025, cada vez más empresas optan por PWAs en lugar de aplicaciones nativas.</li>
+        </ul>
+
+        <h3>Según su funcionalidad</h3>
+
+        <h4>Portales web</h4>
+        <ul>
+            <li>Puntos de entrada que agregan múltiples servicios y secciones.</li>
+            <li>Ofrecen: noticias, foros, correo electrónico, buscadores, servicios personalizados.</li>
+            <li>Ejemplos: Yahoo, MSN (aunque menos relevantes en 2025), intranets corporativas.</li>
+        </ul>
+
+        <h4>Tiendas online (eCommerce)</h4>
+        <ul>
+            <li>Plataformas de comercio electrónico.</li>
+            <li>Funcionalidades: catálogo de productos, carrito de compra, pasarela de pago, gestión de pedidos, sistema
+                de valoraciones.</li>
+            <li>Plataformas populares en 2025: Shopify, WooCommerce, Magento, PrestaShop.</li>
+            <li>Integración con sistemas de pago, logística, inventario.</li>
+            <li>Ejemplos: Amazon, eBay, tiendas online de marcas.</li>
+        </ul>
+
+        <h4>Redes sociales</h4>
+        <ul>
+            <li>Plataformas para conexión e interacción entre usuarios.</li>
+            <li>Características: perfiles de usuario, publicación de contenido, mensajería, feeds personalizados.</li>
+            <li>Ejemplos: Facebook, Instagram, LinkedIn, TikTok, X (Twitter).</li>
+            <li>Algorítmicamente complejas para manejar millones de usuarios simultáneos.</li>
+        </ul>
+
+        <h4>Sistemas de gestión de contenidos (CMS)</h4>
+        <ul>
+            <li>Plataformas que permiten crear y gestionar contenido sin conocimientos técnicos.</li>
+            <li>Interfaz de administración intuitiva.</li>
+            <li>Plataformas populares: WordPress (el CMS más usado mundialmente), Drupal, Joomla; en 2025 también
+                headless CMS como Strapi, Contentful.</li>
+            <li>Permiten a no-técnicos actualizar sitios web fácilmente.</li>
+        </ul>
+
+        <h4>Aplicaciones empresariales (ERP, CRM)</h4>
+        <ul>
+            <li>Sistemas de gestión empresarial accesibles vía web.</li>
+            <li><strong>ERP</strong> (Enterprise Resource Planning): gestión integral de la empresa.</li>
+            <li><strong>CRM</strong> (Customer Relationship Management): gestión de relaciones con clientes.</li>
+            <li>Ejemplos: Salesforce, SAP, Odoo.</li>
+            <li>Aplicaciones complejas con múltiples módulos integrados.</li>
+        </ul>
+
+        <h4>Plataformas educativas (LMS)</h4>
+        <ul>
+            <li>Sistemas de gestión del aprendizaje.</li>
+            <li>Funcionalidades: cursos online, evaluaciones, seguimiento del progreso, foros, contenido multimedia.
+            </li>
+            <li>Ejemplos: Moodle, Canvas, Google Classroom, Coursera, Udemy.</li>
+            <li>Muy importantes especialmente desde 2020-2025 con el auge del aprendizaje online.</li>
+        </ul>
+
+        <h4>Aplicaciones de colaboración y productividad</h4>
+        <ul>
+            <li>Herramientas para trabajo colaborativo.</li>
+            <li>Ejemplos: Google Workspace (Docs, Sheets, Drive), Microsoft 365, Notion, Trello, Slack.</li>
+            <li>Permiten edición simultánea, comunicación en tiempo real, gestión de proyectos.</li>
+        </ul>
+
+        <h4>Servicios de streaming</h4>
+        <ul>
+            <li>Plataformas de contenido multimedia on-demand.</li>
+            <li>Ejemplos: Netflix, YouTube, Spotify, Disney+, Twitch.</li>
+            <li>Requieren infraestructura robusta para distribución de contenido.</li>
+            <li>Adaptación de calidad según ancho de banda (streaming adaptativo).</li>
+        </ul>
+
+        <h4>Aplicaciones de reservas y booking</h4>
+        <ul>
+            <li>Sistemas para reservar servicios o recursos.</li>
+            <li>Ejemplos: Booking.com, Airbnb, sistemas de reserva de citas médicas, reservas de restaurantes.</li>
+            <li>Integración con calendarios, pagos, confirmaciones automáticas.</li>
+        </ul>
+    </section>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servidores Web</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header>
+        <div>Servidores Web</div>
+    </header>
+
+    <section class="contenido-didactico">
+        <h2>2.6. Escalabilidad</h2>
+
+        <p>La <strong>escalabilidad</strong> es la capacidad de un sistema para manejar un aumento en la carga de
+            trabajo sin degradar su rendimiento o, alternativamente, para crecer de manera eficiente cuando se añaden
+            recursos adicionales.</p>
+
+        <p>En el contexto de aplicaciones web, la carga puede variar dramáticamente: un sitio de comercio electrónico
+            puede tener tráfico normal la mayor parte del año, pero experimentar picos enormes durante eventos como
+            Black Friday; un sitio de noticias puede recibir tráfico masivo cuando se produce una noticia de última
+            hora; una aplicación de streaming puede tener diferentes niveles de uso según la hora del día o el
+            lanzamiento de contenido popular.</p>
+
+        <h3>Por qué es importante la escalabilidad</h3>
+        <ul>
+            <li><strong>Experiencia del usuario:</strong> un sitio lento o que falla pierde usuarios.</li>
+            <li><strong>Coste de oportunidad:</strong> si tu sistema no puede manejar la demanda, pierdes ingresos
+                potenciales.</li>
+            <li><strong>Reputación:</strong> fallos públicos dañan la imagen de marca.</li>
+            <li><strong>Competitividad:</strong> en mercados competitivos, el rendimiento es diferenciador.</li>
+        </ul>
+        <h3>Tipos de escalabilidad</h3>
+        <figure>
+            <img src="https://pfst.cf2.poecdn.net/base/image/a7100f2cd4372bb443d5b2bea4d8ed1846cc9607d13414e0bf2952fa9cb1f044?w=1536&h=1024"
+                alt="Imagen didáctica 3">
+            <figcaption>Escalabilidad vertical vs horizontal.</figcaption>
+        </figure>
+
+        <h4>Escalabilidad vertical (Scale Up)</h4>
+
+        <p>Consiste en añadir más recursos al servidor existente:</p>
+        <ul>
+            <li>Más CPU (procesadores más potentes o más núcleos)</li>
+            <li>Más RAM (memoria)</li>
+            <li>Almacenamiento más rápido (SSD NVMe en lugar de HDD)</li>
+            <li>Mejor conectividad de red</li>
+        </ul>
+
+        <p><strong>Ventajas:</strong></p>
+        <ul>
+            <li>Simple de implementar (no requiere cambios en la aplicación)</li>
+            <li>No requiere cambios arquitectónicos significativos</li>
+            <li>Gestión más sencilla (un solo servidor más potente)</li>
+        </ul>
+
+        <p><strong>Desventajas:</strong></p>
+        <ul>
+            <li>Tiene un límite físico (no puedes aumentar indefinidamente)</li>
+            <li>Costoso (hardware de alto rendimiento es caro exponencialmente)</li>
+            <li>Punto único de fallo (si falla el servidor, cae todo)</li>
+            <li>Downtime durante actualizaciones de hardware</li>
+        </ul>
+
+        <p><strong>Cuándo usarla:</strong></p>
+        <ul>
+            <li>Aplicaciones pequeñas o medianas</li>
+            <li>Cuando la complejidad de escalar horizontalmente no se justifica</li>
+            <li>Para bases de datos que son difíciles de distribuir</li>
+            <li>Como solución temporal mientras se implementa escalado horizontal</li>
+        </ul>
+
+        <h4>Escalabilidad horizontal (Scale Out)</h4>
+
+        <p>Consiste en añadir más servidores al sistema: distribuir la carga entre múltiples máquinas. Cada máquina
+            puede ser relativamente modesta en recursos, pero la suma ofrece gran capacidad.</p>
+
+        <p><strong>Ventajas:</strong></p>
+        <ul>
+            <li>Prácticamente sin límite (siempre puedes añadir más servidores)</li>
+            <li>Mejor relación coste-beneficio (servidores commodity son baratos)</li>
+            <li>Redundancia y alta disponibilidad (si falla un servidor, otros continúan)</li>
+            <li>Se puede hacer sin downtime</li>
+        </ul>
+
+        <p><strong>Desventajas:</strong></p>
+        <ul>
+            <li>Mayor complejidad arquitectónica</li>
+            <li>Requiere mecanismos de distribución de carga</li>
+            <li>Puede requerir modificaciones en la aplicación</li>
+            <li>Gestión más compleja (múltiples servidores que coordinar)</li>
+            <li>Consistencia de datos más difícil de garantizar</li>
+        </ul>
+
+        <p><strong>Cuándo usarla:</strong></p>
+        <ul>
+            <li>Aplicaciones grandes con alto tráfico</li>
+            <li>Cuando se necesita alta disponibilidad</li>
+            <li>Aplicaciones diseñadas para la nube</li>
+            <li>Sistemas que experimentan picos impredecibles de tráfico</li>
+        </ul>
+
+        <h3>Estrategias para escalar horizontalmente</h3>
+
+        <h4>Balanceo de carga (Load Balancing)</h4>
+
+        <p>Distribuye las peticiones entrantes entre múltiples servidores.</p>
+
+        <p><strong>Tipos de balanceadores:</strong></p>
+
+        <p><em>Balanceadores por software:</em> se ejecutan como aplicación en un servidor.</p>
+        <ul>
+            <li>Ejemplos: Nginx (muy popular en 2025), HAProxy, Apache con mod_proxy_balancer.</li>
+            <li><strong>Ventajas:</strong> flexibles, económicos, fáciles de configurar.</li>
+            <li><strong>Desventajas:</strong> el balanceador puede convertirse en cuello de botella, requiere recursos
+                computacionales.</li>
+            <li>Pueden examinar peticiones HTTP y tomar decisiones inteligentes: mantener sesiones de usuario en el
+                mismo servidor (sticky sessions), enrutar según el tipo de contenido, aplicar reglas complejas.</li>
+        </ul>
+
+        <p><em>Balanceadores por hardware:</em> dispositivos físicos dedicados.</p>
+        <ul>
+            <li><strong>Ventajas:</strong> muy rápido, alto rendimiento, optimizados específicamente para balanceo.</li>
+            <li><strong>Desventajas:</strong> costosos, menos flexibles que software, requieren conocimientos
+                especializados.</li>
+            <li>Marcas: F5, Citrix NetScaler, A10 Networks.</li>
+            <li>En 2025, menos comunes debido a soluciones cloud.</li>
+        </ul>
+
+        <p><em>Balanceadores en la nube:</em> servicios gestionados por proveedores cloud.</p>
+        <ul>
+            <li>Ejemplos: AWS Elastic Load Balancer, Azure Load Balancer, Google Cloud Load Balancing.</li>
+            <li><strong>Ventajas:</strong> escalabilidad automática, alta disponibilidad, integración con otros
+                servicios cloud, sin gestión de hardware.</li>
+            <li><strong>Desventajas:</strong> coste según uso, dependencia del proveedor.</li>
+            <li>Muy populares en 2025.</li>
+        </ul>
+
+        <p><strong>Algoritmos de balanceo:</strong></p>
+        <ul>
+            <li><strong>Round Robin:</strong> las peticiones se distribuyen secuencialmente entre servidores. Simple
+                pero no considera la carga actual de cada servidor.</li>
+            <li><strong>Least Connections:</strong> envía peticiones al servidor con menos conexiones activas. Mejor
+                para cargas desiguales.</li>
+            <li><strong>Least Response Time:</strong> envía al servidor que responde más rápido. Optimiza la experiencia
+                del usuario.</li>
+            <li><strong>IP Hash:</strong> las peticiones del mismo cliente siempre van al mismo servidor. Útil para
+                mantener sesiones.</li>
+            <li><strong>Weighted algorithms:</strong> servidores más potentes reciben más peticiones.</li>
+        </ul>
+
+        <h4>Gestión de sesiones en entornos distribuidos</h4>
+
+        <p>Cuando múltiples servidores atienden a los usuarios, mantener el estado de la sesión es un desafío.</p>
+
+        <p><strong>Soluciones:</strong></p>
+
+        <p><em>Sticky sessions (sesiones persistentes):</em> el balanceador envía todas las peticiones de un usuario al
+            mismo servidor.</p>
+        <ul>
+            <li><strong>Ventajas:</strong> simple, no requiere cambios en la aplicación.</li>
+            <li><strong>Desventajas:</strong> distribución de carga desigual, si el servidor falla, se pierden las
+                sesiones.</li>
+        </ul>
+
+        <p><em>Almacenamiento de sesiones centralizado:</em> guardar datos de sesión en un almacén compartido.</p>
+        <ul>
+            <li><strong>Opciones:</strong> base de datos compartida (MySQL, PostgreSQL), caché distribuida (Redis,
+                Memcached — muy popular en 2025).</li>
+            <li><strong>Ventajas:</strong> cualquier servidor puede atender cualquier petición, alta disponibilidad,
+                escalable.</li>
+            <li><strong>Desventajas:</strong> latencia adicional para acceder al almacén, el almacén de sesiones puede
+                ser cuello de botella.</li>
+        </ul>
+
+        <p><em>Tokens de sesión (JWT — JSON Web Tokens):</em> información de sesión firmada digitalmente que viaja con
+            cada petición.</p>
+        <ul>
+            <li><strong>Ventajas:</strong> completamente stateless (sin estado en servidor), escalabilidad perfecta,
+                funciona bien con microservicios y APIs.</li>
+            <li><strong>Desventajas:</strong> tokens pueden ser grandes, invalidación de tokens más compleja,
+                información sensible debe cifrarse.</li>
+            <li>Muy popular en aplicaciones modernas en 2025.</li>
+        </ul>
+
+        <h4>Clusters de servidores de aplicaciones</h4>
+
+        <p>Agrupaciones de servidores que trabajan como una unidad lógica.</p>
+
+        <p><strong>Características:</strong></p>
+        <ul>
+            <li>Replicación de sesión entre servidores (todos comparten el estado)</li>
+            <li>Failover automático (si un servidor falla, otro toma su lugar)</li>
+            <li>Balanceo de carga integrado</li>
+        </ul>
+
+        <p><strong>Tecnologías:</strong> clusters de Tomcat, JBoss/WildFly clusters, clusters de IIS con ARR.</p>
+
+        <ul>
+            <li><strong>Ventajas:</strong> alta disponibilidad, transparente para la aplicación.</li>
+            <li><strong>Desventajas:</strong> overhead por replicación de sesión, complejidad de configuración, puede
+                haber problemas de rendimiento con muchos servidores.</li>
+        </ul>
+
+        <p>En 2025, menos común que enfoques stateless con caché externa.</p>
+
+        <h4>Escalabilidad de bases de datos</h4>
+
+        <p>La base de datos es frecuentemente el cuello de botella en aplicaciones web.</p>
+
+        <p><strong>Estrategias:</strong></p>
+
+        <p><em>Replicación:</em> copias de la base de datos en múltiples servidores.</p>
+        <ul>
+            <li><strong>Maestro-esclavo (primario-réplica):</strong> escrituras al maestro, lecturas distribuidas entre
+                réplicas. Reduce carga de lecturas (la mayoría de aplicaciones leen más que escriben).</li>
+            <li><strong>Maestro-maestro:</strong> múltiples servidores aceptan escrituras. Mayor complejidad, riesgo de
+                conflictos.</li>
+        </ul>
+
+        <p><em>Sharding (particionamiento horizontal):</em> dividir datos entre múltiples bases de datos.</p>
+        <ul>
+            <li>Cada shard contiene un subconjunto de los datos.</li>
+            <li>Ejemplo: usuarios con nombres A-M en un shard, N-Z en otro.</li>
+            <li>Permite escalar casi indefinidamente.</li>
+            <li>Complejidad significativa en la aplicación y consultas entre shards.</li>
+        </ul>
+
+        <p><em>Cachés:</em> almacenar datos frecuentemente accedidos en memoria.</p>
+        <ul>
+            <li><strong>Tecnologías:</strong> Redis (muy popular en 2025), Memcached, Varnish (para HTTP).</li>
+            <li>Reduce drásticamente carga en base de datos.</li>
+            <li>Requiere estrategias de invalidación de caché.</li>
+        </ul>
+
+        <p><em>Bases de datos NoSQL:</em> diseñadas para escala horizontal.</p>
+        <ul>
+            <li>Ejemplos: MongoDB, Cassandra, DynamoDB.</li>
+            <li>Escalan naturalmente añadiendo nodos.</li>
+            <li>Pueden sacrificar consistencia estricta por disponibilidad y particionamiento (teorema CAP).</li>
+        </ul>
+
+        <p><em>Base de datos como servicio (DBaaS):</em> servicios gestionados en la nube.</p>
+        <ul>
+            <li>Ejemplos: Amazon RDS, Azure SQL Database, Google Cloud SQL.</li>
+            <li>Escalado más sencillo (a menudo automático).</li>
+            <li>Alta disponibilidad integrada.</li>
+        </ul>
+
+        <h4>Escalabilidad en la nube (Cloud Scaling)</h4>
+
+        <p>Los proveedores de nube ofrecen escalabilidad como servicio:</p>
+
+        <p><em>Auto-scaling:</em> añade o elimina instancias automáticamente según la demanda.</p>
+        <ul>
+            <li>Basado en métricas: CPU, memoria, peticiones por segundo, métricas personalizadas.</li>
+            <li>Puede escalar preventivamente basándose en patrones.</li>
+            <li>Reduce costes al escalar hacia abajo en períodos de bajo tráfico.</li>
+        </ul>
+
+        <p><em>Containers y orquestación:</em> Docker + Kubernetes.</p>
+        <ul>
+            <li>Despliega aplicaciones en contenedores ligeros.</li>
+            <li>Kubernetes orquesta:
+                <ul>
+                    <li>Escalado automático horizontal de pods</li>
+                    <li>Balanceo de carga</li>
+                    <li>Self-healing (reemplaza contenedores que fallan)</li>
+                    <li>Rolling updates sin downtime</li>
+                </ul>
+            </li>
+            <li>Estándar de facto para aplicaciones cloud-native en 2025.</li>
+        </ul>
+
+        <p><em>Serverless computing:</em> funciones que escalan automáticamente.</p>
+        <ul>
+            <li>Escalado completamente automático y transparente.</li>
+            <li>Pago solo por ejecuciones (no por servidores ociosos).</li>
+            <li>Limitaciones en tiempo de ejecución y estado.</li>
+            <li>Ideal para cargas de trabajo esporádicas o muy variables.</li>
+        </ul>
+
+        <p><em>Content Delivery Networks (CDN):</em></p>
+        <ul>
+            <li>Distribuyen contenido estático globalmente.</li>
+            <li>Servidores edge cerca de los usuarios finales.</li>
+            <li>Proveedores: Cloudflare, Akamai, AWS CloudFront, Fastly.</li>
+            <li><strong>Beneficios:</strong> reduce latencia para usuarios globales, reduce carga en servidor origen,
+                protección contra DDoS, cacheo inteligente.</li>
+            <li>Esencial para aplicaciones globales en 2025.</li>
+        </ul>
+
+        <h3>Buenas prácticas para escalabilidad</h3>
+
+        <ul>
+            <li><strong>Diseñar stateless cuando sea posible:</strong> aplicaciones sin estado escalan trivialmente.
+            </li>
+            <li><strong>Separar lectura y escritura:</strong> optimizar cada una independientemente.</li>
+            <li><strong>Usar cachés agresivamente:</strong> reduce carga en sistemas backend.</li>
+            <li><strong>Asincronía:</strong> procesar tareas pesadas en background (colas de mensajes como RabbitMQ,
+                Apache Kafka).</li>
+            <li><strong>Monitorización:</strong> saber qué necesita escalar (herramientas: Prometheus, Grafana,
+                Datadog).</li>
+            <li><strong>Optimización de código y queries:</strong> a menudo más efectivo que añadir servidores.</li>
+            <li><strong>Diseño de base de datos eficiente:</strong> índices apropiados, queries optimizadas.</li>
+            <li><strong>Microservicios:</strong> escalar componentes independientemente según necesidad.</li>
+        </ul>
+
+        <p>En resumen, la escalabilidad no es una característica que se añade al final, sino un aspecto fundamental que
+            debe considerarse desde el diseño inicial de una aplicación web. En 2025, con la prevalencia de servicios
+            cloud y herramientas modernas de orquestación, la escalabilidad es más accesible que nunca, pero aún
+            requiere planificación cuidadosa y comprensión de las diferentes estrategias disponibles.</p>
+    </section>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>

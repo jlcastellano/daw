@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servidores Web</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header>
+        <div>Servidores Web</div>
+    </header>
+
+    <section class="contenido-didactico">
+
+        <h2>1.2. El servicio web e Internet</h2>
+
+        <p>Internet, tal como la conocemos en 2025, funciona gracias a la arquitectura de protocolos
+            <strong>TCP/IP</strong>. Esta arquitectura es fundamental porque permite la comunicación entre equipos que
+            se encuentran en redes diferentes, proporcionando una infraestructura flexible y robusta para el intercambio
+            de información.</p>
+
+        <p>Cuando accedemos a un sitio web mediante un navegador, se inicia una serie de comunicaciones con un sistema
+            remoto que resultan en el intercambio de paquetes de datos, permitiendo finalmente que veamos la página web
+            en nuestra pantalla. Analicemos este proceso paso a paso:</p>
+
+        <ol>
+            <li><strong>Petición del recurso:</strong> el navegador realiza una petición de un recurso al servidor web.
+                Este recurso puede ser una imagen, un documento HTML, un archivo de estilos CSS, un script JavaScript, u
+                otros tipos de contenido.</li>
+            <li><strong>Procesamiento en el servidor:</strong> el servidor web recibe la petición y la procesa. Procesar
+                la petición puede implicar dos escenarios diferentes: servir un <em>recurso estático</em> (simplemente
+                enviar el contenido de un archivo que está almacenado en el disco del servidor), o ejecutar una
+                aplicación en el servidor que genere <em>contenido dinámico</em> (por ejemplo, consultar una base de
+                datos y construir una página HTML personalizada con los resultados).</li>
+            <li><strong>Renderizado:</strong> el navegador web recibe el contenido del servidor y lo procesa mediante un
+                procedimiento llamado <strong>renderizado</strong>. Durante el renderizado, el navegador interpreta el
+                código HTML, aplica los estilos CSS, ejecuta el JavaScript necesario, y convierte toda esa información
+                en la página visual que finalmente vemos en la pantalla.</li>
+            <li><strong>Recursos adicionales:</strong> si para completar la visualización de la página el navegador
+                necesita recursos adicionales (como imágenes, archivos CSS, fuentes tipográficas, scripts JavaScript),
+                realizará nuevas peticiones al servidor siguiendo el mismo proceso anterior. Es común que una sola
+                página web requiera decenas de peticiones individuales para cargar completamente.</li>
+        </ol>
+
+        <p>El protocolo que hace posible todo este proceso es <strong>HTTP</strong>. HTTP define cómo el navegador debe
+            formular sus peticiones y cómo el servidor debe estructurar sus respuestas. Comprender HTTP es fundamental
+            para entender y configurar adecuadamente un servidor web.</p>
+
+        <p>Sin embargo, el éxito de la web no se debe únicamente al protocolo HTTP. Otros factores cruciales han
+            contribuido a su desarrollo:</p>
+
+        <ul>
+            <li><strong>El sistema DNS (Sistema de Nombres de Dominio):</strong> traduce nombres de dominio legibles por
+                humanos (como <code>www.ejemplo.com</code>) en direcciones IP numéricas (como <code>192.168.1.1</code>)
+                que los ordenadores utilizan para identificarse en la red. Gracias al DNS, no necesitamos memorizar
+                largas series de números para acceder a nuestros sitios favoritos.</li>
+            <li><strong>El uso de URLs (Localizadores Uniformes de Recursos):</strong> las URLs proporcionan una forma
+                estandarizada y amigable de nombrar y acceder a recursos en la red. Por ejemplo:
+                <code>https://www.ejemplo.com/productos/zapatos</code>.</li>
+            <li><strong>La creatividad de desarrolladores web:</strong> que con HTML, CSS, JavaScript y tecnologías del
+                lado del servidor, han logrado crear experiencias web cada vez más sofisticadas, interactivas e
+                impresionantes.</li>
+        </ul>
+
+        <p>Profundicemos ahora en el concepto de URL. La mejor forma de entender una URL es analizando un ejemplo
+            concreto y descomponiendo sus partes:</p>
+
+        <p><code>https://es.wikipedia.org/wiki/Localizador_de_recursos_uniforme</code></p>
+
+        <p>Esta URL está compuesta por las siguientes partes:</p>
+
+        <ul>
+            <li><strong>Esquema (<code>https:</code>):</strong> indica el protocolo utilizado para acceder al recurso.
+                Los esquemas más comunes son <code>http:</code> (protocolo HTTP estándar), <code>https:</code>
+                (protocolo HTTP seguro con cifrado), y <code>ftp:</code> (protocolo de transferencia de archivos).
+                También existen esquemas especiales como <code>tel:</code> (para números de teléfono),
+                <code>mailto:</code> (para direcciones de correo electrónico), y muchos otros.</li>
+            <li><strong>Nombre de dominio o FQDN (<code>es.wikipedia.org</code>):</strong> identifica el servidor
+                específico al que estamos accediendo. En este caso, se trata del servidor de Wikipedia en español.</li>
+            <li><strong>Ruta al recurso (<code>/wiki/Localizador_de_recursos_uniforme</code>):</strong> especifica la
+                ubicación exacta del recurso dentro del servidor. Es similar a la ruta de un archivo en nuestro
+                ordenador.</li>
+        </ul>
+
+        <p>Cuando una URL requiere autenticación (como en algunos servidores FTP), podemos incluir credenciales de
+            diferentes formas:</p>
+
+        <ul>
+            <li><code>ftp://usuario@ftp.ejemplo.es/directorio/</code> — donde "usuario" es el nombre de usuario.</li>
+            <li><code>ftp://usuario:contraseña@ftp.ejemplo.es/directorio/</code> — donde se especifican tanto el usuario
+                como la contraseña, separados por dos puntos. <em>Nota: esta forma no es recomendable por motivos de
+                    seguridad, ya que las credenciales quedan visibles en la URL.</em></li>
+        </ul>
+
+        <p>Finalmente, cuando un servicio web utiliza un puerto diferente al estándar, podemos especificarlo en la URL
+            de la siguiente manera:</p>
+
+        <p><code>http://www.ejemplo.com:8080/recurso</code> — donde <strong>8080</strong> es el número de puerto
+            específico que se utilizará para la conexión. Esto es útil cuando se ejecutan múltiples servicios web en el
+            mismo servidor o cuando se utilizan puertos no estándar por razones de seguridad o configuración.</p>
+    </section>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>

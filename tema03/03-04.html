@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servidores Web</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header>
+        <div>Servidores Web</div>
+    </header>
+
+    <section class="contenido-didactico">
+
+        <h2>1.3. El protocolo HTTP</h2>
+
+        <p>El protocolo <strong>HTTP</strong> (Protocolo de Transferencia de Hipertexto) es el lenguaje que permite la
+            transferencia de información entre un cliente web (como tu navegador) y un servidor web en internet. Es la
+            tecnología que da vida a la World Wide Web tal como la conocemos hoy.</p>
+
+        <p>HTTP ha evolucionado significativamente desde su creación. Comenzó con la versión 0.9 (muy básica) y ha
+            pasado por varias iteraciones hasta llegar a las versiones modernas. A principios de 2025, encontramos
+            principalmente tres versiones en uso:</p>
+
+        <ul>
+            <li><strong>HTTP/1.1:</strong> definida en el RFC 2616, fue durante muchos años la versión más extendida y
+                sigue siendo muy utilizada. Es la versión que muchos desarrolladores aprenden primero.</li>
+            <li><strong>HTTP/2:</strong> introducida en 2015, ofrece mejoras significativas en rendimiento y eficiencia.
+                A fecha de 2025, su adopción es cada vez mayor y muchos sitios web importantes ya la utilizan.</li>
+            <li><strong>HTTP/3:</strong> la versión más reciente, que comenzó a implementarse ampliamente a partir de
+                2022. Utiliza QUIC en lugar de TCP como protocolo de transporte, ofreciendo conexiones más rápidas y
+                confiables, especialmente en redes móviles.</li>
+        </ul>
+
+        <p>Aunque HTTP/2 y HTTP/3 son cada vez más prevalentes, es importante conocer las características fundamentales
+            de HTTP/1.1, ya que los conceptos básicos se mantienen en todas las versiones:</p>
+
+        <ul>
+            <li><strong>Es un protocolo de nivel de aplicación:</strong> está diseñado específicamente para que
+                aplicaciones en diferentes sistemas se comuniquen entre sí, sin preocuparse de los detalles técnicos de
+                cómo viajan los datos por la red.</li>
+            <li><strong>Es un protocolo sin estado:</strong> cada petición se trata de forma independiente. El servidor
+                no "recuerda" automáticamente peticiones anteriores del mismo cliente. Cada interacción es como si fuera
+                la primera vez. Esto simplifica el protocolo pero requiere mecanismos adicionales (como cookies) para
+                mantener sesiones de usuario.</li>
+            <li><strong>Utiliza comunicación de petición-respuesta:</strong> el cliente solicita un recurso, el servidor
+                responde. Es un modelo simple pero muy efectivo.</li>
+            <li><strong>Emplea formato de texto legible:</strong> tanto las peticiones como las respuestas (en HTTP/1.1)
+                están escritas en texto que los humanos pueden leer y entender. Esto facilita enormemente la depuración
+                y el aprendizaje. HTTP/2 y HTTP/3 utilizan formato binario para mayor eficiencia.</li>
+            <li><strong>No incluye autenticación integrada:</strong> el protocolo básico no requiere que los usuarios se
+                identifiquen para solicitar recursos. La autenticación debe ser implementada por las aplicaciones web
+                cuando sea necesaria.</li>
+        </ul>
+
+        <p>Como podemos observar, HTTP es intencionalmente simple en su concepción básica. Esto significa que
+            funcionalidades como la autenticación de usuarios, el mantenimiento de sesiones, o la gestión de permisos
+            deben ser implementadas por las aplicaciones web que construimos sobre HTTP, ya que el protocolo en sí mismo
+            no las proporciona.</p>
+
+        <p>Para el seguimiento de usuarios y la gestión de sesiones, se utilizan <strong>cookies</strong>. Las cookies
+            son pequeños fragmentos de información que el servidor web envía al navegador, y que este almacena
+            temporalmente. Cada vez que el navegador realiza una nueva petición al mismo sitio web, envía
+            automáticamente estas cookies de vuelta al servidor. Esto permite a la aplicación web "recordar" información
+            sobre el usuario entre diferentes peticiones.</p>
+
+        <p>Por ejemplo, las cookies pueden almacenar:</p>
+
+        <ul>
+            <li>El identificador de sesión del usuario (que permite al servidor recuperar su información de sesión)</li>
+            <li>Preferencias de visualización (como el idioma elegido o el tema oscuro/claro)</li>
+            <li>Productos visualizados recientemente en una tienda online</li>
+            <li>El contenido del carrito de la compra</li>
+        </ul>
+
+        <p>Veamos ahora en detalle cómo funciona el proceso de comunicación HTTP. Cuando un cliente web (por ejemplo, tu
+            navegador) solicita un recurso, se siguen estos pasos:</p>
+
+        <ol>
+            <li>El cliente web establece una conexión con el servidor web.</li>
+            <li>El cliente web envía una petición al servidor. Existen diferentes métodos HTTP para realizar peticiones,
+                siendo <strong>GET</strong> y <strong>POST</strong> los más comunes. Veremos más métodos en el siguiente
+                apartado.</li>
+            <li>El servidor procesa la petición y genera una respuesta, que incluye información sobre el resultado de la
+                operación, el tipo de contenido que se envía, su tamaño, y el contenido en sí mismo.</li>
+        </ol>
+
+        <p>Para comprender mejor este intercambio, analicemos un ejemplo concreto. Supongamos que escribimos en nuestro
+            navegador la siguiente URL: <code>http://www.ejemplo.es/inicio/</code></p>
+
+        <p>Nuestro navegador establecerá una conexión con el servidor <code>www.ejemplo.es</code> y enviará una petición
+            HTTP similar a esta:</p>
+
+        <pre><code class="language-http">GET /inicio/ HTTP/1.1
+Host: www.ejemplo.es
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0
+Accept: text/html,application/xhtml+xml,application/xml
+Accept-Language: es-ES,es;q=0.9
+Accept-Encoding: gzip, deflate
+Connection: keep-alive</code></pre>
+
+        <p>Desglosemos esta petición:</p>
+
+        <ul>
+            <li>La primera línea indica el <strong>método HTTP</strong> (<code>GET</code>), el <strong>recurso
+                    solicitado</strong> (<code>/inicio/</code>), y la <strong>versión del protocolo</strong>
+                (<code>HTTP/1.1</code>).</li>
+            <li>A continuación, el navegador incluye varias <strong>cabeceras de petición</strong> que proporcionan
+                información adicional al servidor:
+                <ul>
+                    <li><code>Host</code> indica el dominio al que se dirige la petición</li>
+                    <li><code>User-Agent</code> identifica el navegador y sistema operativo del cliente</li>
+                    <li><code>Accept</code> especifica qué tipos de contenido puede procesar el navegador</li>
+                    <li><code>Accept-Language</code> indica los idiomas preferidos del usuario</li>
+                    <li><code>Accept-Encoding</code> señala qué métodos de compresión soporta el navegador</li>
+                    <li><code>Connection</code> indica cómo debe manejarse la conexión</li>
+                </ul>
+            </li>
+        </ul>
+
+        <p>El servidor procesará esta petición y responderá con algo similar a esto:</p>
+
+        <pre><code class="language-http">HTTP/1.1 200 OK
+Date: Wed, 08 Jan 2025 10:30:00 GMT
+Server: Apache/2.4.52 (Unix)
+Content-Type: text/html; charset=UTF-8
+Content-Length: 3542
+Connection: keep-alive
+Set-Cookie: session_id=abc123xyz; Path=/; HttpOnly
+
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;Página de inicio&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;Bienvenido&lt;/h1&gt;
+    ...
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+        <p>La respuesta también tiene varias partes:</p>
+
+        <ul>
+            <li>La primera línea indica la <strong>versión del protocolo</strong> (<code>HTTP/1.1</code>), un
+                <strong>código de estado</strong> (<code>200</code>) que indica que todo fue bien, y un <strong>mensaje
+                    descriptivo</strong> (<code>OK</code>).</li>
+            <li>Seguidamente aparecen las <strong>cabeceras de respuesta</strong>:
+                <ul>
+                    <li><code>Date</code> indica cuándo se generó la respuesta</li>
+                    <li><code>Server</code> identifica el software del servidor web</li>
+                    <li><code>Content-Type</code> especifica el tipo de contenido que se envía (HTML en este caso) y su
+                        codificación de caracteres</li>
+                    <li><code>Content-Length</code> indica el tamaño del contenido en bytes</li>
+                    <li><code>Connection</code> indica cómo se maneja la conexión</li>
+                    <li><code>Set-Cookie</code> envía una cookie al navegador para que la almacene</li>
+                </ul>
+            </li>
+            <li>Después de las cabeceras, hay una <strong>línea en blanco</strong>, seguida del <strong>contenido
+                    real</strong> que se enviará al navegador (en este caso, el código HTML de la página).</li>
+        </ul>
+
+        <p>La diferencia fundamental entre HTTP/1.1 y las versiones más recientes (HTTP/2 y HTTP/3) radica en la
+            eficiencia:</p>
+
+        <p><strong>HTTP/2</strong> introduce:</p>
+        <ul>
+            <li>Comunicación binaria en lugar de texto</li>
+            <li>Multiplexación (permite enviar múltiples recursos simultáneamente en una sola conexión)</li>
+            <li>Compresión de cabeceras (reduce el overhead de cada petición)</li>
+            <li>Priorización de recursos (permite indicar qué recursos son más importantes)</li>
+        </ul>
+
+        <p><strong>HTTP/3</strong> va aún más lejos al utilizar QUIC sobre UDP en lugar de TCP, lo que proporciona:</p>
+        <ul>
+            <li>Establecimiento de conexión más rápido</li>
+            <li>Mejor rendimiento en redes con pérdida de paquetes</li>
+            <li>Migración de conexión (la conexión se mantiene aunque cambies de red WiFi a datos móviles)</li>
+        </ul>
+
+        <p>Estas mejoras hacen que las páginas web se carguen más rápidamente y que la experiencia de usuario sea más
+            fluida, especialmente en dispositivos móviles y conexiones inestables.</p>
+    </section>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>

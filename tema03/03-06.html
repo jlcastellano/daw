@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servidores Web</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div>Servidores Web</div>
+    </header>
+
+    <section class="contenido-didactico">
+    
+        <h2>1.5. Protocolo HTTP vs HTTPS</h2>
+
+               <p>Cuando navegas por internet en 2025, probablemente has notado que algunas URLs comienzan con <code>http://</code> mientras que otras comienzan con <code>https://</code>. Esta pequeña diferencia es extremadamente importante para tu seguridad y privacidad online.</p>
+            
+            <h3>¿Qué es HTTPS?</h3>
+            
+            <p><strong>HTTPS</strong> (HTTP Secure) es la versión segura de HTTP. Añade una capa de cifrado a la comunicación entre tu navegador y el servidor web, protegiendo la información que viaja entre ambos.</p>
+            
+            <h3>Diferencias fundamentales entre HTTP y HTTPS</h3>
+            
+            <p><strong>HTTP (no seguro):</strong></p>
+            <ul>
+                <li>La información viaja en texto claro, sin cifrar.</li>
+                <li>Cualquier persona o sistema que intercepte la comunicación puede leer todo el contenido: contraseñas, números de tarjeta de crédito, mensajes personales, etc.</li>
+                <li>No garantiza que estés conectado al servidor legítimo (vulnerable a ataques de suplantación).</li>
+                <li>En 2025, la mayoría de navegadores marcan los sitios HTTP como "No seguros".</li>
+            </ul>
+            
+            <p><strong>HTTPS (seguro):</strong></p>
+            <ul>
+                <li>La información viaja cifrada, protegida mediante criptografía.</li>
+                <li>Incluso si alguien intercepta la comunicación, solo verá datos ilegibles.</li>
+                <li>Verifica la identidad del servidor mediante certificados digitales.</li>
+                <li>Protege la integridad de los datos (garantiza que no han sido modificados en tránsito).</li>
+                <li>En 2025, es el estándar para prácticamente todos los sitios web profesionales.</li>
+            </ul>
+            
+            <h3>Certificados digitales y autoridades certificadoras</h3>
+            
+            <p>Para establecer una conexión HTTPS, el servidor web necesita un <strong>certificado digital</strong>. Este certificado funciona como una especie de "documento de identidad" del sitio web, que certifica que realmente es quien dice ser.</p>
+            
+            <p>Los certificados son emitidos por entidades llamadas <strong>Autoridades Certificadoras</strong> (CA, por sus siglas en inglés). Estas son organizaciones de confianza que verifican la identidad de los solicitantes antes de emitir certificados. Los navegadores mantienen una lista de CA en las que confían.</p>
+            
+            <p>Cuando visitas un sitio HTTPS:</p>
+            
+            <ul>
+                <li>Si el certificado está firmado por una CA reconocida, el navegador confía en el sitio y muestra un <strong>candado cerrado</strong> en la barra de direcciones.</li>
+                <li>Si el certificado es autofirmado o está firmado por una CA no reconocida, el navegador mostrará una <strong>advertencia de seguridad</strong>.</li>
+                <li>Si el certificado ha caducado o tiene otros problemas, el navegador también alertará al usuario.</li>
+            </ul>
+            
+            <h3>Certificados autofirmados</h3>
+            
+            <p>Es posible que un servidor web genere sus propios certificados (<strong>autofirmados</strong>), sin intervención de una CA. Estos certificados proporcionan cifrado, pero los navegadores no confiarán en ellos automáticamente y mostrarán advertencias de seguridad.</p>
+            
+            <p>Los certificados autofirmados son apropiados para:</p>
+            <ul>
+                <li>Entornos de desarrollo y pruebas.</li>
+                <li>Redes internas de empresas, donde los empleados pueden instalar el certificado manualmente en sus dispositivos.</li>
+                <li>Situaciones donde todos los usuarios conocen y confían explícitamente en el sitio.</li>
+            </ul>
+            
+            <p><strong>No son apropiados</strong> para sitios web públicos en internet, ya que los visitantes verán advertencias alarmantes que dañarán la credibilidad del sitio.</p>
+            
+            <p>En 2025, obtener certificados válidos es mucho más accesible que en el pasado, gracias a iniciativas como <strong>Let's Encrypt</strong>, que proporciona certificados gratuitos y automatizados.</p>
+            
+            <h3>¿Rendimiento de HTTPS vs HTTP?</h3>
+            
+            <p>Cifrar y descifrar información requiere procesamiento computacional, por lo que históricamente HTTPS era más lento que HTTP. Sin embargo, en 2025 esta diferencia es prácticamente imperceptible para los usuarios gracias a:</p>
+            
+            <ul>
+                <li>Hardware más potente en servidores y dispositivos.</li>
+                <li>Mejoras en los algoritmos de cifrado.</li>
+                <li>Optimizaciones en los protocolos (como HTTP/2 y HTTP/3, que funcionan mejor con HTTPS).</li>
+                <li>Aceleración por hardware de las operaciones criptográficas.</li>
+            </ul>
+            
+            <p>De hecho, debido a las optimizaciones de HTTP/2 y HTTP/3 (que requieren HTTPS), muchos sitios HTTPS son ahora <em>más rápidos</em> que si usaran HTTP.</p>
+            
+            <h3>¿Cuándo usar HTTP vs HTTPS?</h3>
+            
+            <p>En 2025, la respuesta es simple: <strong>usa HTTPS siempre que sea posible</strong>. Los motivos incluyen:</p>
+            
+            <ul>
+                <li>Protección de la privacidad de los usuarios.</li>
+                <li>Mejor posicionamiento en buscadores (Google favorece sitios HTTPS).</li>
+                <li>Requisito para muchas funcionalidades web modernas (geolocalización, notificaciones push, service workers).</li>
+                <li>Confianza del usuario (los navegadores alertan sobre sitios no seguros).</li>
+            </ul>
+            
+            <p>HTTP solo es aceptable en entornos muy específicos, como redes completamente cerradas o dispositivos IoT muy limitados.</p>
+            
+            <h3>¿Pueden coexistir HTTP y HTTPS?</h3>
+            
+            <p>Sí, un mismo sitio web puede ser accesible tanto por HTTP como por HTTPS. Sin embargo, la práctica recomendada en 2025 es:</p>
+            
+            <ol>
+                <li>Configurar el sitio para HTTPS.</li>
+                <li>Redireccionar automáticamente todo el tráfico HTTP a HTTPS (usando una redirección 301).</li>
+                <li>Implementar <strong>HSTS</strong> (HTTP Strict Transport Security) para forzar a los navegadores a usar siempre HTTPS.</li>
+            </ol>
+            
+            <h3>¿Cómo funciona HTTPS?</h3>
+            
+            <p>Cuando escribes una dirección HTTPS en tu navegador, el proceso es el siguiente:</p>
+            
+            <ol>
+                <li><strong>Resolución DNS:</strong> el navegador traduce el nombre de dominio (<code>www.ejemplo.com</code>) a una dirección IP, igual que con HTTP.</li>
+                <li><strong>Conexión al puerto 443:</strong> el navegador se conecta al servidor en el puerto 443 (el puerto estándar para HTTPS, mientras que HTTP usa el puerto 80).</li>
+                <li><strong>Negociación TLS/SSL (handshake):</strong> antes de intercambiar cualquier dato de la página web, cliente y servidor establecen una conexión segura:
+                    <ol type="a">
+                        <li>El navegador solicita la identidad del servidor.</li>
+                        <li>El servidor envía su certificado digital, que incluye su clave pública.</li>
+                        <li>El navegador verifica el certificado (comprueba que sea válido, no haya caducado, y esté firmado por una CA de confianza).</li>
+                        <li>Si el certificado es válido, el navegador y el servidor acuerdan un método de cifrado y establecen claves de sesión únicas para esta conexión.</li>
+                        <li>Opcionalmente, el servidor puede solicitar un certificado del cliente (autenticación mutua), aunque esto es poco común en navegación web normal.</li>
+                    </ol>
+                </li>
+                <li><strong>Comunicación cifrada:</strong> una vez establecida la conexión segura, toda la comunicación posterior (peticiones y respuestas HTTP) viaja cifrada. Nadie que intercepte la comunicación podrá leer su contenido.</li>
+            </ol>
+            
+            <h3>Puertos personalizados</h3>
+            
+            <p>Aunque 80 es el puerto estándar para HTTP y 443 para HTTPS, puedes configurar un servidor para usar puertos diferentes. Si lo haces, debes especificarlo en la URL:</p>
+            
+            <ul>
+                <li><code>http://www.ejemplo.com:8080</code> (HTTP en puerto 8080)</li>
+                <li><code>https://www.ejemplo.com:8443</code> (HTTPS en puerto 8443)</li>
+            </ul>
+            
+            <p>Sin embargo, usar puertos no estándar tiene inconvenientes:</p>
+            
+            <ul>
+                <li>Los usuarios deben conocer y recordar el puerto.</li>
+                <li>Algunos firewalls corporativos pueden bloquear puertos no estándar.</li>
+                <li>Los buscadores pueden tener dificultades para indexar el sitio.</li>
+            </ul>
+            
+            <p>Por estas razones, se recomienda usar los puertos estándar (80 y 443) para sitios web públicos.</p>
+            
+            <p>Cuando no especificas el puerto en una URL, el navegador usa automáticamente el puerto estándar del protocolo:</p>
+            
+            <ul>
+                <li><code>http://www.ejemplo.com</code> es equivalente a <code>http://www.ejemplo.com:80</code></li>
+                <li><code>https://www.ejemplo.com</code> es equivalente a <code>https://www.ejemplo.com:443</code></li>
+            </ul>
+        </section>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
