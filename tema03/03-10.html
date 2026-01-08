@@ -16,147 +16,132 @@
 
     <section class="contenido-didactico">
 
-        <h2>2.4. Modelos de arquitecturas web</h2>
+        <h2>2.3. Tipos de aplicaciones web</h2>
 
-        <p>La arquitectura de un sitio web comprende la organización de sus componentes, la estructura de la
-            información, los sistemas de navegación, y cómo estos elementos trabajan conjuntamente para servir a los
-            usuarios. Una buena arquitectura web facilita que los usuarios encuentren lo que buscan y que los
-            desarrolladores mantengan y evolucionen el sistema.</p>
+        <p>Las aplicaciones web abarcan un espectro muy amplio de funcionalidades y complejidad. Desde simples páginas
+            informativas hasta complejas plataformas de comercio electrónico, reservas, redes sociales, o herramientas
+            de productividad. Establecer una clasificación precisa es complejo debido a la enorme variedad existente,
+            pero podemos organizarlas según diferentes criterios:</p>
 
-        <h3>Capas de una aplicación web</h3>
+        <h3>Según su naturaleza de contenido y tecnología</h3>
 
-        <p>Las aplicaciones web modernas típicamente se organizan en tres capas lógicas</p>
-
-        <figure>
-            <img src="https://pfst.cf2.poecdn.net/base/image/b829cd827b7edd68b1f494aa9fdcec65b915b142113995c5fb51b9f14edae37f?w=1536&h=1024"
-                alt="Imagen didáctica 2">
-            <figcaption>Arquitectura en capas.</figcaption>
-        </figure>
-
-        <h4>Capa de presentación (Frontend)</h4>
-        <p>Lo que el usuario ve e interactúa.</p>
+        <h4>Sitios web estáticos</h4>
         <ul>
-            <li><strong>Responsabilidades:</strong> interfaz de usuario, experiencia de usuario (UX), validación de
-                entrada de datos (lado cliente), navegación, formato y visualización de datos.</li>
-            <li><strong>Tecnologías:</strong> HTML, CSS, JavaScript, frameworks frontend.</li>
-            <li>En 2025, cada vez más lógica se ejecuta en esta capa (SPAs, PWAs).</li>
+            <li>Contenido fijo que no cambia sin intervención manual.</li>
+            <li>Implementados en HTML, CSS, y posiblemente JavaScript básico.</li>
+            <li>Pueden incluir elementos dinámicos visuales (animaciones CSS, JavaScript) pero el contenido en sí no
+                cambia.</li>
+            <li>Ejemplos: páginas de presentación de pequeñas empresas, portfolios personales, sitios informativos
+                básicos.</li>
+            <li><strong>Ventajas:</strong> muy rápidos, económicos de hospedar, seguros (menos vectores de ataque).</li>
+            <li><strong>Desventajas:</strong> difíciles de actualizar sin conocimientos técnicos.</li>
+            <li>En 2025, los generadores de sitios estáticos (Gatsby, Next.js en modo estático, Hugo) han revitalizado
+                este enfoque, combinando las ventajas de lo estático con herramientas modernas de desarrollo.</li>
         </ul>
 
-        <h4>Capa de lógica de negocio (Backend)</h4>
-        <p>El "cerebro" de la aplicación.</p>
+        <h4>Sitios web dinámicos</h4>
         <ul>
-            <li><strong>Responsabilidades:</strong> procesamiento de peticiones, aplicación de reglas de negocio,
-                validación de datos (lado servidor), autenticación y autorización, orquestación entre diferentes
-                servicios, generación de respuestas.</li>
-            <li><strong>Tecnologías:</strong> lenguajes de servidor (PHP, Python, Java, Node.js), frameworks backend.
+            <li>Contenido generado en tiempo real según la petición del usuario.</li>
+            <li>Interactúan con bases de datos para recuperar y presentar información.</li>
+            <li>Implementados con tecnologías del servidor (PHP, ASP.NET, Node.js, etc.).</li>
+            <li>Permiten personalización según el usuario.</li>
+            <li>Ejemplos: blogs, sitios de noticias, buscadores, plataformas educativas.</li>
+            <li>Se actualizan fácilmente mediante paneles de administración.</li>
+        </ul>
+
+        <h4>Aplicaciones web de una sola página (SPA)</h4>
+        <ul>
+            <li>Cargan una única página HTML y actualizan dinámicamente el contenido sin recargar.</li>
+            <li>Implementadas con frameworks JavaScript (React, Vue, Angular).</li>
+            <li>Experiencia de usuario fluida, similar a aplicaciones nativas.</li>
+            <li>Se comunican con el servidor mediante APIs (generalmente REST o GraphQL).</li>
+            <li>Ejemplos: Gmail, Google Maps, Facebook, Twitter/X.</li>
+            <li>Requieren JavaScript habilitado en el navegador.</li>
+        </ul>
+
+        <h4>Aplicaciones web progresivas (PWA)</h4>
+        <ul>
+            <li>Combinan características de web y aplicaciones móviles nativas.</li>
+            <li>Funcionan offline, se pueden instalar, envían notificaciones.</li>
+            <li>Responsivas y adaptables a cualquier dispositivo.</li>
+            <li>Ejemplos: Twitter Lite, Starbucks, Uber.</li>
+            <li>En 2025, cada vez más empresas optan por PWAs en lugar de aplicaciones nativas.</li>
+        </ul>
+
+        <h3>Según su funcionalidad</h3>
+
+        <h4>Portales web</h4>
+        <ul>
+            <li>Puntos de entrada que agregan múltiples servicios y secciones.</li>
+            <li>Ofrecen: noticias, foros, correo electrónico, buscadores, servicios personalizados.</li>
+            <li>Ejemplos: Yahoo, MSN (aunque menos relevantes en 2025), intranets corporativas.</li>
+        </ul>
+
+        <h4>Tiendas online (eCommerce)</h4>
+        <ul>
+            <li>Plataformas de comercio electrónico.</li>
+            <li>Funcionalidades: catálogo de productos, carrito de compra, pasarela de pago, gestión de pedidos, sistema
+                de valoraciones.</li>
+            <li>Plataformas populares en 2025: Shopify, WooCommerce, Magento, PrestaShop.</li>
+            <li>Integración con sistemas de pago, logística, inventario.</li>
+            <li>Ejemplos: Amazon, eBay, tiendas online de marcas.</li>
+        </ul>
+
+        <h4>Redes sociales</h4>
+        <ul>
+            <li>Plataformas para conexión e interacción entre usuarios.</li>
+            <li>Características: perfiles de usuario, publicación de contenido, mensajería, feeds personalizados.</li>
+            <li>Ejemplos: Facebook, Instagram, LinkedIn, TikTok, X (Twitter).</li>
+            <li>Algorítmicamente complejas para manejar millones de usuarios simultáneos.</li>
+        </ul>
+
+        <h4>Sistemas de gestión de contenidos (CMS)</h4>
+        <ul>
+            <li>Plataformas que permiten crear y gestionar contenido sin conocimientos técnicos.</li>
+            <li>Interfaz de administración intuitiva.</li>
+            <li>Plataformas populares: WordPress (el CMS más usado mundialmente), Drupal, Joomla; en 2025 también
+                headless CMS como Strapi, Contentful.</li>
+            <li>Permiten a no-técnicos actualizar sitios web fácilmente.</li>
+        </ul>
+
+        <h4>Aplicaciones empresariales (ERP, CRM)</h4>
+        <ul>
+            <li>Sistemas de gestión empresarial accesibles vía web.</li>
+            <li><strong>ERP</strong> (Enterprise Resource Planning): gestión integral de la empresa.</li>
+            <li><strong>CRM</strong> (Customer Relationship Management): gestión de relaciones con clientes.</li>
+            <li>Ejemplos: Salesforce, SAP, Odoo.</li>
+            <li>Aplicaciones complejas con múltiples módulos integrados.</li>
+        </ul>
+
+        <h4>Plataformas educativas (LMS)</h4>
+        <ul>
+            <li>Sistemas de gestión del aprendizaje.</li>
+            <li>Funcionalidades: cursos online, evaluaciones, seguimiento del progreso, foros, contenido multimedia.
             </li>
+            <li>Ejemplos: Moodle, Canvas, Google Classroom, Coursera, Udemy.</li>
+            <li>Muy importantes especialmente desde 2020-2025 con el auge del aprendizaje online.</li>
         </ul>
 
-        <h4>Capa de datos (Database)</h4>
-        <p>Almacenamiento persistente de información.</p>
+        <h4>Aplicaciones de colaboración y productividad</h4>
         <ul>
-            <li><strong>Responsabilidades:</strong> almacenamiento de datos, recuperación eficiente de información,
-                integridad y consistencia de datos, respaldo y recuperación.</li>
-            <li><strong>Tecnologías:</strong> bases de datos relacionales (MySQL, PostgreSQL, SQL Server), bases de
-                datos NoSQL (MongoDB, Redis, Cassandra), sistemas de archivos, servicios de almacenamiento en la nube.
-            </li>
+            <li>Herramientas para trabajo colaborativo.</li>
+            <li>Ejemplos: Google Workspace (Docs, Sheets, Drive), Microsoft 365, Notion, Trello, Slack.</li>
+            <li>Permiten edición simultánea, comunicación en tiempo real, gestión de proyectos.</li>
         </ul>
 
-        <p>Esta separación en capas ofrece importantes beneficios:</p>
+        <h4>Servicios de streaming</h4>
         <ul>
-            <li><strong>Mantenibilidad:</strong> cambios en una capa no afectan a las otras.</li>
-            <li><strong>Escalabilidad:</strong> puedes escalar cada capa independientemente.</li>
-            <li><strong>Reutilización:</strong> la misma lógica de negocio puede servir a múltiples interfaces (web,
-                móvil, API).</li>
-            <li><strong>Seguridad:</strong> cada capa puede tener sus propias medidas de seguridad.</li>
-            <li><strong>Desarrollo paralelo:</strong> diferentes equipos pueden trabajar en diferentes capas.</li>
+            <li>Plataformas de contenido multimedia on-demand.</li>
+            <li>Ejemplos: Netflix, YouTube, Spotify, Disney+, Twitch.</li>
+            <li>Requieren infraestructura robusta para distribución de contenido.</li>
+            <li>Adaptación de calidad según ancho de banda (streaming adaptativo).</li>
         </ul>
 
-        <h3>Modelos arquitectónicos históricos</h3>
-
-        <p>La arquitectura de aplicaciones web ha evolucionado significativamente:</p>
-
-        <h4>Modelo 1 (CGI tradicional)</h4>
+        <h4>Aplicaciones de reservas y booking</h4>
         <ul>
-            <li>Una única capa mezclaba presentación, lógica, y acceso a datos.</li>
-            <li>Scripts (típicamente Perl) que generaban HTML directamente.</li>
-            <li>Difícil de mantener y escalar.</li>
-            <li>Muy ineficiente (nuevo proceso por cada petición).</li>
-            <li>Prácticamente obsoleto en 2025.</li>
-        </ul>
-
-        <h4>Modelo 1.5 (Tecnologías de scripting del servidor)</h4>
-        <ul>
-            <li>Separación básica entre lógica y presentación.</li>
-            <li>En Java: JSP (presentación) + JavaBeans (lógica).</li>
-            <li>En PHP: plantillas PHP + funciones de lógica.</li>
-            <li>Mejor que el Modelo 1, pero aún con acoplamiento significativo.</li>
-        </ul>
-
-        <h4>Modelo 2 (MVC — Modelo Vista Controlador)</h4>
-        <p>Paradigma arquitectónico que separa claramente responsabilidades:</p>
-        <ul>
-            <li><strong>Modelo:</strong> datos y lógica de negocio.</li>
-            <li><strong>Vista:</strong> presentación (lo que ve el usuario).</li>
-            <li><strong>Controlador:</strong> gestiona peticiones, coordina modelo y vista.</li>
-        </ul>
-        <p><strong>Ventajas:</strong> separación de responsabilidades clara, testeable, mantenible, reutilizable.</p>
-        <p><strong>Frameworks MVC en 2025:</strong> Spring MVC (Java), ASP.NET MVC, Ruby on Rails, Laravel (PHP), Django
-            (Python).</p>
-        <p>Sigue siendo muy popular en 2025.</p>
-
-        <h4>Modelo 2X (MVC con XML/XSLT para multi-canal)</h4>
-        <ul>
-            <li>Extensión del Modelo 2 para servir múltiples tipos de clientes.</li>
-            <li>El servidor genera XML con los datos.</li>
-            <li>Transformaciones XSLT diferentes según el dispositivo (HTML para web, WML para móviles antiguos, etc.).
-            </li>
-            <li>Fue popular en 2005-2010 pero ha sido superado por enfoques más modernos.</li>
-        </ul>
-
-        <h3>Arquitecturas modernas en 2025</h3>
-
-        <h4>API-First / Backend-for-Frontend (BFF)</h4>
-        <ul>
-            <li>El backend expone APIs (generalmente REST o GraphQL).</li>
-            <li>Múltiples frontends consumen estas APIs: aplicación web (SPA), aplicación móvil iOS, aplicación móvil
-                Android, aplicaciones de escritorio, dispositivos IoT.</li>
-            <li>Desacopla completamente frontend y backend.</li>
-            <li>Cada frontend puede tener su propio BFF optimizado.</li>
-        </ul>
-
-        <h4>Microservicios</h4>
-        <p>La aplicación se divide en servicios pequeños e independientes.</p>
-        <ul>
-            <li>Cada microservicio:
-                <ul>
-                    <li>Tiene una responsabilidad específica</li>
-                    <li>Se puede desarrollar en diferentes tecnologías</li>
-                    <li>Se despliega independientemente</li>
-                    <li>Se escala independientemente</li>
-                </ul>
-            </li>
-            <li>Comunicación entre servicios vía APIs (HTTP/REST, gRPC, mensajería).</li>
-            <li>Complejidad operacional, pero gran flexibilidad.</li>
-            <li>Popular en grandes organizaciones en 2025.</li>
-        </ul>
-
-        <h4>Serverless / Functions as a Service (FaaS)</h4>
-        <ul>
-            <li>Código que se ejecuta sin gestionar servidores.</li>
-            <li>Funciones que responden a eventos.</li>
-            <li>Escalado automático y pago por uso.</li>
-            <li>Proveedores: AWS Lambda, Azure Functions, Google Cloud Functions.</li>
-            <li>Ideal para cargas de trabajo variables o esporádicas.</li>
-        </ul>
-
-        <h4>JAMstack (JavaScript, APIs, Markup)</h4>
-        <ul>
-            <li>Frontend estático precompilado.</li>
-            <li>Funcionalidad dinámica vía JavaScript y APIs.</li>
-            <li>CDN (Content Delivery Network) para distribución global.</li>
-            <li>Rendimiento excepcional y seguridad mejorada.</li>
-            <li>Popular para sitios de contenido y blogs en 2025.</li>
+            <li>Sistemas para reservar servicios o recursos.</li>
+            <li>Ejemplos: Booking.com, Airbnb, sistemas de reserva de citas médicas, reservas de restaurantes.</li>
+            <li>Integración con calendarios, pagos, confirmaciones automáticas.</li>
         </ul>
     </section>
 

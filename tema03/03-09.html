@@ -15,134 +15,225 @@
     </header>
 
     <section class="contenido-didactico">
+        <h2>2.2. ¿Cuáles son las tecnologías asociadas a las aplicaciones web?</h2>
 
-        <h2>2.3. Tipos de aplicaciones web</h2>
+        <p>Las aplicaciones web modernas emplean páginas dinámicas que se procesan de dos formas principales: en el
+            servidor (antes de enviarse al navegador) o en el cliente (dentro del navegador del usuario). Muchas
+            aplicaciones actuales utilizan una combinación de ambos enfoques. Veamos las tecnologías más relevantes en
+            cada contexto:</p>
 
-        <p>Las aplicaciones web abarcan un espectro muy amplio de funcionalidades y complejidad. Desde simples páginas
-            informativas hasta complejas plataformas de comercio electrónico, reservas, redes sociales, o herramientas
-            de productividad. Establecer una clasificación precisa es complejo debido a la enorme variedad existente,
-            pero podemos organizarlas según diferentes criterios:</p>
+        <h3>Tecnologías del lado del servidor (Backend)</h3>
 
-        <h3>Según su naturaleza de contenido y tecnología</h3>
+        <p>Estas tecnologías se ejecutan en el servidor web y generan contenido dinámico antes de enviarlo al navegador
+            del usuario.</p>
 
-        <h4>Sitios web estáticos</h4>
+        <h4>CGI (Common Gateway Interface — Interfaz Común de Pasarela)</h4>
         <ul>
-            <li>Contenido fijo que no cambia sin intervención manual.</li>
-            <li>Implementados en HTML, CSS, y posiblemente JavaScript básico.</li>
-            <li>Pueden incluir elementos dinámicos visuales (animaciones CSS, JavaScript) pero el contenido en sí no
-                cambia.</li>
-            <li>Ejemplos: páginas de presentación de pequeñas empresas, portfolios personales, sitios informativos
-                básicos.</li>
-            <li><strong>Ventajas:</strong> muy rápidos, económicos de hospedar, seguros (menos vectores de ataque).</li>
-            <li><strong>Desventajas:</strong> difíciles de actualizar sin conocimientos técnicos.</li>
-            <li>En 2025, los generadores de sitios estáticos (Gatsby, Next.js en modo estático, Hugo) han revitalizado
-                este enfoque, combinando las ventajas de lo estático con herramientas modernas de desarrollo.</li>
+            <li>Uno de los estándares más antiguos para aplicaciones web dinámicas, desarrollado en los años 90.</li>
+            <li>Permite que un servidor web ejecute programas externos y devuelva su salida al cliente.</li>
+            <li>Históricamente se usaba para formularios web, contadores de visitas, y funcionalidades básicas.</li>
+            <li>Generalmente implementado en lenguajes como Perl, C, o scripts de shell.</li>
+            <li>En 2025, CGI está prácticamente obsoleto, reemplazado por tecnologías más modernas y eficientes.</li>
         </ul>
 
-        <h4>Sitios web dinámicos</h4>
+        <h4>PHP (Hypertext Preprocessor)</h4>
         <ul>
-            <li>Contenido generado en tiempo real según la petición del usuario.</li>
-            <li>Interactúan con bases de datos para recuperar y presentar información.</li>
-            <li>Implementados con tecnologías del servidor (PHP, ASP.NET, Node.js, etc.).</li>
-            <li>Permiten personalización según el usuario.</li>
-            <li>Ejemplos: blogs, sitios de noticias, buscadores, plataformas educativas.</li>
-            <li>Se actualizan fácilmente mediante paneles de administración.</li>
+            <li>Uno de los lenguajes más populares para desarrollo web del lado del servidor.</li>
+            <li>Código abierto y multiplataforma.</li>
+            <li>Fácil de aprender e integrar con HTML.</li>
+            <li>Excelente soporte para bases de datos (MySQL, PostgreSQL, MongoDB).</li>
+            <li>Gran ecosistema de frameworks (Laravel, Symfony, WordPress).</li>
+            <li>En 2025, PHP sigue siendo muy utilizado, especialmente en su versión 8.x, que ha introducido mejoras
+                significativas de rendimiento y características modernas del lenguaje.</li>
+            <li>Utilizado por sitios importantes como Facebook, Wikipedia, y WordPress.</li>
         </ul>
 
-        <h4>Aplicaciones web de una sola página (SPA)</h4>
+        <h4>ASP.NET</h4>
         <ul>
-            <li>Cargan una única página HTML y actualizan dinámicamente el contenido sin recargar.</li>
-            <li>Implementadas con frameworks JavaScript (React, Vue, Angular).</li>
-            <li>Experiencia de usuario fluida, similar a aplicaciones nativas.</li>
-            <li>Se comunican con el servidor mediante APIs (generalmente REST o GraphQL).</li>
-            <li>Ejemplos: Gmail, Google Maps, Facebook, Twitter/X.</li>
-            <li>Requieren JavaScript habilitado en el navegador.</li>
+            <li>Desarrollado por Microsoft como evolución de ASP clásico.</li>
+            <li>Framework robusto para desarrollo de aplicaciones web empresariales.</li>
+            <li>Soporte para múltiples lenguajes (C#, VB.NET, F#).</li>
+            <li>En 2025, ASP.NET Core es multiplataforma (Windows, Linux, macOS) y de código abierto.</li>
+            <li>Excelente integración con el ecosistema Microsoft.</li>
+            <li>Alto rendimiento y escalabilidad.</li>
+            <li>Muy utilizado en entornos corporativos y empresariales.</li>
         </ul>
 
-        <h4>Aplicaciones web progresivas (PWA)</h4>
+        <h4>Java (Ecosistema Java EE / Jakarta EE)</h4>
         <ul>
-            <li>Combinan características de web y aplicaciones móviles nativas.</li>
-            <li>Funcionan offline, se pueden instalar, envían notificaciones.</li>
-            <li>Responsivas y adaptables a cualquier dispositivo.</li>
-            <li>Ejemplos: Twitter Lite, Starbucks, Uber.</li>
-            <li>En 2025, cada vez más empresas optan por PWAs en lugar de aplicaciones nativas.</li>
-        </ul>
-
-        <h3>Según su funcionalidad</h3>
-
-        <h4>Portales web</h4>
-        <ul>
-            <li>Puntos de entrada que agregan múltiples servicios y secciones.</li>
-            <li>Ofrecen: noticias, foros, correo electrónico, buscadores, servicios personalizados.</li>
-            <li>Ejemplos: Yahoo, MSN (aunque menos relevantes en 2025), intranets corporativas.</li>
-        </ul>
-
-        <h4>Tiendas online (eCommerce)</h4>
-        <ul>
-            <li>Plataformas de comercio electrónico.</li>
-            <li>Funcionalidades: catálogo de productos, carrito de compra, pasarela de pago, gestión de pedidos, sistema
-                de valoraciones.</li>
-            <li>Plataformas populares en 2025: Shopify, WooCommerce, Magento, PrestaShop.</li>
-            <li>Integración con sistemas de pago, logística, inventario.</li>
-            <li>Ejemplos: Amazon, eBay, tiendas online de marcas.</li>
-        </ul>
-
-        <h4>Redes sociales</h4>
-        <ul>
-            <li>Plataformas para conexión e interacción entre usuarios.</li>
-            <li>Características: perfiles de usuario, publicación de contenido, mensajería, feeds personalizados.</li>
-            <li>Ejemplos: Facebook, Instagram, LinkedIn, TikTok, X (Twitter).</li>
-            <li>Algorítmicamente complejas para manejar millones de usuarios simultáneos.</li>
-        </ul>
-
-        <h4>Sistemas de gestión de contenidos (CMS)</h4>
-        <ul>
-            <li>Plataformas que permiten crear y gestionar contenido sin conocimientos técnicos.</li>
-            <li>Interfaz de administración intuitiva.</li>
-            <li>Plataformas populares: WordPress (el CMS más usado mundialmente), Drupal, Joomla; en 2025 también
-                headless CMS como Strapi, Contentful.</li>
-            <li>Permiten a no-técnicos actualizar sitios web fácilmente.</li>
-        </ul>
-
-        <h4>Aplicaciones empresariales (ERP, CRM)</h4>
-        <ul>
-            <li>Sistemas de gestión empresarial accesibles vía web.</li>
-            <li><strong>ERP</strong> (Enterprise Resource Planning): gestión integral de la empresa.</li>
-            <li><strong>CRM</strong> (Customer Relationship Management): gestión de relaciones con clientes.</li>
-            <li>Ejemplos: Salesforce, SAP, Odoo.</li>
-            <li>Aplicaciones complejas con múltiples módulos integrados.</li>
-        </ul>
-
-        <h4>Plataformas educativas (LMS)</h4>
-        <ul>
-            <li>Sistemas de gestión del aprendizaje.</li>
-            <li>Funcionalidades: cursos online, evaluaciones, seguimiento del progreso, foros, contenido multimedia.
+            <li>Plataforma madura y robusta para aplicaciones web empresariales.</li>
+            <li>Tecnologías clave:
+                <ul>
+                    <li><strong>Servlets:</strong> clases Java que manejan peticiones HTTP</li>
+                    <li><strong>JSP (JavaServer Pages):</strong> similar a PHP pero con Java</li>
+                    <li><strong>JSF (JavaServer Faces):</strong> framework de componentes UI</li>
+                    <li><strong>Spring Framework:</strong> el framework Java más popular en 2025</li>
+                </ul>
             </li>
-            <li>Ejemplos: Moodle, Canvas, Google Classroom, Coursera, Udemy.</li>
-            <li>Muy importantes especialmente desde 2020-2025 con el auge del aprendizaje online.</li>
+            <li>Muy utilizado en grandes corporaciones y aplicaciones bancarias/financieras.</li>
+            <li>Excelente para aplicaciones que requieren alta seguridad y fiabilidad.</li>
         </ul>
 
-        <h4>Aplicaciones de colaboración y productividad</h4>
+        <h4>Python</h4>
         <ul>
-            <li>Herramientas para trabajo colaborativo.</li>
-            <li>Ejemplos: Google Workspace (Docs, Sheets, Drive), Microsoft 365, Notion, Trello, Slack.</li>
-            <li>Permiten edición simultánea, comunicación en tiempo real, gestión de proyectos.</li>
+            <li>Lenguaje versátil y de sintaxis clara.</li>
+            <li>Frameworks web populares:
+                <ul>
+                    <li><strong>Django:</strong> framework completo y robusto, con ORM incluido</li>
+                    <li><strong>Flask:</strong> microframework ligero y flexible</li>
+                    <li><strong>FastAPI:</strong> framework moderno para APIs, muy rápido</li>
+                </ul>
+            </li>
+            <li>Muy popular en 2025 para desarrollo rápido de prototipos y aplicaciones.</li>
+            <li>Excelente para integración con IA y machine learning.</li>
+            <li>Usado por sitios como Instagram, Pinterest, y Spotify.</li>
         </ul>
 
-        <h4>Servicios de streaming</h4>
+        <h4>Ruby</h4>
         <ul>
-            <li>Plataformas de contenido multimedia on-demand.</li>
-            <li>Ejemplos: Netflix, YouTube, Spotify, Disney+, Twitch.</li>
-            <li>Requieren infraestructura robusta para distribución de contenido.</li>
-            <li>Adaptación de calidad según ancho de banda (streaming adaptativo).</li>
+            <li>Conocido especialmente por <strong>Ruby on Rails</strong>, un framework que revolucionó el desarrollo
+                web.</li>
+            <li>Énfasis en convención sobre configuración.</li>
+            <li>Desarrollo rápido de aplicaciones.</li>
+            <li>Aunque su popularidad ha disminuido respecto a su pico en 2010-2015, sigue siendo utilizado por empresas
+                establecidas.</li>
         </ul>
 
-        <h4>Aplicaciones de reservas y booking</h4>
+        <h4>Node.js / JavaScript del lado del servidor</h4>
         <ul>
-            <li>Sistemas para reservar servicios o recursos.</li>
-            <li>Ejemplos: Booking.com, Airbnb, sistemas de reserva de citas médicas, reservas de restaurantes.</li>
-            <li>Integración con calendarios, pagos, confirmaciones automáticas.</li>
+            <li>Permite ejecutar JavaScript en el servidor, no solo en el navegador.</li>
+            <li>Modelo de E/S no bloqueante, ideal para aplicaciones en tiempo real.</li>
+            <li>Frameworks populares:
+                <ul>
+                    <li><strong>Express.js:</strong> minimalista y flexible</li>
+                    <li><strong>Nest.js:</strong> inspirado en Angular, muy estructurado</li>
+                    <li><strong>Fastify:</strong> enfocado en rendimiento</li>
+                </ul>
+            </li>
+            <li><strong>NPM:</strong> el mayor ecosistema de paquetes del mundo.</li>
+            <li>En 2025, muy popular para desarrollo "full-stack" (mismo lenguaje en cliente y servidor).</li>
+            <li>Ideal para aplicaciones que requieren muchas conexiones simultáneas (chat, juegos online, streaming).
+            </li>
         </ul>
+
+        <h4>Go (Golang)</h4>
+        <ul>
+            <li>Lenguaje desarrollado por Google.</li>
+            <li>Excelente rendimiento y eficiencia.</li>
+            <li>Concurrencia nativa.</li>
+            <li>Cada vez más popular para microservicios y APIs de alto rendimiento.</li>
+            <li>Sintaxis simple y clara.</li>
+        </ul>
+
+        <h3>Tecnologías del lado del cliente (Frontend)</h3>
+
+        <p>Estas tecnologías se ejecutan en el navegador del usuario.</p>
+
+        <h4>HTML (HyperText Markup Language)</h4>
+        <ul>
+            <li>El lenguaje fundamental de la web, utilizado para estructurar el contenido.</li>
+            <li>En 2025, <strong>HTML5</strong> es el estándar, incorporando:
+                <ul>
+                    <li>Elementos semánticos (<code>article</code>, <code>nav</code>, <code>section</code>)</li>
+                    <li>Soporte multimedia nativo (<code>video</code>, <code>audio</code>)</li>
+                    <li>APIs para aplicaciones avanzadas (geolocalización, almacenamiento local, canvas para gráficos)
+                    </li>
+                </ul>
+            </li>
+            <li>Base sobre la que se construyen todas las páginas web.</li>
+        </ul>
+
+        <h4>CSS (Cascading Style Sheets)</h4>
+        <ul>
+            <li>Define la presentación visual de las páginas web.</li>
+            <li>Separa contenido (HTML) de diseño (CSS).</li>
+            <li><strong>CSS3</strong> incluye:
+                <ul>
+                    <li>Animaciones y transiciones</li>
+                    <li>Diseño responsive (media queries)</li>
+                    <li>Flexbox y grid para layouts complejos</li>
+                    <li>Variables CSS</li>
+                    <li>Filtros y efectos visuales avanzados</li>
+                </ul>
+            </li>
+            <li>Preprocesadores populares en 2025: Sass, Less, PostCSS.</li>
+            <li>Frameworks CSS: Tailwind CSS, Bootstrap 5, Material Design.</li>
+        </ul>
+
+        <h4>JavaScript</h4>
+        <ul>
+            <li>El lenguaje de programación de la web, esencial para interactividad.</li>
+            <li>En 2025, JavaScript moderno (ES2024+) incluye:
+                <ul>
+                    <li>async/await para programación asíncrona</li>
+                    <li>Módulos ES6</li>
+                    <li>Características de programación funcional</li>
+                    <li>Mejoras constantes del lenguaje</li>
+                </ul>
+            </li>
+            <li>Frameworks y bibliotecas principales:
+                <ul>
+                    <li><strong>React</strong> (de Meta/Facebook, muy popular para UIs complejas)</li>
+                    <li><strong>Vue.js</strong> (progresivo y fácil de aprender)</li>
+                    <li><strong>Angular</strong> (de Google, framework completo)</li>
+                    <li><strong>Svelte</strong> (compilador que genera código muy eficiente)</li>
+                </ul>
+            </li>
+            <li><strong>TypeScript:</strong> superset de JavaScript que añade tipos estáticos, muy popular en 2025 para
+                proyectos grandes.</li>
+            <li>JavaScript permite:
+                <ul>
+                    <li>Manipulación del DOM (modificar la página dinámicamente)</li>
+                    <li>Peticiones asíncronas (AJAX, Fetch API)</li>
+                    <li>Validación de formularios</li>
+                    <li>Animaciones e interacciones complejas</li>
+                    <li>Aplicaciones de una sola página (SPA)</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h4>WebAssembly (Wasm)</h4>
+        <ul>
+            <li>Tecnología relativamente nueva que permite ejecutar código de alto rendimiento en el navegador.</li>
+            <li>Puedes escribir en lenguajes como C, C++, Rust, y compilar a WebAssembly.</li>
+            <li>Rendimiento cercano al nativo.</li>
+            <li>Útil para:
+                <ul>
+                    <li>Juegos en el navegador</li>
+                    <li>Edición de vídeo/audio online</li>
+                    <li>Aplicaciones CAD</li>
+                    <li>Cualquier aplicación que requiera cálculos intensivos</li>
+                </ul>
+            </li>
+            <li>En 2025, cada vez más adoptado para aplicaciones exigentes.</li>
+        </ul>
+
+        <h4>Progressive Web Apps (PWAs)</h4>
+        <ul>
+            <li>Aplicaciones web que funcionan como aplicaciones nativas.</li>
+            <li>Características:
+                <ul>
+                    <li>Funcionan offline</li>
+                    <li>Se pueden instalar en el dispositivo</li>
+                    <li>Reciben notificaciones push</li>
+                    <li>Acceso a hardware del dispositivo (cámara, GPS)</li>
+                </ul>
+            </li>
+            <li>Basadas en tecnologías web estándar (HTML, CSS, JavaScript).</li>
+            <li>Service Workers permiten cacheo avanzado y funcionamiento offline.</li>
+            <li>En 2025, ampliamente adoptadas como alternativa a aplicaciones nativas.</li>
+        </ul>
+
+        <h3>Tecnologías obsoletas o en desuso</h3>
+        <ul>
+            <li><strong>Java Applets:</strong> prácticamente extintos debido a problemas de seguridad y rendimiento.
+            </li>
+            <li><strong>Adobe Flash:</strong> oficialmente descontinuado en 2020, completamente obsoleto en 2025.</li>
+            <li><strong>VBScript:</strong> solo funcionaba en Internet Explorer, que fue reemplazado por Edge. Ya no se
+                usa.</li>
+            <li><strong>Silverlight:</strong> tecnología de Microsoft descontinuada, reemplazada por HTML5.</li>
+        </ul>
+
     </section>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>

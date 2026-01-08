@@ -16,168 +16,148 @@
 
     <section class="contenido-didactico">
 
-        <h2>2.5. Plataformas web libres y propietarias</h2>
+        <h2>2.4. Modelos de arquitecturas web</h2>
 
-        <p>Una <strong>plataforma web</strong> es el conjunto de tecnologías que utilizamos para desarrollar, ejecutar y
-            servir un sitio web o aplicación web. Estas plataformas se componen típicamente de cuatro elementos
-            fundamentales:</p>
+        <p>La arquitectura de un sitio web comprende la organización de sus componentes, la estructura de la
+            información, los sistemas de navegación, y cómo estos elementos trabajan conjuntamente para servir a los
+            usuarios. Una buena arquitectura web facilita que los usuarios encuentren lo que buscan y que los
+            desarrolladores mantengan y evolucionen el sistema.</p>
 
+        <h3>Capas de una aplicación web</h3>
+
+        <p>Las aplicaciones web modernas típicamente se organizan en tres capas lógicas</p>
+
+        <figure>
+            <img src="https://pfst.cf2.poecdn.net/base/image/b829cd827b7edd68b1f494aa9fdcec65b915b142113995c5fb51b9f14edae37f?w=1536&h=1024"
+                alt="Imagen didáctica 2">
+            <figcaption>Arquitectura en capas.</figcaption>
+        </figure>
+
+        <h4>Capa de presentación (Frontend)</h4>
+        <p>Lo que el usuario ve e interactúa.</p>
         <ul>
-            <li><strong>Sistema operativo:</strong> el software base sobre el cual se ejecuta todo lo demás (Linux,
-                Windows, macOS, etc.). Determina aspectos fundamentales de seguridad, rendimiento y compatibilidad.</li>
-            <li><strong>Servidor web:</strong> el software que recibe peticiones HTTP y devuelve respuestas (Apache,
-                Nginx, IIS, etc.). Es el intermediario entre internet y tu aplicación.</li>
-            <li><strong>Sistema de gestión de bases de datos:</strong> almacena y gestiona los datos de forma
-                estructurada (MySQL, PostgreSQL, MongoDB, SQL Server, etc.). Esencial para prácticamente cualquier
-                aplicación web dinámica.</li>
-            <li><strong>Lenguaje de programación/interpretado:</strong> el lenguaje en el que desarrollas la lógica de
-                tu aplicación (PHP, Python, JavaScript, C#, Java, etc.).</li>
+            <li><strong>Responsabilidades:</strong> interfaz de usuario, experiencia de usuario (UX), validación de
+                entrada de datos (lado cliente), navegación, formato y visualización de datos.</li>
+            <li><strong>Tecnologías:</strong> HTML, CSS, JavaScript, frameworks frontend.</li>
+            <li>En 2025, cada vez más lógica se ejecuta en esta capa (SPAs, PWAs).</li>
         </ul>
 
-        <p>Las diferentes combinaciones de estos componentes dan lugar a diversas plataformas web. Veamos las más
-            relevantes:</p>
-
-        <h3>Plataformas de código abierto</h3>
-
-        <h4>LAMP (Linux + Apache + MySQL + PHP)</h4>
+        <h4>Capa de lógica de negocio (Backend)</h4>
+        <p>El "cerebro" de la aplicación.</p>
         <ul>
-            <li>Probablemente la plataforma web de código abierto más famosa de la historia.</li>
-            <li><strong>Componentes:</strong> Linux (sistema operativo), Apache (servidor web), MySQL (base de datos),
-                PHP (lenguaje de programación, aunque a veces Perl o Python).</li>
-            <li>Completamente gratuita y de código abierto.</li>
-            <li>Ampliamente documentada y con gran comunidad.</li>
-            <li>Muy popular para hosting compartido económico.</li>
-            <li>En 2025, sigue siendo muy utilizada, especialmente para WordPress y aplicaciones PHP.</li>
-            <li><strong>Variaciones:</strong> MAMP (macOS en lugar de Linux), WAMP (Windows en lugar de Linux).</li>
+            <li><strong>Responsabilidades:</strong> procesamiento de peticiones, aplicación de reglas de negocio,
+                validación de datos (lado servidor), autenticación y autorización, orquestación entre diferentes
+                servicios, generación de respuestas.</li>
+            <li><strong>Tecnologías:</strong> lenguajes de servidor (PHP, Python, Java, Node.js), frameworks backend.
+            </li>
         </ul>
 
-        <h4>LEMP (Linux + Nginx + MySQL + PHP)</h4>
+        <h4>Capa de datos (Database)</h4>
+        <p>Almacenamiento persistente de información.</p>
         <ul>
-            <li>Similar a LAMP pero usando Nginx en lugar de Apache.</li>
-            <li>Nginx ofrece: mejor rendimiento para contenido estático, menor consumo de memoria, mejor manejo de
-                conexiones concurrentes.</li>
-            <li>En 2025, muy popular para aplicaciones de alto tráfico.</li>
-            <li>MySQL a menudo se reemplaza por MariaDB (fork de MySQL, totalmente compatible).</li>
+            <li><strong>Responsabilidades:</strong> almacenamiento de datos, recuperación eficiente de información,
+                integridad y consistencia de datos, respaldo y recuperación.</li>
+            <li><strong>Tecnologías:</strong> bases de datos relacionales (MySQL, PostgreSQL, SQL Server), bases de
+                datos NoSQL (MongoDB, Redis, Cassandra), sistemas de archivos, servicios de almacenamiento en la nube.
+            </li>
         </ul>
 
-        <h4>MEAN (MongoDB + Express.js + Angular + Node.js)</h4>
+        <p>Esta separación en capas ofrece importantes beneficios:</p>
         <ul>
-            <li>Stack completamente basado en JavaScript.</li>
-            <li><strong>Componentes:</strong>
+            <li><strong>Mantenibilidad:</strong> cambios en una capa no afectan a las otras.</li>
+            <li><strong>Escalabilidad:</strong> puedes escalar cada capa independientemente.</li>
+            <li><strong>Reutilización:</strong> la misma lógica de negocio puede servir a múltiples interfaces (web,
+                móvil, API).</li>
+            <li><strong>Seguridad:</strong> cada capa puede tener sus propias medidas de seguridad.</li>
+            <li><strong>Desarrollo paralelo:</strong> diferentes equipos pueden trabajar en diferentes capas.</li>
+        </ul>
+
+        <h3>Modelos arquitectónicos históricos</h3>
+
+        <p>La arquitectura de aplicaciones web ha evolucionado significativamente:</p>
+
+        <h4>Modelo 1 (CGI tradicional)</h4>
+        <ul>
+            <li>Una única capa mezclaba presentación, lógica, y acceso a datos.</li>
+            <li>Scripts (típicamente Perl) que generaban HTML directamente.</li>
+            <li>Difícil de mantener y escalar.</li>
+            <li>Muy ineficiente (nuevo proceso por cada petición).</li>
+            <li>Prácticamente obsoleto en 2025.</li>
+        </ul>
+
+        <h4>Modelo 1.5 (Tecnologías de scripting del servidor)</h4>
+        <ul>
+            <li>Separación básica entre lógica y presentación.</li>
+            <li>En Java: JSP (presentación) + JavaBeans (lógica).</li>
+            <li>En PHP: plantillas PHP + funciones de lógica.</li>
+            <li>Mejor que el Modelo 1, pero aún con acoplamiento significativo.</li>
+        </ul>
+
+        <h4>Modelo 2 (MVC — Modelo Vista Controlador)</h4>
+        <p>Paradigma arquitectónico que separa claramente responsabilidades:</p>
+        <ul>
+            <li><strong>Modelo:</strong> datos y lógica de negocio.</li>
+            <li><strong>Vista:</strong> presentación (lo que ve el usuario).</li>
+            <li><strong>Controlador:</strong> gestiona peticiones, coordina modelo y vista.</li>
+        </ul>
+        <p><strong>Ventajas:</strong> separación de responsabilidades clara, testeable, mantenible, reutilizable.</p>
+        <p><strong>Frameworks MVC en 2025:</strong> Spring MVC (Java), ASP.NET MVC, Ruby on Rails, Laravel (PHP), Django
+            (Python).</p>
+        <p>Sigue siendo muy popular en 2025.</p>
+
+        <h4>Modelo 2X (MVC con XML/XSLT para multi-canal)</h4>
+        <ul>
+            <li>Extensión del Modelo 2 para servir múltiples tipos de clientes.</li>
+            <li>El servidor genera XML con los datos.</li>
+            <li>Transformaciones XSLT diferentes según el dispositivo (HTML para web, WML para móviles antiguos, etc.).
+            </li>
+            <li>Fue popular en 2005-2010 pero ha sido superado por enfoques más modernos.</li>
+        </ul>
+
+        <h3>Arquitecturas modernas en 2025</h3>
+
+        <h4>API-First / Backend-for-Frontend (BFF)</h4>
+        <ul>
+            <li>El backend expone APIs (generalmente REST o GraphQL).</li>
+            <li>Múltiples frontends consumen estas APIs: aplicación web (SPA), aplicación móvil iOS, aplicación móvil
+                Android, aplicaciones de escritorio, dispositivos IoT.</li>
+            <li>Desacopla completamente frontend y backend.</li>
+            <li>Cada frontend puede tener su propio BFF optimizado.</li>
+        </ul>
+
+        <h4>Microservicios</h4>
+        <p>La aplicación se divide en servicios pequeños e independientes.</p>
+        <ul>
+            <li>Cada microservicio:
                 <ul>
-                    <li>MongoDB (base de datos NoSQL orientada a documentos)</li>
-                    <li>Express.js (framework web para Node.js)</li>
-                    <li>Angular (framework frontend)</li>
-                    <li>Node.js (entorno de ejecución JavaScript del servidor)</li>
+                    <li>Tiene una responsabilidad específica</li>
+                    <li>Se puede desarrollar en diferentes tecnologías</li>
+                    <li>Se despliega independientemente</li>
+                    <li>Se escala independientemente</li>
                 </ul>
             </li>
-            <li>Mismo lenguaje en toda la pila (JavaScript).</li>
-            <li>Muy apropiado para aplicaciones en tiempo real.</li>
-            <li>JSON nativo en toda la pila.</li>
+            <li>Comunicación entre servicios vía APIs (HTTP/REST, gRPC, mensajería).</li>
+            <li>Complejidad operacional, pero gran flexibilidad.</li>
+            <li>Popular en grandes organizaciones en 2025.</li>
         </ul>
 
-        <h4>MERN y MEVN</h4>
+        <h4>Serverless / Functions as a Service (FaaS)</h4>
         <ul>
-            <li>Variaciones de MEAN: <strong>MERN</strong> usa React en lugar de Angular, <strong>MEVN</strong> usa
-                Vue.js en lugar de Angular.</li>
-            <li>En 2025, MERN es especialmente popular.</li>
+            <li>Código que se ejecuta sin gestionar servidores.</li>
+            <li>Funciones que responden a eventos.</li>
+            <li>Escalado automático y pago por uso.</li>
+            <li>Proveedores: AWS Lambda, Azure Functions, Google Cloud Functions.</li>
+            <li>Ideal para cargas de trabajo variables o esporádicas.</li>
         </ul>
 
-        <h4>Python-based stacks</h4>
+        <h4>JAMstack (JavaScript, APIs, Markup)</h4>
         <ul>
-            <li>Combinaciones comunes: Linux + Nginx + PostgreSQL + Django, Linux + Nginx + PostgreSQL + Flask.</li>
-            <li>Muy populares en 2025 para aplicaciones que integran IA/ML.</li>
+            <li>Frontend estático precompilado.</li>
+            <li>Funcionalidad dinámica vía JavaScript y APIs.</li>
+            <li>CDN (Content Delivery Network) para distribución global.</li>
+            <li>Rendimiento excepcional y seguridad mejorada.</li>
+            <li>Popular para sitios de contenido y blogs en 2025.</li>
         </ul>
-
-        <h3>Plataformas propietarias</h3>
-
-        <h4>WISA (Windows + IIS + SQL Server + ASP.NET)</h4>
-        <ul>
-            <li>Pila completamente Microsoft.</li>
-            <li><strong>Componentes:</strong>
-                <ul>
-                    <li>Windows Server (sistema operativo)</li>
-                    <li>IIS (Internet Information Services — servidor web)</li>
-                    <li>SQL Server (base de datos relacional)</li>
-                    <li>ASP.NET (framework web)</li>
-                </ul>
-            </li>
-            <li>Software propietario con costes de licencia.</li>
-            <li>Excelente integración entre componentes.</li>
-            <li>Muy usado en entornos corporativos y empresariales.</li>
-            <li>Soporte técnico oficial de Microsoft.</li>
-            <li>En 2025, ASP.NET Core permite ejecutar en Linux, haciendo la pila más flexible.</li>
-        </ul>
-
-        <h3>Otras configuraciones populares en 2025</h3>
-
-        <h4>LNMP (Linux + Nginx + MariaDB + PHP)</h4>
-        <ul>
-            <li>Optimización de LEMP usando MariaDB.</li>
-            <li>Excelente rendimiento y totalmente open source.</li>
-            <li>Muy popular para WordPress y aplicaciones PHP modernas.</li>
-        </ul>
-
-        <h4>Docker-based stacks</h4>
-        <ul>
-            <li>Contenedores Docker que empaquetan toda la pila.</li>
-            <li>Portable entre diferentes entornos.</li>
-            <li>Fácil de replicar y escalar.</li>
-            <li>No dependiente de un SO específico.</li>
-            <li>Cada vez más popular en 2025.</li>
-            <li>Kubernetes para orquestación de contenedores a gran escala.</li>
-        </ul>
-
-        <h4>Cloud-native platforms</h4>
-        <ul>
-            <li><strong>Plataformas como servicio (PaaS):</strong> Heroku, Google App Engine, Azure App Service, AWS
-                Elastic Beanstalk.</li>
-            <li>Abstraen la infraestructura subyacente.</li>
-            <li>Despliegue simplificado.</li>
-            <li>Escalado automático.</li>
-            <li>Pago por uso.</li>
-            <li>Muy populares en 2025 para startups y desarrollo rápido.</li>
-        </ul>
-
-        <h3>Consideraciones para elegir una plataforma</h3>
-
-        <h4>Coste</h4>
-        <ul>
-            <li><strong>Plataformas open source:</strong> generalmente sin coste de licencias.</li>
-            <li><strong>Plataformas propietarias:</strong> requieren licencias que pueden ser costosas.</li>
-            <li>Costes de hosting: varía según la plataforma y proveedor.</li>
-            <li>Costes de mantenimiento y soporte.</li>
-        </ul>
-
-        <h4>Familiaridad y experiencia del equipo</h4>
-        <ul>
-            <li>Usa lo que tu equipo conoce bien.</li>
-            <li>Considera la curva de aprendizaje para nuevas tecnologías.</li>
-        </ul>
-
-        <h4>Requisitos de la aplicación</h4>
-        <ul>
-            <li>Algunas aplicaciones funcionan mejor en ciertas plataformas.</li>
-            <li>Integración con sistemas existentes.</li>
-            <li>Requisitos de rendimiento, seguridad, escalabilidad.</li>
-        </ul>
-
-        <h4>Comunidad y ecosistema</h4>
-        <ul>
-            <li>Disponibilidad de bibliotecas, frameworks, herramientas.</li>
-            <li>Comunidad activa para resolver problemas.</li>
-            <li>Documentación y recursos de aprendizaje.</li>
-        </ul>
-
-        <h4>Soporte técnico</h4>
-        <ul>
-            <li>Soporte oficial (en plataformas propietarias).</li>
-            <li>Soporte comunitario (en plataformas open source).</li>
-            <li>Disponibilidad de desarrolladores en el mercado laboral.</li>
-        </ul>
-
-        <p>En 2025, muchas organizaciones usan arquitecturas híbridas, combinando diferentes tecnologías según las
-            necesidades específicas de cada componente de su sistema.</p>
     </section>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
