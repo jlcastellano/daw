@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instalación y Configuración de Apache2, MySQL, PHP y phpMyAdmin</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div>Instalación y Configuración de Apache2, MySQL, PHP y phpMyAdmin</div>
+    </header>
+
+    <section class="contenido-didactico">
+        <h1>Instalación y Configuración de Apache2, MySQL, PHP y phpMyAdmin</h1>
+
+        <p>Esta guía detalla el proceso completo de instalación y configuración de un servidor web Apache2 con MySQL, PHP y phpMyAdmin en un sistema basado en Debian/Ubuntu. Incluye la configuración de <strong>hosts virtuales</strong>, <strong>SSL/TLS</strong> y las herramientas necesarias para el desarrollo web.</p>
+
+        <h2>1. Instalación y Configuración Básica de Apache2</h2>
+
+        <p>El primer paso es instalar el servidor web Apache2 y realizar las configuraciones básicas de seguridad y nombre del servidor.</p>
+
+        <h3>1.1 Instalación de Apache2</h3>
+
+        <pre><code class="language-bash">sudo apt -y install apache2</code></pre>
+
+        <h3>1.2 Configuración de Seguridad</h3>
+
+        <p>Edita el archivo de configuración de seguridad para ocultar información del servidor:</p>
+
+        <pre><code class="language-bash">sudo nano -l /etc/apache2/conf-enabled/security.conf</code></pre>
+
+        <p>Modifica la línea 25:</p>
+
+        <pre><code class="language-apache">ServerTokens Prod</code></pre>
+
+        <h3>1.3 Especificar el Nombre del Servidor</h3>
+
+        <p>Edita el archivo principal de configuración de Apache2:</p>
+
+        <pre><code class="language-bash">sudo nano -l /etc/apache2/apache2.conf</code></pre>
+
+        <p>Añade en la línea 70:</p>
+
+        <pre><code class="language-apache">ServerName www.despliegue.com</code></pre>
+
+        <h3>1.4 Configurar el Firewall y Reiniciar Apache2</h3>
+
+        <pre><code class="language-bash">sudo ufw allow http
+sudo systemctl restart apache2
+ip a</code></pre>
+
+        <p>Accede a la dirección IP mostrada en tu navegador para ver la página por defecto de Apache2.</p>
+
+        <h2>2. Configuración de Host Virtual</h2>
+
+        <p>Los hosts virtuales permiten alojar múltiples sitios web en un mismo servidor Apache2.</p>
+
+        <h3>2.1 Crear el Archivo de Configuración del Host Virtual</h3>
+
+        <pre><code class="language-bash">sudo nano -l /etc/apache2/sites-available/despliegue.com.conf</code></pre>
+
+        <p>Añade la siguiente configuración:</p>
+
+        <pre><code class="language-apache">&lt;VirtualHost *:80&gt;
+    DocumentRoot /var/www/despliegue.com
+    ServerName www.despliegue.com
+    ServerAdmin webmaster@despliegue.com
+    ErrorLog /var/log/apache2/despliegue.com.error.log
+    CustomLog /var/log/apache2/despliegue.com.access.log combined
+&lt;/VirtualHost&gt;</code></pre>
+
+        <h3>2.2 Habilitar el Sitio y Deshabilitar el Sitio por Defecto</h3>
+
+        <pre><code class="language-bash">sudo a2ensite despliegue.com
+sudo a2dissite 000-default
+sudo systemctl restart apache2</code></pre>
+
+        <h3>2.3 Crear el Directorio y Página de Prueba</h3>
+
+        <pre><code class="language-bash">sudo mkdir /var/www/despliegue.com
+sudo nano /var/www/despliegue.com/index.html</code></pre>
+
+        <p>Añade el siguiente contenido HTML:</p>
+
+        <pre><code class="language-html">&lt;html&gt;
+&lt;body&gt;
+&lt;div style="width: 100%; font-size: 40px; font-weight: bold; text-align: center;"&gt;
+    P&aacute;gina de prueba de www.despliegue.com
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+        <h2>3. Configurar SSL/TLS</h2>
+
+        <p>La configuración de <strong>SSL/TLS</strong> permite habilitar conexiones seguras mediante HTTPS.</p>
+
+        <h3>3.1 Crear Directorio y Generar Certificados</h3>
+
+        <pre><code class="language-bash">sudo mkdir /var/www/ssl-despliegue
+sudo openssl req -x509 -nodes -newkey rsa:2048 -keyout /var/www/ssl-despliegue/despliegue.key.pem -out /var/www/ssl-despliegue/despliegue.cert.pem -days 365</code></pre>
+
+        <h3>3.2 Configurar el Host Virtual SSL</h3>
+
+        <pre><code class="language-bash">sudo cp /etc/apache2/sites-available/default-ssl.conf /etc/apache2/sites-available/despliegue.com-ssl.conf
+sudo nano -l /etc/apache2/sites-available/despliegue.com-ssl.conf</code></pre>
+
+        <p>Modifica las siguientes líneas:</p>
+
+        <ul>
+            <li><strong>Línea 5:</strong> Cambia el directorio raíz del documento</li>
+        </ul>
+
+        <pre><code class="language-apache">DocumentRoot /var/www/despliegue.com</code></pre>
+
+        <ul>
+            <li><strong>Líneas 32 y 33:</strong> Especifica las rutas de los certificados generados</li>
+        </ul>
+
+        <pre><code class="language-apache">SSLCertificateFile      /var/www/ssl-despliegue/despliegue.cert.pem
+SSLCertificateKeyFile   /var/www/ssl-despliegue/despliegue.key.pem</code></pre>
+
+        <h3>3.3 Habilitar SSL y Configurar Redirección</h3>
+
+        <pre><code class="language-bash">sudo a2ensite despliegue.com-ssl
+sudo a2enmod ssl
+sudo ufw allow https
+</code></pre>
+
+        <p>Edita el archivo de configuración del host virtual HTTP para redirigir a HTTPS:</p>
+
+        <pre><code class="language-bash">sudo nano -l /etc/apache2/sites-available/despliegue.com.conf</code></pre>
+
+        <p>Añade dentro del bloque <code>&lt;VirtualHost *:80&gt;</code>:</p>
+
+        <pre><code class="language-apache">RewriteEngine On
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]</code></pre>
+
+        <h3>3.4 Habilitar el Módulo Rewrite y Reiniciar Apache2</h3>
+
+        <pre><code class="language-bash">sudo a2enmod rewrite
+sudo systemctl restart apache2</code></pre>
+
+        <h2>4. Instalar MySQL</h2>
+
+        <p>MySQL es el sistema de gestión de bases de datos que utilizaremos.</p>
+
+        <h3>4.1 Instalación de MySQL Server</h3>
+
+        <pre><code class="language-bash">sudo apt -y install mysql-server</code></pre>
+
+        <h3>4.2 Configuración Segura de MySQL</h3>
+
+        <p>Ejecuta el script de configuración segura:</p>
+
+        <pre><code class="language-bash">sudo mysql_secure_installation</code></pre>
+
+        <p>Sigue las instrucciones en pantalla para establecer contraseñas y eliminar usuarios anónimos.</p>
+
+        <h3>4.3 Acceder a MySQL</h3>
+
+        <pre><code class="language-bash">sudo mysql</code></pre>
+
+        <h2>5. Instalar PHP</h2>
+
+        <p>PHP es el lenguaje de programación del lado del servidor necesario para aplicaciones web dinámicas.</p>
+
+        <h3>5.1 Instalación de PHP y Extensiones</h3>
+
+        <pre><code class="language-bash">sudo apt install -y php php-mysql php-mbstring php-zip php-gd php-json php-curl</code></pre>
+
+        <h3>5.2 Crear un Archivo de Prueba PHP</h3>
+
+        <pre><code class="language-bash">sudo nano /var/www/despliegue.com/info.php</code></pre>
+
+        <p>Añade el siguiente contenido:</p>
+
+        <pre><code class="language-php">&lt;?php phpinfo(); ?&gt;</code></pre>
+
+        <p>Accede a <code>https://www.despliegue.com/info.php</code> en tu navegador para verificar la instalación de PHP.</p>
+
+        <h2>6. Instalar phpMyAdmin</h2>
+
+        <p><strong>phpMyAdmin</strong> es una herramienta web para administrar bases de datos MySQL de forma gráfica.</p>
+
+        <h3>6.0 Acceder a MySQL para crear un usuario a phpMyAdmin</h3>
+
+        <pre><code class="language-bash">sudo mysql</code></pre>
+<p>Crea el usuario y otórgale privilegios</p>
+<pre><code class="language-bash">
+CREATE USER 'phpmyadmin'@'localhost' IDENTIFIED WITH mysql_native_password BY 'tu_contraseña';
+GRANT ALL PRIVILEGES ON *.* TO 'phpmyadmin'@'localhost' WITH GRANT OPTION;
+FLUSH PRIVILEGES;        
+</code></pre>
+
+        <h3>6.1 Instalación de phpMyAdmin</h3>
+
+        <pre><code class="language-bash">sudo apt install -y phpmyadmin</code></pre>
+
+        <p>Durante la instalación, selecciona <kbd>apache2</kbd> como servidor web y configura la base de datos.</p>
+
+        <h3>6.2 Crear un Enlace Simbólico</h3>
+
+        <pre><code class="language-bash">sudo ln -s /usr/share/phpmyadmin /var/www/html/phpmyadmin</code></pre>
+
+        <h3>6.3 Configurar phpMyAdmin para SSL</h3>
+
+        <pre><code class="language-bash">sudo nano /etc/apache2/conf-available/phpmyadmin.conf</code></pre>
+
+        <p>Añade la siguiente configuración:</p>
+
+        <pre><code class="language-apache">&lt;IfModule mod_ssl.c&gt;
+    &lt;Directory /usr/share/phpmyadmin&gt;
+        Options FollowSymLinks
+        DirectoryIndex index.php
+        AllowOverride All
+        Require all granted
+    &lt;/Directory&gt;
+&lt;/IfModule&gt;</code></pre>
+
+        <h3>6.4 Habilitar la Configuración y Reiniciar Apache2</h3>
+
+        <pre><code class="language-bash">sudo a2enconf phpmyadmin
+sudo systemctl restart apache2</code></pre>
+
+        <p>Accede a <code>https://www.despliegue.com/phpmyadmin</code> para utilizar phpMyAdmin.</p>
+
+        <h2>Resumen</h2>
+
+        <p>Has completado la instalación y configuración de un servidor web completo con:</p>
+
+        <ul>
+            <li><strong>Apache2</strong> como servidor web</li>
+            <li><strong>MySQL</strong> como sistema de gestión de bases de datos</li>
+            <li><strong>PHP</strong> para procesamiento del lado del servidor</li>
+            <li><strong>phpMyAdmin</strong> para administración gráfica de bases de datos</li>
+            <li><strong>SSL/TLS</strong> para conexiones seguras HTTPS</li>
+            <li><strong>Hosts virtuales</strong> para alojar múltiples sitios</li>
+        </ul>
+
+        <p>Este entorno está listo para el desarrollo y despliegue de aplicaciones web.</p>
+
+    </section>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
