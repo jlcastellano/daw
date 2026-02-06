@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Funcionamiento del Sistema Apache-Tomcat con Proxy Inverso</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div>Funcionamiento del Sistema Apache-Tomcat con Proxy Inverso</div>
+    </header>
+
+    <section class="contenido-didactico">
+        <h1>Funcionamiento del Sistema Apache-Tomcat con Proxy Inverso</h1>
+
+        <h2>1. Arquitectura General</h2>
+        
+        <pre><code class="language-plaintext">                                    ZONA DMZ                         ZONA INTERNA
+                              ┌──────────────────────┐           ┌─────────────────────┐
+                              │                      │           │                     │
+Internet ──► [Firewall] ──►   │  Apache HTTP Server  │ ◄──AJP──► │   Apache Tomcat     │
+   │                          │  (Puerto 443/80)     │  (8009)   │   (Puerto 8080)     │
+   │                          │                      │           │                     │
+ HTTPS                        │  • SSL Termination   │           │  • Servlets         │
+ (TLS 1.2/1.3)                │  • mod_proxy_ajp     │           │  • JSP              │
+                              │  • Contenido estático│           │  • Aplicaciones WAR │
+                              │  • Filtrado/WAF      │           │                     │
+                              └──────────────────────┘           └─────────────────────┘</code></pre>
+
+        <p><strong>Componentes Principales:</strong></p>
+        <ul>
+            <li><strong>Apache HTTP Server:</strong> Servidor web frontal que actúa como punto de entrada único. Gestiona todas las conexiones entrantes, maneja el cifrado SSL/TLS, sirve contenido estático (imágenes, CSS, JavaScript) y actúa como proxy inverso hacia Tomcat. Al estar en la zona DMZ, proporciona una capa adicional de seguridad.</li>
+            <li><strong>mod_proxy y mod_proxy_ajp:</strong> Módulos de Apache que implementan la funcionalidad de proxy inverso. mod_proxy proporciona la infraestructura base, mientras que mod_proxy_ajp añade soporte específico para el protocolo AJP, permitiendo una comunicación optimizada con Tomcat.</li>
+            <li><strong>AJP (Apache JServ Protocol):</strong> Protocolo binario diseñado específicamente para la comunicación entre servidores web y contenedores de servlets. Opera en el puerto 8009 por defecto y es más eficiente que HTTP al utilizar un formato binario compacto que reduce el overhead de parsing y transmisión.</li>
+            <li><strong>Apache Tomcat:</strong> Contenedor de servlets y servidor de aplicaciones Java EE. Procesa las peticiones dinámicas, ejecuta aplicaciones web empaquetadas en archivos WAR, gestiona sesiones de usuario y se comunica con bases de datos y otros servicios backend. Se mantiene en la red interna, inaccesible directamente desde Internet.</li>
+        </ul>
+
+        <h2>2. Flujo de una Petición</h2>
+
+        <h3>2.1. Llegada de la Petición</h3>
+        <ol>
+            <li><strong>Conexión inicial:</strong> El navegador del cliente establece una conexión TCP con Apache en el puerto 443. Se inicia el handshake TLS donde se negocian los algoritmos de cifrado, se verifica el certificado SSL del servidor y se establecen las claves de sesión para el cifrado simétrico.</li>
+            <li><strong>Terminación SSL (SSL Offloading):</strong> Apache descifra la petición HTTPS utilizando su clave privada. Este proceso libera a Tomcat de la carga computacional del cifrado, centralizando la gestión de certificados en un único punto y simplificando la arquitectura.</li>
+            <li><strong>Recepción por mod_proxy:</strong> Una vez descifrada, la petición HTTP se pasa al módulo mod_proxy, que analiza las cabeceras y el URI para determinar cómo debe enrutarse la petición según las directivas configuradas.</li>
+        </ol>
+
+        <h3>2.2. Procesamiento en Apache</h3>
+        <ol>
+            <li><strong>Resolución del VirtualHost:</strong> Apache examina la cabecera Host de la petición y la compara con los VirtualHosts configurados. Esto permite alojar múltiples dominios en un mismo servidor, cada uno con su propia configuración de proxy.</li>
+            <li><strong>Procesamiento de reglas de reescritura:</strong> Si existen directivas RewriteRule, Apache modifica la URL según los patrones definidos. Esto permite URLs amigables, redirecciones condicionales y normalización de rutas antes del envío a Tomcat.</li>
+            <li><strong>Evaluación de directivas ProxyPass:</strong> Apache determina si la petición debe reenviarse a Tomcat basándose en los patrones de URL configurados. Las directivas ProxyPassMatch permiten usar expresiones regulares para un control más granular.</li>
+            <li><strong>Conversión a protocolo AJP:</strong> La petición HTTP se serializa al formato binario AJP. Este proceso empaqueta eficientemente las cabeceras HTTP, el método, la URI, los parámetros de query string y el cuerpo de la petición en un formato optimizado.</li>
+        </ol>
+
+        <h3>2.3. Comunicación AJP</h3>
+        <ol>
+            <li><strong>Transmisión al conector AJP:</strong> La petición serializada se envía a través del socket TCP al puerto 8009 de Tomcat. El protocolo AJP utiliza paquetes de tamaño fijo (8KB por defecto) para optimizar la transmisión.</li>
+            <li><strong>Pool de conexiones persistentes:</strong> mod_proxy_ajp mantiene un pool de conexiones TCP reutilizables hacia Tomcat. Esto elimina el overhead de establecer nuevas conexiones TCP para cada petición, reduciendo significativamente la latencia.</li>
+            <li><strong>Transmisión de metadatos:</strong> AJP transmite información adicional que no está presente en HTTP estándar, incluyendo: IP real del cliente, protocolo original (HTTPS), puerto del cliente, información de autenticación SSL, y atributos personalizados del servidor.</li>
+        </ol>
+
+        <h3>2.4. Procesamiento en Tomcat</h3>
+        <ol>
+            <li><strong>Deserialización AJP:</strong> El conector AJP de Tomcat recibe el paquete binario y lo convierte de vuelta a un objeto HttpServletRequest estándar de Java, preservando todos los atributos y cabeceras originales.</li>
+            <li><strong>Enrutamiento al contexto:</strong> Tomcat utiliza el path de la URI para determinar qué aplicación web (contexto) debe procesar la petición. Cada aplicación desplegada tiene su propio contexto con configuración independiente.</li>
+            <li><strong>Ejecución de la cadena de filtros:</strong> La petición atraviesa los filtros configurados (autenticación, logging, compresión, etc.) antes de llegar al servlet destino. Esto implementa el patrón Chain of Responsibility.</li>
+            <li><strong>Procesamiento del Servlet/JSP:</strong> El servlet o JSP correspondiente procesa la lógica de negocio, interactúa con la base de datos, invoca servicios y genera la respuesta HTTP (HTML, JSON, XML, etc.).</li>
+            <li><strong>Serialización de respuesta:</strong> La respuesta generada se serializa de vuelta al formato AJP, incluyendo código de estado HTTP, cabeceras de respuesta y el cuerpo del contenido.</li>
+        </ol>
+
+        <h3>2.5. Respuesta al Cliente</h3>
+        <ol>
+            <li><strong>Recepción en Apache:</strong> mod_proxy_ajp recibe la respuesta AJP de Tomcat y la deserializa a formato HTTP estándar. Las cabeceras se procesan según las directivas ProxyPassReverse para ajustar URLs y cookies.</li>
+            <li><strong>Procesamiento de cabeceras:</strong> Apache puede modificar cabeceras de respuesta (añadir cabeceras de seguridad como HSTS, CSP, X-Frame-Options), aplicar compresión gzip si no está ya comprimido, y gestionar el caché.</li>
+            <li><strong>Cifrado SSL:</strong> La respuesta se cifra utilizando las claves de sesión establecidas durante el handshake TLS inicial, garantizando la confidencialidad e integridad de los datos transmitidos.</li>
+            <li><strong>Envío al cliente:</strong> La respuesta cifrada se transmite al navegador del cliente a través de la conexión TCP establecida, completando el ciclo de la petición.</li>
+        </ol>
+
+        <h2>3. Ventajas de esta Arquitectura</h2>
+
+        <h3>3.1. Seguridad</h3>
+        <ul>
+            <li><strong>Centralización del SSL/TLS:</strong> Apache gestiona toda la infraestructura de certificados, permitiendo renovaciones, cambios de algoritmos y auditorías de seguridad sin modificar las aplicaciones Java. Facilita la implementación de Perfect Forward Secrecy (PFS) y protocolos modernos.</li>
+            <li><strong>Aislamiento de red:</strong> Tomcat permanece en una red interna sin acceso directo desde Internet. Incluso si se descubre una vulnerabilidad en una aplicación Java, el atacante no puede acceder directamente al servidor de aplicaciones.</li>
+            <li><strong>Protocolo AJP más seguro:</strong> A diferencia de HTTP, AJP no es un protocolo estándar que los atacantes puedan explotar fácilmente. Además, al ser binario, es más difícil de manipular mediante ataques de inyección.</li>
+            <li><strong>Integración con WAF:</strong> Apache permite integrar módulos como mod_security para implementar un Web Application Firewall, detectando y bloqueando ataques como SQL Injection, XSS, y CSRF antes de que lleguen a Tomcat.</li>
+            <li><strong>Control de acceso granular:</strong> Apache proporciona directivas robustas para control de acceso por IP, autenticación básica/digest, integración con LDAP, y limitación de tasa de peticiones (rate limiting).</li>
+        </ul>
+
+        <h3>3.2. Rendimiento</h3>
+        <ul>
+            <li><strong>Eficiencia del protocolo AJP:</strong> El formato binario de AJP reduce el tamaño de las cabeceras HTTP típicas de ~800 bytes a ~200 bytes. Además, evita el parsing de texto, reduciendo el uso de CPU en ambos extremos.</li>
+            <li><strong>Conexiones persistentes optimizadas:</strong> El pool de conexiones entre Apache y Tomcat elimina el overhead del handshake TCP (3-way handshake) para cada petición, reduciendo la latencia en aproximadamente 1-3ms por petición.</li>
+            <li><strong>Servicio de contenido estático:</strong> Apache sirve directamente archivos estáticos (imágenes, CSS, JS, fuentes) sin involucrar a Tomcat. Apache está optimizado para este propósito con sendfile() y mmap(), siendo hasta 10 veces más rápido que Tomcat para contenido estático.</li>
+            <li><strong>Caché de respuestas:</strong> mod_cache permite almacenar respuestas de Tomcat, reduciendo la carga en el servidor de aplicaciones para contenido que no cambia frecuentemente. Soporta tanto caché en memoria como en disco.</li>
+            <li><strong>Compresión centralizada:</strong> mod_deflate puede comprimir las respuestas antes de enviarlas al cliente, reduciendo el ancho de banda sin añadir carga a Tomcat.</li>
+        </ul>
+
+        <h3>3.3. Flexibilidad</h3>
+        <ul>
+            <li><strong>Balanceo de carga:</strong> mod_proxy_balancer permite distribuir peticiones entre múltiples instancias de Tomcat usando algoritmos como round-robin, least-connections, o basado en el tráfico. Soporta sticky sessions para mantener la afinidad de sesión.</li>
+            <li><strong>Alta disponibilidad:</strong> Configuración de workers de respaldo (hot-standby) que se activan automáticamente si el worker principal falla. Health checks periódicos detectan y excluyen instancias no saludables.</li>
+            <li><strong>Virtual Hosts múltiples:</strong> Un único servidor Apache puede servir decenas de dominios diferentes, cada uno dirigiendo a diferentes aplicaciones o instancias de Tomcat, optimizando el uso de recursos.</li>
+            <li><strong>Reescritura avanzada de URLs:</strong> mod_rewrite permite transformaciones complejas de URLs, implementar redirecciones SEO-friendly, versionar APIs, y gestionar migraciones de URLs sin modificar las aplicaciones.</li>
+            <li><strong>Despliegue blue-green:</strong> La arquitectura facilita despliegues sin downtime, permitiendo dirigir tráfico gradualmente entre versiones antiguas y nuevas de aplicaciones.</li>
+        </ul>
+
+        <h2>4. Protocolos y Puertos</h2>
+
+        <pre><code class="language-plaintext">┌─────────────────────────────────────────────────────────────────────────────────────┐
+│                          FLUJO DE COMUNICACIÓN DETALLADO                            │
+├─────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                     │
+│   CLIENTE                    APACHE                         TOMCAT                  │
+│      │                          │                              │                    │
+│      │ ─── HTTPS (443) ────────►│                              │                    │
+│      │     TLS 1.2/1.3          │                              │                    │
+│      │     Cifrado: AES-256-GCM │                              │                    │
+│      │                          │                              │                    │
+│      │                          │ ─── AJP/1.3 (8009) ─────────►│                    │
+│      │                          │     Protocolo binario        │                    │
+│      │                          │     Sin cifrado (red interna)│                    │
+│      │                          │                              │                    │
+│      │                          │◄─── AJP/1.3 (8009) ──────────│                    │
+│      │                          │     Respuesta serializada    │                    │
+│      │                          │                              │                    │
+│      │◄─── HTTPS (443) ─────────│                              │                    │
+│      │     Respuesta cifrada    │                              │                    │
+│                                                                                     │
+├─────────────────────────────────────────────────────────────────────────────────────┤
+│  PUERTOS TÍPICOS:                                                                   │
+│  • 443: HTTPS (obligatorio para producción)                                         │
+│  • 80:  HTTP (solo para redirección a HTTPS)                                        │
+│  • 8009: AJP (comunicación interna Apache-Tomcat)                                   │
+│  • 8080: HTTP Tomcat (solo para diagnóstico, deshabilitado en producción)           │
+│  • 8443: HTTPS Tomcat (raramente usado con proxy inverso)                           │
+└─────────────────────────────────────────────────────────────────────────────────────┘</code></pre>
+
+ 
+    </section>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
