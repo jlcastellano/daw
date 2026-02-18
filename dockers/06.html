@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Volúmenes y Persistencia de Datos - Docker</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div>Volúmenes y Persistencia de Datos</div>
+    </header>
+
+    <section class="contenido-didactico">
+        <h1>6.1 Sistema de Almacenamiento en Docker</h1>
+        
+        <p><strong>Principio fundamental:</strong> Los contenedores son efímeros por diseño. La capa de escritura del contenedor se pierde al eliminarlo. Docker ofrece tres mecanismos para persistir datos más allá del ciclo de vida del contenedor.</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Tipo</th>
+                    <th>Ubicación</th>
+                    <th>Gestión</th>
+                    <th>Caso de uso</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Volumes</td>
+                    <td><code>/var/lib/docker/volumes/</code></td>
+                    <td>Docker</td>
+                    <td>Datos persistentes en producción</td>
+                </tr>
+                <tr>
+                    <td>Bind Mounts</td>
+                    <td>Cualquier ruta del host</td>
+                    <td>Usuario</td>
+                    <td>Desarrollo, configuración</td>
+                </tr>
+                <tr>
+                    <td>tmpfs</td>
+                    <td>Memoria RAM</td>
+                    <td>Docker</td>
+                    <td>Datos sensibles temporales</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <pre><code class="language-bash"># Ver uso de disco de Docker
+docker system df
+docker system df -v  # Detallado</code></pre>
+    </section>
+
+    <section class="contenido-didactico">
+        <h1>6.2 Docker Volumes</h1>
+        
+        <p><strong>Gestión de volúmenes:</strong></p>
+
+        <pre><code class="language-bash"># Crear
+docker volume create mi-volumen
+docker volume create --label proyecto=web datos-web
+
+# Listar
+docker volume ls
+docker volume ls --filter dangling=true  # Huérfanos
+docker volume ls --filter label=proyecto=web
+
+# Inspeccionar
+docker volume inspect mi-volumen
+docker volume inspect mi-volumen --format '{{.Mountpoint}}'
+
+# Eliminar
+docker volume rm mi-volumen
+docker volume prune  # Eliminar no utilizados
+docker volume prune --filter label!=importante</code></pre>
+
+        <p><strong>Usar volúmenes con contenedores:</strong></p>
+
+        <pre><code class="language-bash"># Sintaxis -v (volumen nombrado)
+docker run -v mi-volumen:/datos nginx
+
+# Sintaxis --mount (más explícita, recomendada)
+docker run --mount source=mi-volumen,target=/datos nginx
+
+# Volumen anónimo
+docker run -v /datos nginx
+
+# Solo lectura
+docker run -v mi-volumen:/datos:ro nginx
+docker run --mount source=mi-volumen,target=/datos,readonly nginx
+
+# Crear volumen si no existe (implícito con -v)
+docker run -v nuevo-volumen:/datos nginx</code></pre>
+
+        <p><strong>Opciones avanzadas de montaje:</strong></p>
+
+        <pre><code class="language-bash"># Volumen con opciones específicas
+docker run --mount \
+    type=volume,\
+    source=mi-volumen,\
+    target=/datos,\
+    volume-driver=local,\
+    volume-opt=type=nfs,\
+    volume-opt=device=:/path/to/dir,\
+    volume-opt=o=addr=192.168.1.1 \
+    nginx</code></pre>
+    </section>
+
+    <section class="contenido-didactico">
+        <h1>6.3 Bind Mounts</h1>
+        
+        <p><strong>Montaje de directorios del host:</strong></p>
+
+        <pre><code class="language-bash"># Sintaxis -v (ruta absoluta indica bind mount)
+docker run -v /home/usuario/proyecto:/app nginx
+docker run -v $(pwd):/app nginx
+
+# Sintaxis --mount
+docker run --mount type=bind,source=/home/usuario/proyecto,target=/app nginx
+
+# Solo lectura
+docker run -v /config:/etc/nginx/conf.d:ro nginx
+docker run --mount type=bind,source=/config,target=/etc/nginx/conf.d,readonly nginx
+
+# Archivo específico
+docker run -v /host/nginx.conf:/etc/nginx/nginx.conf:ro nginx</code></pre>
+
+        <p><strong>Propagación de montajes (Linux):</strong></p>
+
+        <pre><code class="language-bash"># rprivate (defecto): cambios no se propagan
+docker run -v /datos:/datos:rprivate nginx
+
+# rslave: propaga montajes del host al contenedor
+docker run -v /datos:/datos:rslave nginx
+
+# rshared: propagación bidireccional
+docker run -v /datos:/datos:rshared nginx</code></pre>
+
+        <p><strong>Consideraciones de bind mounts:</strong></p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Ventaja</th>
+                    <th>Desventaja</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Acceso directo a archivos del host</td>
+                    <td>Depende de estructura del host</td>
+                </tr>
+                <tr>
+                    <td>Ideal para desarrollo (hot-reload)</td>
+                    <td>Problemas de permisos UID/GID</td>
+                </tr>
+                <tr>
+                    <td>No requiere gestión de volúmenes</td>
+                    <td>Menos portable</td>
+                </tr>
+                <tr>
+                    <td>Puede montar archivos individuales</td>
+                    <td>Riesgo de seguridad si ruta incorrecta</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section class="contenido-didactico">
+        <h1>6.4 tmpfs Mounts</h1>
+        
+        <p>Almacenamiento en memoria RAM, nunca persiste en disco. Solo disponible en Linux.</p>
+
+        <pre><code class="language-bash"># Sintaxis --tmpfs
+docker run --tmpfs /tmp nginx
+docker run --tmpfs /tmp:size=100m,mode=1777 nginx
+
+# Sintaxis --mount
+docker run --mount type=tmpfs,target=/tmp nginx
+docker run --mount type=tmpfs,target=/tmp,tmpfs-size=100m,tmpfs-mode=1777 nginx</code></pre>
+
+        <p><strong>Casos de uso:</strong> Datos sensibles temporales (tokens, claves), caché en memoria, archivos temporales que no deben persistir.</p>
+    </section>
+
+    <section class="contenido-didactico">
+        <h1>6.5 Volúmenes en Docker Compose</h1>
+        
+        <p><strong>Definición y uso:</strong></p>
+
+        <pre><code class="language-yaml">version: '3.8'
+services:
+  db:
+    image: postgres:15
+    volumes:
+      # Volumen nombrado
+      - postgres-data:/var/lib/postgresql/data
+      # Bind mount para inicialización
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      # Volumen anónimo
+      - /var/log/postgresql
+    environment:
+      POSTGRES_PASSWORD: secret
+
+  app:
+    image: mi-app
+    volumes:
+      # Bind mount para desarrollo
+      - ./src:/app/src
+      # Volumen compartido
+      - uploads:/app/uploads
+    tmpfs:
+      - /tmp:size=50m
+
+volumes:
+  postgres-data:
+    # Configuración por defecto (driver local)
+  uploads:
+    driver: local
+    driver_opts:
+      type: none
+      device: /data/uploads
+      o: bind</code></pre>
+
+        <p><strong>Volúmenes externos (preexistentes):</strong></p>
+
+        <pre><code class="language-yaml">volumes:
+  datos-existentes:
+    external: true
+    name: mi-volumen-produccion</code></pre>
+
+        <p><strong>Volúmenes con labels:</strong></p>
+
+        <pre><code class="language-yaml">volumes:
+  mi-volumen:
+    labels:
+      proyecto: "web"
+      entorno: "produccion"</code></pre>
+    </section>
+
+    <section class="contenido-didactico">
+        <h1>6.6 Drivers de Volumen</h1>
+        
+        <p><strong>Driver local con opciones:</strong></p>
+
+        <pre><code class="language-bash"># NFS
+docker volume create --driver local \
+    --opt type=nfs \
+    --opt o=addr=192.168.1.100,rw \
+    --opt device=:/export/datos \
+    nfs-data
+
+# CIFS/SMB
+docker volume create --driver local \
+    --opt type=cifs \
+    --opt device=//192.168.1.100/share \
+    --opt o=addr=192.168.1.100,username=user,password=pass \
+    smb-data
+
+# Dispositivo de bloque
+docker volume create --driver local \
+    --opt type=ext4 \
+    --opt device=/dev/sdb1 \
+    block-data</code></pre>
+
+        <p><strong>Drivers de terceros:</strong> Ejemplos incluyen REX-Ray (AWS EBS, Azure, GCE), Portworx (almacenamiento distribuido), NetApp (Trident), y GlusterFS.</p>
+
+        <pre><code class="language-bash"># Instalar plugin
+docker plugin install rexray/ebs
+
+# Crear volumen con driver
+docker volume create --driver rexray/ebs --opt size=100 ebs-vol</code></pre>
+    </section>
+
+    <section class="contenido-didactico">
+        <h1>6.7 Backup y Restauración</h1>
+        
+        <p><strong>Backup de volumen:</strong></p>
+
+        <pre><code class="language-bash"># Método básico con tar
+docker run --rm \
+    -v mi-volumen:/source:ro \
+    -v $(pwd):/backup \
+    alpine tar czf /backup/mi-volumen-$(date +%Y%m%d).tar.gz -C /source .
+
+# Backup mientras contenedor está corriendo (cuidado con consistencia)
+docker run --rm \
+    --volumes-from mi-contenedor:ro \
+    -v $(pwd):/backup \
+    alpine tar czf /backup/backup.tar.gz -C /datos .</code></pre>
+
+        <p><strong>Restauración:</strong></p>
+
+        <pre><code class="language-bash"># Restaurar a volumen nuevo
+docker volume create mi-volumen-restaurado
+docker run --rm \
+    -v mi-volumen-restaurado:/target \
+    -v $(pwd):/backup:ro \
+    alpine tar xzf /backup/mi-volumen.tar.gz -C /target</code></pre>
+
+        <p><strong>Clonar volumen:</strong></p>
+
+        <pre><code class="language-bash">docker run --rm \
+    -v origen:/from:ro \
+    -v destino:/to \
+    alpine sh -c "cd /from && cp -av . /to"</code></pre>
+
+        <p><strong>Backup de bases de datos (método recomendado):</strong></p>
+
+        <pre><code class="language-bash"># PostgreSQL
+docker exec mi-postgres pg_dump -U usuario basedatos > backup.sql
+docker exec mi-postgres pg_dumpall -U postgres > full-backup.sql
+
+# MySQL
+docker exec mi-mysql mysqldump -u root -p basedatos > backup.sql
+
+# MongoDB
+docker exec mi-mongo mongodump --out /backup</code></pre>
+    </section>
+
+    <section class="contenido-didactico">
+        <h1>6.8 Permisos y Propiedad</h1>
+        
+        <p><strong>Problema común:</strong> El UID/GID dentro del contenedor no coincide con el del host.</p>
+
+        <pre><code class="language-bash"># Ejecutar como usuario específico
+docker run --user 1000:1000 -v $(pwd)/datos:/datos nginx
+
+# Ver UID del proceso en contenedor
+docker exec mi-contenedor id
+
+# Ajustar permisos en host
+sudo chown -R 1000:1000 /path/datos</code></pre>
+
+        <p><strong>Soluciones en Dockerfile:</strong></p>
+
+        <pre><code class="language-dockerfile"># Crear usuario con UID específico
+RUN groupadd -g 1000 app && useradd -u 1000 -g app app
+RUN chown -R app:app /app
+USER app</code></pre>
+
+        <p><strong>Usando fixuid/gosu para ajuste dinámico:</strong></p>
+
+        <pre><code class="language-dockerfile">RUN curl -SsL https://github.com/boxboat/fixuid/releases/download/v0.5/fixuid-0.5-linux-amd64.tar.gz | tar -C /usr/local/bin -xzf -
+ENTRYPOINT ["fixuid", "-q"]</code></pre>
+    </section>
+
+    <section class="contenido-didactico">
+        <h1>6.9 Rendimiento</h1>
+        
+        <p><strong>Comparativa de rendimiento:</strong></p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Tipo</th>
+                    <th>Rendimiento</th>
+                    <th>Notas</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>tmpfs</td>
+                    <td>Excelente</td>
+                    <td>Limitado por RAM</td>
+                </tr>
+                <tr>
+                    <td>Volumes (local)</td>
+                    <td>Muy bueno</td>
+                    <td>Overhead mínimo</td>
+                </tr>
+                <tr>
+                    <td>Bind mounts (Linux)</td>
+                    <td>Muy bueno</td>
+                    <td>Similar a volumes</td>
+                </tr>
+                <tr>
+                    <td>Bind mounts (Mac/Win)</td>
+                    <td>Moderado</td>
+                    <td>Usa sistema de sincronización</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p><strong>Optimización en Docker Desktop (Mac/Windows):</strong></p>
+
+        <pre><code class="language-yaml"># docker-compose.yml con caché
+services:
+  app:
+    volumes:
+      - ./src:/app/src:cached      # Prioriza vista del host
+      - ./vendor:/app/vendor:delegated  # Prioriza vista del contenedor</code></pre>
+
+        <p><strong>Alternativas para desarrollo en Mac/Windows:</strong> Mutagen, docker-sync, o usar volúmenes nombrados con sincronización selectiva.</p>
+    </section>
+
+    <section class="contenido-didactico">
+        <h1>6.10 Patrones de Uso</h1>
+        
+        <p><strong>Patrón: Separar datos de configuración:</strong></p>
+
+        <pre><code class="language-yaml">services:
+  nginx:
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro  # Config (bind)
+      - ./certs:/etc/nginx/certs:ro            # Certs (bind)
+      - static-content:/usr/share/nginx/html   # Datos (volume)
+      - nginx-logs:/var/log/nginx              # Logs (volume)</code></pre>
+
+        <p><strong>Patrón: Inicialización condicional:</strong></p>
+
+        <pre><code class="language-bash"># Script que inicializa solo si volumen está vacío
+if [ -z "$(ls -A /datos)" ]; then
+    echo "Inicializando datos..."
+    cp -r /datos-default/* /datos/
+fi</code></pre>
+
+        <p><strong>Patrón: Volumen compartido entre servicios:</strong></p>
+
+        <pre><code class="language-yaml">services:
+  app:
+    volumes:
+      - uploads:/app/uploads
+
+  procesador:
+    volumes:
+      - uploads:/datos:ro  # Solo lectura
+
+volumes:
+  uploads:</code></pre>
+    </section>
+
+    <section class="contenido-didactico">
+        <h1>6.11 Limpieza y Mantenimiento</h1>
+
+        <pre><code class="language-bash"># Ver espacio usado por volúmenes
+docker system df -v | grep -A 100 "VOLUME NAME"
+
+# Eliminar volúmenes huérfanos
+docker volume prune
+
+# Eliminar volúmenes con filtro
+docker volume prune --filter "label!=importante"
+
+# Encontrar volúmenes grandes (Linux)
+du -sh /var/lib/docker/volumes/*
+
+# Limpieza completa (cuidado en producción)
+docker system prune --volumes</code></pre>
+    </section>
+
+    <section class="contenido-didactico">
+        <h1>6.12 Comandos de Referencia Rápida</h1>
+
+        <pre><code class="language-bash"># Volúmenes
+docker volume create NOMBRE
+docker volume ls
+docker volume inspect NOMBRE
+docker volume rm NOMBRE
+docker volume prune
+
+# Montar volumen
+docker run -v VOLUMEN:/ruta IMAGEN
+docker run --mount source=VOLUMEN,target=/ruta IMAGEN
+
+# Bind mount
+docker run -v /host/path:/container/path IMAGEN
+docker run --mount type=bind,source=/host,target=/container IMAGEN
+
+# tmpfs
+docker run --tmpfs /ruta IMAGEN
+docker run --mount type=tmpfs,target=/ruta IMAGEN
+
+# Opciones
+:ro                    # Solo lectura
+:rw                    # Lectura/escritura (defecto)
+:cached/:delegated     # Mac/Windows performance
+
+# Backup
+docker run --rm -v VOL:/src:ro -v $(pwd):/bk alpine tar czf /bk/backup.tar.gz -C /src .</code></pre>
+    </section>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="script.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+</body>
+</html>

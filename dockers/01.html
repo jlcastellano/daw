@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conceptos Fundamentales de Docker</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div>Conceptos Fundamentales de Docker</div>
+    </header>
+
+    <section class="contenido-didactico">
+        <h1>1. Conceptos Fundamentales de Docker</h1>
+
+        <h2>1.1 ¿Qué es la Containerización?</h2>
+        
+        <p>La containerización es una tecnología de virtualización a nivel de sistema operativo que permite empaquetar una aplicación junto con todas sus dependencias (librerías, binarios, archivos de configuración) en una unidad estandarizada llamada <strong>contenedor</strong>. Este contenedor puede ejecutarse de manera consistente en cualquier infraestructura que soporte el runtime de contenedores.</p>
+
+        <p><strong>Analogía práctica:</strong> Piensa en un contenedor de transporte marítimo. Sin importar qué haya dentro (muebles, electrónicos, alimentos), el contenedor tiene dimensiones estándar que permiten transportarlo en cualquier barco, camión o tren diseñado para esos contenedores. De la misma forma, un contenedor Docker "empaqueta" tu aplicación de manera que puede ejecutarse en cualquier máquina con Docker instalado, sin importar si es tu laptop, un servidor en la nube o un clúster de producción.</p>
+
+        <p><strong>¿Qué incluye un contenedor?</strong></p>
+        <ul>
+            <li>El código fuente de la aplicación</li>
+            <li>El runtime del lenguaje (Python, Node.js, Java, etc.)</li>
+            <li>Las librerías y dependencias del sistema</li>
+            <li>Las herramientas necesarias para la ejecución</li>
+            <li>Las variables de entorno y configuraciones</li>
+        </ul>
+
+        <h2>1.2 Diferencia entre Máquinas Virtuales y Contenedores</h2>
+
+        <p>Aunque ambas tecnologías proporcionan aislamiento, funcionan de manera fundamentalmente diferente.</p>
+
+        <p><strong>Máquinas Virtuales (VMs):</strong> Virtualizan el hardware completo. Cada VM ejecuta su propio sistema operativo completo sobre un hipervisor (como VMware, VirtualBox o Hyper-V). Esto significa que si tienes 3 VMs, tienes 3 sistemas operativos completos consumiendo recursos.</p>
+
+        <p><strong>Contenedores:</strong> Virtualizan a nivel del sistema operativo. Todos los contenedores comparten el kernel del sistema operativo host, pero cada uno tiene su propio espacio de usuario aislado. Esto los hace mucho más ligeros y eficientes.</p>
+
+        <h3>Comparativa detallada</h3>
+
+        <dl>
+            <dt>Sistema Operativo</dt>
+            <dd>Las máquinas virtuales incluyen un SO completo por cada instancia, mientras que los contenedores comparten el kernel del host.</dd>
+
+            <dt>Consumo de Recursos</dt>
+            <dd>Las VMs requieren RAM y CPU dedicados para cada SO guest, en tanto que los contenedores solo consumen lo que la aplicación necesita.</dd>
+
+            <dt>Tiempo de Arranque</dt>
+            <dd>Las VMs necesitan de 1 a 5 minutos típicamente, mientras que los contenedores arrancan en milisegundos a segundos.</dd>
+
+            <dt>Tamaño</dt>
+            <dd>Las VMs ocupan entre 1 y 20+ GB, contra los 10 MB a 1 GB de los contenedores.</dd>
+
+            <dt>Nivel de Aislamiento</dt>
+            <dd>Las VMs ofrecen aislamiento completo a nivel de hardware (más seguro), mientras que los contenedores proporcionan aislamiento a nivel de proceso (eficiente pero comparten kernel).</dd>
+
+            <dt>Portabilidad</dt>
+            <dd>Las VMs dependen del hipervisor específico, mientras que los contenedores se ejecutan en cualquier host con Docker.</dd>
+        </dl>
+
+        <details>
+            <summary>¿Cuándo usar cada uno?</summary>
+            <p><strong>Máquinas Virtuales son preferibles cuando:</strong></p>
+            <ul>
+                <li>Necesitas aislamiento completo por seguridad</li>
+                <li>Ejecutar diferentes sistemas operativos</li>
+                <li>Correr aplicaciones que requieren acceso directo al hardware</li>
+            </ul>
+            <p><strong>Contenedores son ideales para:</strong></p>
+            <ul>
+                <li>Microservicios</li>
+                <li>Aplicaciones cloud-native</li>
+                <li>Entornos de desarrollo consistentes</li>
+                <li>Cuando la densidad y eficiencia son prioritarias</li>
+            </ul>
+        </details>
+
+        <h2>1.3 Arquitectura Básica de Docker</h2>
+
+        <p>Docker utiliza una arquitectura cliente-servidor con tres componentes principales que trabajan en conjunto.</p>
+
+        <h3>Docker Daemon (dockerd)</h3>
+        <p>Es el corazón de Docker. Este servicio en segundo plano es responsable de construir, ejecutar y gestionar los contenedores. Escucha peticiones a través de la API REST y administra objetos Docker como imágenes, contenedores, redes y volúmenes. El daemon puede comunicarse con otros daemons para gestionar servicios distribuidos.</p>
+
+        <h3>REST API</h3>
+        <p>Es la interfaz de programación que define cómo los programas pueden comunicarse con el daemon. Cualquier herramienta que quiera interactuar con Docker lo hace a través de esta API. Esto permite que existan múltiples clientes (CLI, interfaces gráficas, herramientas de orquestación) que pueden controlar Docker.</p>
+
+        <h3>Cliente Docker (docker CLI)</h3>
+        <p>Es la herramienta de línea de comandos que los usuarios utilizan para interactuar con Docker. Cuando ejecutas comandos como <kbd>docker run</kbd> o <kbd>docker build</kbd>, el cliente envía estas instrucciones al daemon a través de la API REST. El cliente puede comunicarse con un daemon local o remoto.</p>
+
+        <h3>Flujo de trabajo típico</h3>
+        <ol>
+            <li>El usuario escribe un comando en el cliente (por ejemplo, <kbd>docker run nginx</kbd>)</li>
+            <li>El cliente traduce el comando a una petición REST API</li>
+            <li>El daemon recibe la petición y ejecuta la acción (descargar imagen si es necesario, crear y arrancar el contenedor)</li>
+            <li>El daemon devuelve el resultado al cliente</li>
+        </ol>
+
+        <details>
+            <summary>Componente adicional importante - Docker Registry</summary>
+            <p>Es un servicio para almacenar y distribuir imágenes Docker. Docker Hub es el registry público por defecto, pero puedes configurar registries privados para tu organización. Cuando ejecutas <kbd>docker pull</kbd>, las imágenes se descargan desde un registry.</p>
+        </details>
+
+        <h2>1.4 Ventajas en el Desarrollo y Despliegue</h2>
+
+        <h3>Consistencia entre entornos</h3>
+        <p>El famoso problema <em>"funciona en mi máquina"</em> desaparece porque el contenedor incluye todo lo necesario para ejecutar la aplicación. El entorno de desarrollo, testing, staging y producción son idénticos. Esto elimina discrepancias causadas por diferentes versiones de dependencias o configuraciones del sistema.</p>
+
+        <h3>Velocidad de desarrollo</h3>
+        <p>Los desarrolladores pueden levantar entornos complejos con un solo comando. No hay necesidad de instalar y configurar bases de datos, servicios de cache, o herramientas auxiliares manualmente. Un nuevo desarrollador puede tener el proyecto funcionando en minutos en lugar de horas o días.</p>
+
+        <h3>Aislamiento de aplicaciones</h3>
+        <p>Cada contenedor opera en su propio espacio aislado. Puedes ejecutar múltiples versiones de la misma aplicación o dependencia sin conflictos. Una aplicación que requiere Python 2.7 puede coexistir con otra que necesita Python 3.11.</p>
+
+        <h3>Escalabilidad horizontal</h3>
+        <p>Escalar una aplicación es tan simple como crear más instancias del contenedor. Los orquestadores como Kubernetes aprovechan esta característica para escalar automáticamente según la demanda. El proceso de escalado toma segundos, no minutos u horas.</p>
+
+        <h3>Versionado de infraestructura</h3>
+        <p>Las imágenes Docker pueden versionarse como código. Puedes rastrear exactamente qué versión de la infraestructura se ejecutó en cada momento. Esto facilita rollbacks y auditorías, tratando la infraestructura como código (<em>Infrastructure as Code</em>).</p>
+
+        <h3>Portabilidad total</h3>
+        <p>Un contenedor que funciona en tu laptop funcionará en AWS, Google Cloud, Azure, o en el data center de tu empresa. Esta independencia del proveedor de infraestructura evita el <em>vendor lock-in</em> y facilita estrategias multi-cloud.</p>
+
+        <h3>Uso eficiente de recursos</h3>
+        <p>Al compartir el kernel del SO, los contenedores tienen una huella de memoria y CPU mucho menor que las VMs. Puedes ejecutar decenas de contenedores donde solo cabrían unas pocas máquinas virtuales.</p>
+
+        <h2>1.5 Conceptos Clave Adicionales</h2>
+
+        <dl>
+            <dt>Imagen Docker</dt>
+            <dd>Es una plantilla inmutable (de solo lectura) que contiene las instrucciones para crear un contenedor. Está compuesta por capas apiladas, donde cada capa representa una instrucción del Dockerfile. Las capas se comparten entre imágenes, optimizando el espacio en disco. Piensa en una imagen como una "foto" del estado de un sistema en un momento dado.</dd>
+
+            <dt>Contenedor</dt>
+            <dd>Es una instancia en ejecución de una imagen. Mientras la imagen es estática, el contenedor es dinámico y puede ser iniciado, detenido, movido o eliminado. Cada contenedor tiene su propia capa de escritura donde se almacenan los cambios realizados durante la ejecución. Múltiples contenedores pueden crearse a partir de la misma imagen.</dd>
+
+            <dt>Dockerfile</dt>
+            <dd>Es un archivo de texto que contiene una serie de instrucciones para construir una imagen Docker automáticamente. Cada instrucción crea una capa en la imagen. Las instrucciones comunes incluyen <code>FROM</code> (imagen base), <code>COPY</code> (copiar archivos), <code>RUN</code> (ejecutar comandos), y <code>CMD</code> (comando por defecto al iniciar). El Dockerfile permite reproducir exactamente el mismo entorno cada vez.</dd>
+
+            <dt>Registry (Registro)</dt>
+            <dd>Es un servicio de almacenamiento y distribución de imágenes Docker. Docker Hub es el registry público más popular, con miles de imágenes oficiales y de la comunidad. Las organizaciones pueden usar registries privados (como Amazon ECR, Google Container Registry, o Harbor) para almacenar imágenes propietarias de forma segura.</dd>
+
+            <dt>Volumen</dt>
+            <dd>Mecanismo para persistir datos generados o usados por contenedores. Los datos en volúmenes sobreviven aunque el contenedor se elimine. Son esenciales para bases de datos, archivos de usuario, o cualquier dato que deba persistir.</dd>
+
+            <dt>Red Docker (Docker Network)</dt>
+            <dd>Sistema que permite la comunicación entre contenedores y con el mundo exterior. Docker crea redes virtuales que aíslan el tráfico entre grupos de contenedores. Esto permite arquitecturas de microservicios donde cada servicio puede comunicarse solo con los componentes autorizados.</dd>
+        </dl>
+    </section>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="script.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+</body>
+</html>

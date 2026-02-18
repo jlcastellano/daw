@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual de Docker - Instalación</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div>Manual de Docker</div>
+    </header>
+
+    <section class="contenido-didactico">
+        <h1>0. Instalación de Docker</h1>
+
+        <h2>0.1 Instalación en Ubuntu</h2>
+
+        <h3>Requisitos Previos</h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Requisito</th>
+                    <th>Detalle</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Sistema Operativo</td>
+                    <td>Ubuntu 20.04 LTS, 22.04 LTS o 24.04 LTS</td>
+                </tr>
+                <tr>
+                    <td>Privilegios</td>
+                    <td>Usuario con acceso <code>sudo</code></td>
+                </tr>
+                <tr>
+                    <td>Arquitectura</td>
+                    <td>64-bit (amd64, arm64, armhf)</td>
+                </tr>
+                <tr>
+                    <td>Conexión</td>
+                    <td>Internet estable</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p><strong>Nota importante:</strong> Antes de instalar, si tienes versiones antiguas de Docker, desinstálalas para evitar conflictos.</p>
+
+        <h3>Paso 0: Eliminar versiones anteriores (si existen)</h3>
+
+        <pre><code class="language-bash"># Eliminar instalaciones previas de Docker
+sudo apt remove -y docker docker-engine docker.io containerd runc</code></pre>
+
+        <h3>Pasos de Instalación</h3>
+
+        <pre><code class="language-bash"># 1. Actualizar el índice de paquetes
+sudo apt update
+sudo apt upgrade -y
+
+# 2. Instalar dependencias necesarias
+# Estos paquetes permiten que apt use repositorios sobre HTTPS
+sudo apt install -y \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    gnupg \
+    lsb-release
+
+# 3. Añadir clave GPG oficial de Docker
+# Esta clave verifica la autenticidad de los paquetes descargados
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
+    sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
+
+# 4. Configurar el repositorio estable de Docker
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
+  https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+# 5. Instalar Docker Engine y plugins
+sudo apt update
+sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+# 6. Añadir usuario al grupo docker (evita usar sudo en cada comando)
+sudo usermod -aG docker $USER</code></pre>
+
+        <p><strong>Importante:</strong> Después del paso 6, debes <strong>cerrar sesión y volver a iniciarla</strong> (o ejecutar <code>newgrp docker</code>) para que los cambios de grupo surtan efecto.</p>
+
+        <h3>Verificación de la Instalación</h3>
+
+        <pre><code class="language-bash"># Verificar que Docker está instalado correctamente
+docker --version
+
+# Verificar que el servicio está corriendo
+sudo systemctl status docker
+
+# Ejecutar contenedor de prueba
+docker run hello-world
+
+# Verificar Docker Compose (ahora viene integrado como plugin)
+docker compose version</code></pre>
+
+        <p><strong>Explicación:</strong> El contenedor <code>hello-world</code> descarga una imagen mínima, la ejecuta y muestra un mensaje confirmando que Docker funciona correctamente.</p>
+
+        <h3>Sobre Docker Compose</h3>
+
+        <p><strong>Actualización importante:</strong> A partir de Docker Engine 23.0, <strong>Docker Compose V2 viene integrado como plugin</strong> (<code>docker compose</code> sin guión). Ya no es necesario instalarlo por separado.</p>
+
+        <pre><code class="language-bash"># Sintaxis moderna (recomendada)
+docker compose up -d
+
+# La sintaxis antigua sigue funcionando pero está deprecada
+docker-compose up -d  # ← Evitar usar esta forma</code></pre>
+
+        <p>Si aún necesitas la versión standalone por compatibilidad:</p>
+
+        <pre><code class="language-bash"># Instalar versión standalone (solo si es necesario)
+COMPOSE_VERSION=$(curl -s https://api.github.com/repos/docker/compose/releases/latest | grep -Po '"tag_name": "\K.*?(?=")')
+sudo curl -L "https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" \
+    -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose</code></pre>
+
+        <h2>0.2 Instalación en Windows</h2>
+
+        <h3>Requisitos del Sistema</h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Requisito</th>
+                    <th>Detalle</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Sistema Operativo</td>
+                    <td>Windows 10 (Build 19041+) / Windows 11</td>
+                </tr>
+                <tr>
+                    <td>Edición</td>
+                    <td>Pro, Enterprise, Education o <strong>Home</strong> (con WSL 2)</td>
+                </tr>
+                <tr>
+                    <td>RAM</td>
+                    <td>Mínimo 4GB (recomendado 8GB)</td>
+                </tr>
+                <tr>
+                    <td>Virtualización</td>
+                    <td>Habilitada en BIOS/UEFI</td>
+                </tr>
+                <tr>
+                    <td>Espacio en disco</td>
+                    <td>Mínimo 20GB libres</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p><strong>Novedad:</strong> Windows 10/11 <strong>Home</strong> ahora soporta Docker Desktop usando WSL 2 como backend.</p>
+
+        <h3>Instalación de WSL 2 (Prerequisito)</h3>
+
+        <pre><code class="language-powershell"># Abrir PowerShell como Administrador
+
+# 1. Instalar WSL con Ubuntu (método simplificado)
+wsl --install
+
+# 2. Reiniciar el equipo cuando se solicite
+
+# 3. Después del reinicio, verificar la instalación
+wsl --list --verbose
+
+# 4. Asegurar que WSL 2 es la versión predeterminada
+wsl --set-default-version 2</code></pre>
+
+        <p><strong>Método manual (si el anterior falla):</strong></p>
+
+        <pre><code class="language-powershell"># Habilitar subsistema de Windows para Linux
+dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
+
+# Habilitar plataforma de máquina virtual
+dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart
+
+# Reiniciar el sistema
+Restart-Computer
+
+# Después del reinicio, descargar e instalar el kernel de WSL 2:
+# https://aka.ms/wsl2kernel</code></pre>
+
+        <h3>Instalación de Docker Desktop</h3>
+
+        <ol>
+            <li><strong>Descargar</strong> Docker Desktop desde <a href="https://www.docker.com/products/docker-desktop" target="_blank">docker.com/products/docker-desktop</a></li>
+            <li><strong>Ejecutar</strong> el instalador <code>Docker Desktop Installer.exe</code></li>
+            <li><strong>Marcar</strong> la opción "Use WSL 2 instead of Hyper-V" durante la instalación</li>
+            <li><strong>Reiniciar</strong> el sistema si se solicita</li>
+            <li><strong>Iniciar</strong> Docker Desktop desde el menú de inicio</li>
+        </ol>
+
+        <h3>Verificación en Windows</h3>
+
+        <pre><code class="language-powershell"># Abrir PowerShell o CMD
+
+# Verificar versión de Docker
+docker --version
+
+# Verificar Docker Compose
+docker compose version
+
+# Probar con contenedor hello-world
+docker run hello-world
+
+# Ver contenedores en ejecución
+docker ps</code></pre>
+
+        <h3>Configuración Recomendada de Docker Desktop</h3>
+
+        <p>Accede a <strong>Settings</strong> y configura:</p>
+
+        <ul>
+            <li><strong>General:</strong> "Start Docker Desktop when you log in" (opcional)</li>
+            <li><strong>Resources &gt; WSL Integration:</strong> Habilita la integración con tu distro de WSL</li>
+            <li><strong>Resources &gt; Advanced:</strong> Ajusta CPU y memoria según tu equipo</li>
+        </ul>
+
+        <h2>0.3 Solución de Problemas Comunes</h2>
+
+        <h3>Ubuntu</h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Problema</th>
+                    <th>Solución</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>permission denied</code> al ejecutar docker</td>
+                    <td>Ejecuta <code>sudo usermod -aG docker $USER</code> y reinicia sesión</td>
+                </tr>
+                <tr>
+                    <td>El servicio no inicia</td>
+                    <td><code>sudo systemctl start docker</code> y <code>sudo systemctl enable docker</code></td>
+                </tr>
+                <tr>
+                    <td>Conflicto de puertos</td>
+                    <td>Verifica puertos en uso: <code>sudo lsof -i -P -n | grep LISTEN</code></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>Windows</h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Problema</th>
+                    <th>Solución</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>"WSL 2 installation is incomplete"</td>
+                    <td>Instala el kernel WSL 2 desde <a href="https://aka.ms/wsl2kernel" target="_blank">aka.ms/wsl2kernel</a></td>
+                </tr>
+                <tr>
+                    <td>Docker Desktop no inicia</td>
+                    <td>Verifica que la virtualización esté habilitada en BIOS</td>
+                </tr>
+                <tr>
+                    <td>Rendimiento lento</td>
+                    <td>Mueve tus proyectos al filesystem de WSL (<code>\\wsl$\Ubuntu\home\...</code>)</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>0.4 Comandos Útiles Post-Instalación</h2>
+
+        <pre><code class="language-bash"># Ver información detallada del sistema Docker
+docker info
+
+# Ver espacio utilizado por Docker
+docker system df
+
+# Limpiar recursos no utilizados
+docker system prune -a
+
+# Ver logs del servicio Docker (Ubuntu)
+sudo journalctl -u docker.service</code></pre>
+
+    </section>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="script.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+</body>
+</html>

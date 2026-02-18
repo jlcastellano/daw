@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docker Compose - Docker</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div>Docker Compose</div>
+    </header>
+
+    <section class="contenido-didactico">
+        <h1>7.1 Introducción a Docker Compose</h1>
+        
+        <p>Docker Compose es una herramienta para definir y ejecutar aplicaciones Docker multi-contenedor. Permite:</p>
+
+        <ul>
+            <li>Definir toda la infraestructura en un archivo YAML declarativo</li>
+            <li>Gestionar múltiples servicios con un solo comando</li>
+            <li>Mantener el entorno de desarrollo consistente entre equipos</li>
+            <li>Automatizar el despliegue de aplicaciones complejas</li>
+            <li>Crear redes aisladas automáticamente para los servicios definidos</li>
+        </ul>
+
+        <blockquote>
+            <strong>Nota importante:</strong> A partir de Docker Desktop 3.4 y Docker Engine 20.10, se recomienda usar el comando <code>docker compose</code> (sin guion) en lugar de <code>docker-compose</code>. La versión integrada en Docker CLI es más moderna y mantenida activamente. Los ejemplos de este capítulo funcionan con ambas sintaxis.
+        </blockquote>
+    </section>
+
+    <section class="contenido-didactico">
+        <h1>7.2 Estructura del archivo docker-compose.yml</h1>
+        
+        <h2>Componentes Principales</h2>
+
+        <pre><code class="language-yaml">version: '3.8'
+
+services:
+  web:
+    build: ./web
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_USER=user
+      
+  db:
+    image: mysql:8.0
+    volumes:
+      - db_data:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=secret
+      
+volumes:
+  db_data:</code></pre>
+
+        <h2>Elementos clave explicados</h2>
+
+        <p><strong>version:</strong> Especifica la versión de la sintaxis de Compose. La versión 3.8 es compatible con Docker Engine 19.03+. A partir de Compose V2, este campo es opcional y se considera obsoleto, aunque se mantiene por compatibilidad.</p>
+
+        <p><strong>services:</strong> Define cada contenedor que formará parte de la aplicación. Cada servicio puede construirse desde un Dockerfile (<code>build</code>) o usar una imagen existente (<code>image</code>).</p>
+
+        <p><strong>volumes:</strong> Declara volúmenes nombrados para almacenamiento persistente. Los datos en estos volúmenes sobreviven a la eliminación de contenedores.</p>
+
+        <p><strong>networks:</strong> Configuración de redes personalizadas. Si no se especifica, Compose crea automáticamente una red bridge llamada <code>[nombre_proyecto]_default</code> donde todos los servicios pueden comunicarse entre sí usando el nombre del servicio como hostname.</p>
+
+        <h2>Opciones comunes en servicios</h2>
+
+        <pre><code class="language-yaml">services:
+  ejemplo:
+    image: nginx:alpine          # Imagen base
+    build: ./directorio          # O construir desde Dockerfile
+    container_name: mi_contenedor # Nombre específico (opcional)
+    ports:
+      - "8080:80"                 # HOST:CONTENEDOR
+    volumes:
+      - ./local:/contenedor      # Bind mount
+      - datos:/app/data          # Volumen nombrado
+    environment:
+      - VARIABLE=valor           # Variables de entorno
+    env_file:
+      - .env                     # Archivo de variables
+    depends_on:
+      - otro_servicio            # Dependencias
+    restart: unless-stopped      # Política de reinicio
+    networks:
+      - mi_red                   # Redes personalizadas</code></pre>
+    </section>
+
+    <section class="contenido-didactico">
+        <h1>7.3 Comandos Básicos de Docker Compose</h1>
+        
+        <h2>Comandos principales</h2>
+
+        <pre><code class="language-bash"># Iniciar servicios (construye imágenes si es necesario)
+docker compose up
+
+# Iniciar en modo detached (segundo plano)
+docker compose up -d
+
+# Construir o reconstruir imágenes
+docker compose build
+
+# Construir sin usar caché
+docker compose build --no-cache
+
+# Detener servicios (mantiene volúmenes)
+docker compose stop
+
+# Detener y eliminar contenedores, redes
+docker compose down
+
+# Detener y eliminar también volúmenes
+docker compose down -v
+
+# Ver estado de los servicios
+docker compose ps
+
+# Ver logs de todos los servicios
+docker compose logs
+
+# Ver logs de un servicio específico en tiempo real
+docker compose logs -f web
+
+# Ejecutar comando en un servicio
+docker compose exec web bash
+
+# Escalar servicios (crear múltiples instancias)
+docker compose up -d --scale web=3</code></pre>
+
+        <h2>Ciclo de vida típico de desarrollo</h2>
+
+        <pre><code class="language-bash"># 1. Construir las imágenes
+docker compose build
+
+# 2. Iniciar los servicios
+docker compose up -d
+
+# 3. Verificar que están corriendo
+docker compose ps
+
+# 4. Revisar logs si hay problemas
+docker compose logs
+
+# 5. Hacer cambios en el código y reconstruir
+docker compose up -d --build
+
+# 6. Al terminar, detener todo
+docker compose down</code></pre>
+
+        <h2>Diferencia entre stop y down</h2>
+
+        <p><code>docker compose stop</code> detiene los contenedores pero los mantiene, junto con las redes y volúmenes. Puedes reiniciarlos con <code>docker compose start</code>.</p>
+
+        <p><code>docker compose down</code> elimina los contenedores y las redes creadas. Los volúmenes nombrados se mantienen a menos que uses la bandera <code>-v</code>.</p>
+    </section>
+
+    <section class="contenido-didactico">
+        <h1>7.4 Configuraciones Avanzadas</h1>
+        
+        <h2>Healthchecks</h2>
+
+        <p>Los healthchecks permiten a Docker verificar si un servicio está funcionando correctamente, no solo si el proceso está corriendo.</p>
+
+        <pre><code class="language-yaml">services:
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile.dev
+      args:
+        - BUILD_ENV=development
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 30s      # Cada cuánto verificar
+      timeout: 10s       # Tiempo máximo de espera
+      retries: 3         # Intentos antes de marcar como unhealthy
+      start_period: 40s  # Tiempo de gracia inicial</code></pre>
+
+        <h2>Límites de recursos</h2>
+
+        <p>Controlan cuántos recursos puede consumir cada servicio.</p>
+
+        <pre><code class="language-yaml">services:
+  web:
+    image: nginx:alpine
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'      # Máximo 50% de un CPU
+          memory: 512M     # Máximo 512 MB de RAM
+        reservations:
+          cpus: '0.25'     # Reserva mínima de CPU
+          memory: 256M     # Reserva mínima de RAM</code></pre>
+
+        <blockquote>
+            <strong>Nota:</strong> La sección <code>deploy</code> funciona completamente en Docker Swarm. En Compose standalone, los límites de recursos requieren usar <code>docker compose up</code> con el flag <code>--compatibility</code> o definirlos fuera de <code>deploy</code> en versiones anteriores.
+        </blockquote>
+
+        <h2>Dependencias avanzadas con condiciones</h2>
+
+        <pre><code class="language-yaml">services:
+  web:
+    build: ./web
+    depends_on:
+      db:
+        condition: service_healthy  # Espera a que db pase healthcheck
+      redis:
+        condition: service_started  # Solo espera a que inicie
+        
+  db:
+    image: postgres:15
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5</code></pre>
+
+        <h2>Redes personalizadas</h2>
+
+        <pre><code class="language-yaml">services:
+  frontend:
+    image: nginx:alpine
+    networks:
+      - frontend_net
+      
+  api:
+    build: ./api
+    networks:
+      - frontend_net
+      - backend_net
+      
+  db:
+    image: postgres:15
+    networks:
+      - backend_net
+
+networks:
+  frontend_net:
+    driver: bridge
+  backend_net:
+    driver: bridge
+    internal: true  # Sin acceso a internet</code></pre>
+
+        <p>Este ejemplo aísla la base de datos: solo <code>api</code> puede comunicarse con ella, mientras que <code>frontend</code> no tiene acceso directo.</p>
+    </section>
+
+    <section class="contenido-didactico">
+        <h1>7.5 Entornos de Desarrollo vs Producción</h1>
+        
+        <h2>Estructura de archivos recomendada</h2>
+
+        <pre><code class="language-plaintext">proyecto/
+├── docker-compose.yml           # Configuración base común
+├── docker-compose.override.yml  # Desarrollo (se carga automáticamente)
+├── docker-compose.prod.yml      # Producción
+├── .env                         # Variables de entorno (no commitear)
+└── .env.example                 # Plantilla de variables</code></pre>
+
+        <h2>Archivo base (docker-compose.yml)</h2>
+
+        <pre><code class="language-yaml">version: '3.8'
+
+services:
+  web:
+    build: ./web
+    depends_on:
+      - db
+      
+  db:
+    image: postgres:15
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:</code></pre>
+
+        <h2>Override para desarrollo (docker-compose.override.yml)</h2>
+
+        <p>Este archivo se carga automáticamente junto con docker-compose.yml.</p>
+
+        <pre><code class="language-yaml">version: '3.8'
+
+services:
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./web/src:/app/src  # Hot reload del código
+    environment:
+      - DEBUG=true
+      - LOG_LEVEL=debug
+      
+  db:
+    ports:
+      - "5432:5432"  # Acceso directo para debugging
+    environment:
+      - POSTGRES_PASSWORD=desarrollo</code></pre>
+
+        <h2>Configuración de producción (docker-compose.prod.yml)</h2>
+
+        <pre><code class="language-yaml">version: '3.8'
+
+services:
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile.prod
+    restart: always
+    environment:
+      - DEBUG=false
+      - LOG_LEVEL=warning
+    deploy:
+      replicas: 3
+      resources:
+        limits:
+          memory: 512M
+          
+  db:
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD_FILE=/run/secrets/db_password
+    secrets:
+      - db_password
+
+secrets:
+  db_password:
+    file: ./secrets/db_password.txt</code></pre>
+
+        <h2>Comandos para cada entorno</h2>
+
+        <pre><code class="language-bash"># Desarrollo (carga automáticamente docker-compose.override.yml)
+docker compose up
+
+# Producción (especificar archivos explícitamente)
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+# Puedes crear un alias o script para simplificar
+# prod.sh:
+docker compose -f docker-compose.yml -f docker-compose.prod.yml "$@"</code></pre>
+    </section>
+
+    <section class="contenido-didactico">
+        <h1>7.6 Variables de Entorno y Secretos</h1>
+        
+        <h2>Formas de definir variables de entorno</h2>
+
+        <p><strong>Directamente en el archivo:</strong></p>
+
+        <pre><code class="language-yaml">services:
+  web:
+    environment:
+      - DATABASE_URL=postgres://user:pass@db:5432/app
+      - DEBUG=true</code></pre>
+
+        <p><strong>Desde archivo .env:</strong></p>
+
+        <pre><code class="language-yaml">services:
+  web:
+    env_file:
+      - .env
+      - .env.local  # Puede sobrescribir valores</code></pre>
+
+        <p><strong>Interpolación desde el shell o archivo .env del proyecto:</strong></p>
+
+        <pre><code class="language-yaml">services:
+  web:
+    image: myapp:${VERSION:-latest}
+    environment:
+      - API_KEY=${API_KEY}</code></pre>
+
+        <p>Compose busca automáticamente un archivo <code>.env</code> en el mismo directorio.</p>
+
+        <h2>Manejo de secretos</h2>
+
+        <p>Para datos sensibles en producción, es preferible usar secretos en lugar de variables de entorno.</p>
+
+        <pre><code class="language-yaml">services:
+  db:
+    image: postgres:15
+    environment:
+      - POSTGRES_PASSWORD_FILE=/run/secrets/db_password
+    secrets:
+      - db_password
+      
+  api:
+    build: ./api
+    secrets:
+      - source: api_key
+        target: /run/secrets/api_key
+        mode: 0400
+
+secrets:
+  db_password:
+    file: ./secrets/db_password.txt
+  api_key:
+    file: ./secrets/api_key.txt</code></pre>
+
+        <p>Los secretos se montan como archivos en <code>/run/secrets/</code> dentro del contenedor.</p>
+    </section>
+
+    <section class="contenido-didactico">
+        <h1>7.7 Mejores Prácticas</h1>
+        
+        <p><strong>Organización y mantenimiento:</strong></p>
+        <ul>
+            <li>Mantener los archivos Compose bajo control de versiones, excepto archivos con secretos</li>
+            <li>Documentar todas las variables de entorno requeridas en un archivo <code>.env.example</code></li>
+            <li>Separar configuraciones de desarrollo y producción usando múltiples archivos</li>
+        </ul>
+
+        <p><strong>Configuración de servicios:</strong></p>
+        <ul>
+            <li>Usar variables de entorno para configuraciones que cambian entre entornos</li>
+            <li>Implementar healthchecks para todos los servicios críticos</li>
+            <li>Definir dependencias claras entre servicios usando <code>depends_on</code> con condiciones</li>
+            <li>Especificar políticas de reinicio (<code>restart: unless-stopped</code> o <code>restart: always</code>)</li>
+        </ul>
+
+        <p><strong>Almacenamiento y redes:</strong></p>
+        <ul>
+            <li>Utilizar volúmenes nombrados para datos persistentes en lugar de bind mounts en producción</li>
+            <li>Crear redes personalizadas para aislar grupos de servicios</li>
+            <li>Usar la opción <code>internal: true</code> en redes que no necesitan acceso a internet</li>
+        </ul>
+
+        <p><strong>Seguridad:</strong></p>
+        <ul>
+            <li>Nunca incluir contraseñas directamente en los archivos Compose que se commitean</li>
+            <li>Usar secretos de Docker para credenciales en producción</li>
+            <li>Limitar los recursos de los contenedores para evitar que un servicio afecte a otros</li>
+        </ul>
+
+        <p><strong>Rendimiento:</strong></p>
+        <ul>
+            <li>Usar imágenes específicas con tags de versión, evitar <code>latest</code> en producción</li>
+            <li>Aprovechar la caché de construcción ordenando las instrucciones del Dockerfile correctamente</li>
+            <li>Considerar usar <code>docker compose build --parallel</code> para construir múltiples imágenes simultáneamente</li>
+        </ul>
+    </section>
+
+    <section class="contenido-didactico">
+        <h1>7.8 Ejemplos Prácticos</h1>
+        
+        <h2>Aplicación Web con Nginx, API y PostgreSQL</h2>
+
+        <pre><code class="language-yaml">version: '3.8'
+
+services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - frontend
+      
+  api:
+    build: 
+      context: ./api
+      dockerfile: Dockerfile
+    environment:
+      - DATABASE_URL=postgres://app:${DB_PASSWORD}@db:5432/appdb
+      - NODE_ENV=production
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - frontend
+      - backend
+      
+  db:
+    image: postgres:15-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    environment:
+      - POSTGRES_DB=appdb
+      - POSTGRES_USER=app
+      - POSTGRES_PASSWORD_FILE=/run/secrets/db_password
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d appdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    secrets:
+      - db_password
+    restart: unless-stopped
+    networks:
+      - backend
+
+volumes:
+  postgres_data:
+    name: myapp_postgres_data
+
+networks:
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge
+    internal: true
+
+secrets:
+  db_password:
+    file: ./secrets/db_password.txt</code></pre>
+
+        <h2>Stack de desarrollo con hot reload</h2>
+
+        <pre><code class="language-yaml">version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      target: development
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+    environment:
+      - REACT_APP_API_URL=http://localhost:8080
+    stdin_open: true  # Necesario para React en modo desarrollo
+
+  api:
+    build:
+      context: ./api
+      target: development
+    ports:
+      - "8080:8080"
+      - "9229:9229"  # Puerto de debugging Node.js
+    volumes:
+      - ./api/src:/app/src
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgres://dev:dev@db:5432/devdb
+    command: npm run dev  # Sobrescribe CMD del Dockerfile
+    depends_on:
+      - db
+      - redis
+
+  db:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_dev:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=dev
+      - POSTGRES_PASSWORD=dev
+      - POSTGRES_DB=devdb
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  adminer:
+    image: adminer
+    ports:
+      - "8081:8080"
+    depends_on:
+      - db
+
+volumes:
+  postgres_dev:</code></pre>
+
+        <p>Este stack incluye Adminer para gestionar la base de datos visualmente durante el desarrollo, y expone puertos para debugging.</p>
+    </section>
+
+    <section class="contenido-didactico">
+        <h1>7.9 Solución de Problemas Comunes</h1>
+        
+        <p><strong>El servicio no puede conectar con la base de datos:</strong><br>
+        Verifica que estás usando el nombre del servicio como hostname (ejemplo: <code>db</code> en lugar de <code>localhost</code>). Asegúrate de que el servicio de base de datos está healthy antes de que la aplicación intente conectar.</p>
+
+        <p><strong>Los cambios en el código no se reflejan:</strong><br>
+        Si usas bind mounts para desarrollo, verifica que la ruta es correcta. Si modificaste el Dockerfile, necesitas reconstruir con <code>docker compose up --build</code>.</p>
+
+        <p><strong>El contenedor se reinicia constantemente:</strong><br>
+        Revisa los logs con <code>docker compose logs [servicio]</code>. Puede ser un error en la aplicación o un healthcheck fallando.</p>
+
+        <p><strong>Conflicto de puertos:</strong><br>
+        El error "port is already allocated" indica que otro proceso usa ese puerto. Cambia el puerto del host en el mapeo o detén el proceso conflictivo.</p>
+
+        <p><strong>Permisos en volúmenes:</strong><br>
+        En Linux, los archivos creados en bind mounts pueden tener permisos de root. Considera usar el mismo UID/GID en el contenedor que en el host, o ajustar permisos en el Dockerfile.</p>
+    </section>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="script.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+</body>
+</html>

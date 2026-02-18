@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comandos Básicos de Docker</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div>Comandos Básicos de Docker</div>
+    </header>
+
+    <section class="contenido-didactico">
+        <h1>3. Comandos Básicos de Docker</h1>
+
+        <h2>3.1 docker pull</h2>
+        
+        <h3>Descarga de imágenes desde registros</h3>
+        
+        <p>El comando <code>docker pull</code> descarga imágenes desde un registro de contenedores a tu máquina local. Por defecto, Docker busca las imágenes en Docker Hub, pero puedes especificar otros registros.</p>
+
+        <p><strong>Sintaxis completa:</strong></p>
+
+        <pre><code class="language-bash">docker pull [opciones] [registro/]nombre_imagen[:tag|@digest]</code></pre>
+
+        <p><strong>Componentes del nombre de imagen:</strong></p>
+
+        <p>El nombre completo de una imagen sigue el formato <code>registro/usuario/imagen:tag</code>. El registro es opcional y por defecto es <code>docker.io</code> (Docker Hub). El usuario también es opcional; para imágenes oficiales se omite (internamente es <code>library</code>). El tag es opcional y por defecto es <code>latest</code>, aunque no se recomienda depender de esto.</p>
+
+        <p><strong>Ejemplos prácticos:</strong></p>
+
+        <pre><code class="language-bash"># Descargar la última versión de Ubuntu
+docker pull ubuntu:latest
+
+# Descargar una versión específica de Nginx
+docker pull nginx:1.25-alpine
+
+# Descargar desde un registro privado
+docker pull mi-registro.ejemplo.com:5000/mi-app:v2.0
+
+# Descargar desde GitHub Container Registry
+docker pull ghcr.io/usuario/imagen:tag
+
+# Descargar desde Amazon ECR
+docker pull 123456789.dkr.ecr.us-east-1.amazonaws.com/mi-app:latest
+
+# Descargar usando digest (hash SHA256) para máxima reproducibilidad
+docker pull nginx@sha256:abc123def456...
+
+# Descargar todas las tags de una imagen
+docker pull --all-tags ubuntu</code></pre>
+
+        <p><strong>Opciones importantes:</strong></p>
+
+        <p>La opción <code>--platform</code> permite especificar la arquitectura cuando una imagen soporta múltiples plataformas. Esto es especialmente útil en equipos con procesadores ARM (como Apple Silicon) que necesitan imágenes específicas.</p>
+
+        <pre><code class="language-bash"># Descargar imagen para una arquitectura específica
+docker pull --platform linux/amd64 nginx:alpine
+docker pull --platform linux/arm64 nginx:alpine</code></pre>
+
+        <p>La opción <code>--quiet</code> o <code>-q</code> suprime la salida detallada, mostrando solo el digest final. Útil en scripts donde no necesitas ver el progreso de descarga.</p>
+
+        <p><strong>¿Qué sucede durante un pull?</strong></p>
+
+        <p>Cuando ejecutas <code>docker pull</code>, Docker primero contacta al registro y solicita el manifiesto de la imagen. El manifiesto contiene información sobre las capas que componen la imagen. Docker compara las capas con las que ya tiene localmente y descarga solo las capas faltantes, lo que hace que pulls subsecuentes sean más rápidos si comparten capas base. Finalmente, las capas se ensamblan para formar la imagen completa.</p>
+
+        <p><strong>Buenas prácticas:</strong></p>
+
+        <p>Evita usar el tag <code>latest</code> en producción porque su contenido puede cambiar sin aviso. Usa tags específicos como <code>nginx:1.25.3</code> o mejor aún, digests para garantizar reproducibilidad absoluta. Mantén un registro de qué versiones usas en cada entorno.</p>
+
+        <h2>3.2 docker run</h2>
+
+        <h3>Creación y ejecución de contenedores</h3>
+
+        <p>El comando <code>docker run</code> es probablemente el más utilizado en Docker. Combina varias operaciones: descarga la imagen si no existe localmente (<code>pull</code>), crea un nuevo contenedor (<code>create</code>), y lo inicia (<code>start</code>).</p>
+
+        <p><strong>Sintaxis completa:</strong></p>
+
+        <pre><code class="language-bash">docker run [opciones] imagen[:tag] [comando] [argumentos]</code></pre>
+
+        <p><strong>Modos de ejecución:</strong></p>
+
+        <p><strong>Modo Foreground (primer plano):</strong> El contenedor se ejecuta adjunto a tu terminal. Ves la salida directamente y puedes interactuar con él. El contenedor se detiene si cierras la terminal o presionas Ctrl+C.</p>
+
+        <pre><code class="language-bash"># Ejecutar y ver la salida en tiempo real
+docker run nginx</code></pre>
+
+        <p><strong>Modo Detached (segundo plano):</strong> El contenedor se ejecuta en background. La terminal queda libre inmediatamente. Debes usar otros comandos para ver logs o interactuar.</p>
+
+        <pre><code class="language-bash"># Ejecutar en segundo plano
+docker run -d nginx
+
+# El comando devuelve el ID del contenedor
+# a1b2c3d4e5f6g7h8i9j0...</code></pre>
+
+        <p><strong>Modo Interactivo:</strong> Permite interactuar con el contenedor a través de una terminal. Esencial para contenedores que ejecutan shells o aplicaciones interactivas.</p>
+
+        <pre><code class="language-bash"># -i: mantiene STDIN abierto
+# -t: asigna una pseudo-TTY
+docker run -it ubuntu bash
+docker run -it python:3.11 python
+docker run -it node:18 node</code></pre>
+
+        <p><strong>Opciones fundamentales explicadas:</strong></p>
+
+        <p><strong>Nomenclatura del contenedor (<code>--name</code>):</strong></p>
+
+        <pre><code class="language-bash"># Asignar nombre personalizado (facilita la gestión)
+docker run --name mi-servidor-web nginx
+
+# Sin --name, Docker asigna nombres aleatorios como "hungry_einstein"</code></pre>
+
+        <p><strong>Mapeo de puertos (<code>-p</code> o <code>--publish</code>):</strong></p>
+
+        <p>Los contenedores tienen su propia red aislada. Para acceder a servicios dentro del contenedor desde el host, debes mapear puertos.</p>
+
+        <pre><code class="language-bash"># Formato: -p puerto_host:puerto_contenedor
+docker run -p 8080:80 nginx
+
+# Mapear a interfaz específica del host
+docker run -p 127.0.0.1:8080:80 nginx
+
+# Mapear múltiples puertos
+docker run -p 80:80 -p 443:443 nginx
+
+# Puerto aleatorio del host (Docker elige uno disponible)
+docker run -p 80 nginx
+docker port nombre_contenedor  # Ver qué puerto asignó
+
+# Mapear rangos de puertos
+docker run -p 8080-8090:80-90 mi-app</code></pre>
+
+        <p><strong>Variables de entorno (<code>-e</code> o <code>--env</code>):</strong></p>
+
+        <p>Permiten configurar el contenedor sin modificar la imagen.</p>
+
+        <pre><code class="language-bash"># Definir variables individuales
+docker run -e MYSQL_ROOT_PASSWORD=secreto mysql:8
+
+# Múltiples variables
+docker run -e DB_HOST=localhost -e DB_PORT=5432 mi-app
+
+# Cargar variables desde archivo
+docker run --env-file ./config.env mi-app</code></pre>
+
+        <p>El archivo <code>config.env</code> tendría el formato:</p>
+
+        <pre><code class="language-bash">DB_HOST=localhost
+DB_PORT=5432
+DB_USER=admin
+# Los comentarios se ignoran</code></pre>
+
+        <p><strong>Montaje de volúmenes (<code>-v</code> o <code>--volume</code>):</strong></p>
+
+        <p>Permiten persistir datos y compartir archivos entre host y contenedor.</p>
+
+        <pre><code class="language-bash"># Bind mount: directorio del host → contenedor
+docker run -v /ruta/host:/ruta/contenedor nginx
+docker run -v $(pwd)/html:/usr/share/nginx/html nginx
+
+# Volumen nombrado (gestionado por Docker)
+docker run -v mis-datos:/var/lib/mysql mysql:8
+
+# Solo lectura (el contenedor no puede modificar)
+docker run -v $(pwd)/config:/etc/app/config:ro mi-app</code></pre>
+
+        <p><strong>Límites de recursos:</strong></p>
+
+        <p>Controla cuántos recursos puede consumir el contenedor.</p>
+
+        <pre><code class="language-bash"># Limitar memoria
+docker run --memory="512m" nginx
+docker run --memory="2g" mi-app
+
+# Limitar CPU
+docker run --cpus="1.5" mi-app        # 1.5 CPUs
+docker run --cpu-shares=512 mi-app    # Peso relativo
+
+# Combinados
+docker run --memory="1g" --cpus="2" mi-app</code></pre>
+
+        <p><strong>Políticas de reinicio (<code>--restart</code>):</strong></p>
+
+        <p>Define qué hacer cuando el contenedor se detiene.</p>
+
+        <pre><code class="language-bash"># No reiniciar (por defecto)
+docker run --restart=no nginx
+
+# Reiniciar siempre (excepto si se detiene manualmente)
+docker run --restart=always nginx
+
+# Reiniciar solo si falla (exit code != 0)
+docker run --restart=on-failure nginx
+
+# Reiniciar si falla, máximo 3 intentos
+docker run --restart=on-failure:3 mi-app
+
+# Reiniciar siempre, excepto si Docker se detiene
+docker run --restart=unless-stopped nginx</code></pre>
+
+        <p><strong>Eliminación automática (<code>--rm</code>):</strong></p>
+
+        <p>El contenedor se elimina automáticamente al detenerse. Útil para tareas puntuales.</p>
+
+        <pre><code class="language-bash"># Ejecutar comando y limpiar
+docker run --rm ubuntu cat /etc/os-release
+docker run --rm -it python:3.11 python -c "print('Hola')"
+
+# Útil para herramientas de desarrollo
+docker run --rm -v $(pwd):/app node:18 npm install</code></pre>
+
+        <p><strong>Redes (<code>--network</code>):</strong></p>
+
+        <p>Controla a qué red se conecta el contenedor.</p>
+
+        <pre><code class="language-bash"># Conectar a red específica
+docker run --network=mi-red nginx
+
+# Usar la red del host directamente (sin aislamiento de red)
+docker run --network=host nginx
+
+# Sin red
+docker run --network=none mi-app</code></pre>
+
+        <p><strong>Usuario (<code>--user</code>):</strong></p>
+
+        <p>Especifica con qué usuario se ejecuta el proceso dentro del contenedor.</p>
+
+        <pre><code class="language-bash"># Ejecutar como usuario específico
+docker run --user 1000:1000 mi-app
+docker run --user www-data nginx</code></pre>
+
+        <p><strong>Ejemplos de combinaciones comunes:</strong></p>
+
+        <pre><code class="language-bash"># Servidor web de desarrollo
+docker run -d \
+  --name web-dev \
+  -p 8080:80 \
+  -v $(pwd)/html:/usr/share/nginx/html:ro \
+  --restart unless-stopped \
+  nginx:alpine
+
+# Base de datos MySQL para desarrollo
+docker run -d \
+  --name mysql-dev \
+  -p 3306:3306 \
+  -e MYSQL_ROOT_PASSWORD=desarrollo \
+  -e MYSQL_DATABASE=mi_app \
+  -v mysql-data:/var/lib/mysql \
+  mysql:8
+
+# Contenedor temporal para debugging
+docker run --rm -it \
+  --network container:mi-app \
+  nicolaka/netshoot \
+  bash
+
+# Aplicación con recursos limitados
+docker run -d \
+  --name api-produccion \
+  --memory="512m" \
+  --cpus="1" \
+  --restart=on-failure:5 \
+  -p 3000:3000 \
+  mi-api:v1.0</code></pre>
+
+        <h2>3.3 docker ps</h2>
+
+        <h3>Listar y filtrar contenedores</h3>
+
+        <p>El comando <code>docker ps</code> muestra información sobre los contenedores. Por defecto muestra solo los contenedores en ejecución, pero tiene muchas opciones para filtrar y formatear la salida.</p>
+
+        <p><strong>Sintaxis:</strong></p>
+
+        <pre><code class="language-bash">docker ps [opciones]</code></pre>
+
+        <p><strong>Variaciones básicas:</strong></p>
+
+        <pre><code class="language-bash"># Contenedores en ejecución
+docker ps
+
+# Todos los contenedores (incluyendo detenidos)
+docker ps -a
+docker ps --all
+
+# Último contenedor creado (sin importar estado)
+docker ps -l
+docker ps --latest
+
+# Últimos N contenedores creados
+docker ps -n 5
+
+# Solo mostrar IDs (útil para scripts)
+docker ps -q
+docker ps --quiet
+
+# Mostrar tamaños de contenedores
+docker ps -s
+docker ps --size</code></pre>
+
+        <p><strong>Filtrado con <code>--filter</code>:</strong></p>
+
+        <p>Permite buscar contenedores que cumplan criterios específicos.</p>
+
+        <pre><code class="language-bash"># Por estado
+docker ps --filter "status=running"
+docker ps --filter "status=exited"
+docker ps --filter "status=paused"
+docker ps -a --filter "status=created"
+
+# Por nombre (soporta expresiones regulares)
+docker ps --filter "name=web"
+docker ps --filter "name=^mi-app"
+
+# Por imagen
+docker ps --filter "ancestor=nginx"
+docker ps --filter "ancestor=nginx:alpine"
+
+# Por etiqueta
+docker ps --filter "label=env=production"
+docker ps --filter "label=maintainer"
+
+# Por código de salida (solo contenedores detenidos)
+docker ps -a --filter "exited=0"    # Terminaron correctamente
+docker ps -a --filter "exited=1"    # Terminaron con error
+
+# Por red
+docker ps --filter "network=mi-red"
+
+# Por volumen
+docker ps --filter "volume=mis-datos"
+
+# Múltiples filtros (AND lógico)
+docker ps --filter "status=running" --filter "name=web"</code></pre>
+
+        <p><strong>Formato personalizado con <code>--format</code>:</strong></p>
+
+        <p>Controla exactamente qué información mostrar y cómo.</p>
+
+        <pre><code class="language-bash"># Mostrar solo nombre e imagen
+docker ps --format "{{.Names}}: {{.Image}}"
+
+# Formato tabla personalizada
+docker ps --format "table {{.ID}}\t{{.Names}}\t{{.Status}}\t{{.Ports}}"
+
+# Formato JSON (útil para procesamiento)
+docker ps --format "json"
+docker ps --format '{{json .}}'</code></pre>
+
+        <p><strong>Campos disponibles para formato:</strong></p>
+
+        <p>Los campos que puedes usar incluyen <code>.ID</code> para el ID del contenedor, <code>.Image</code> para la imagen base, <code>.Command</code> para el comando en ejecución, <code>.CreatedAt</code> para la fecha de creación, <code>.RunningFor</code> para el tiempo desde la creación, <code>.Ports</code> para los puertos mapeados, <code>.State</code> para el estado actual, <code>.Status</code> para el estado con detalles, <code>.Size</code> para el tamaño del contenedor, <code>.Names</code> para el nombre asignado, <code>.Labels</code> para las etiquetas, <code>.Mounts</code> para los volúmenes montados, y <code>.Networks</code> para las redes conectadas.</p>
+
+        <p><strong>Ejemplos prácticos:</strong></p>
+
+        <pre><code class="language-bash"># Monitoreo rápido: nombre, estado y uso de recursos
+docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Size}}"
+
+# Listar contenedores con sus IPs
+docker ps -q | xargs -I {} docker inspect -f '{{.Name}} - {{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' {}
+
+# Exportar lista a archivo
+docker ps -a --format "{{.Names}},{{.Image}},{{.Status}}" > contenedores.csv
+
+# Configurar formato por defecto (en ~/.docker/config.json)
+# {
+#   "psFormat": "table {{.Names}}\t{{.Image}}\t{{.Status}}"
+# }</code></pre>
+
+        <h2>3.4 docker images</h2>
+
+        <h3>Gestionar imágenes locales</h3>
+
+        <p>El comando <code>docker images</code> (alias de <code>docker image ls</code>) muestra las imágenes almacenadas localmente en tu sistema.</p>
+
+        <p><strong>Sintaxis:</strong></p>
+
+        <pre><code class="language-bash">docker images [opciones] [repositorio[:tag]]</code></pre>
+
+        <p><strong>Usos básicos:</strong></p>
+
+        <pre><code class="language-bash"># Listar todas las imágenes
+docker images
+
+# Listar imágenes de un repositorio específico
+docker images nginx
+docker images ubuntu
+
+# Solo mostrar IDs
+docker images -q
+
+# Mostrar todas las imágenes (incluyendo intermedias)
+docker images -a
+
+# Mostrar digests (hash SHA256)
+docker images --digests
+
+# No truncar la salida (IDs completos)
+docker images --no-trunc</code></pre>
+
+        <p><strong>Filtrado de imágenes:</strong></p>
+
+        <pre><code class="language-bash"># Imágenes huérfanas (sin tag, aparecen como &lt;none&gt;)
+docker images --filter "dangling=true"
+
+# Por etiqueta
+docker images --filter "label=maintainer=equipo@ejemplo.com"
+
+# Creadas antes de una imagen específica
+docker images --filter "before=nginx:latest"
+
+# Creadas después de una imagen específica
+docker images --filter "since=ubuntu:20.04"
+
+# Por referencia (patrón de nombre)
+docker images --filter "reference=nginx"
+docker images --filter "reference=*/nginx"
+docker images --filter "reference=*:alpine"</code></pre>
+
+        <p><strong>Formato personalizado:</strong></p>
+
+        <pre><code class="language-bash"># Lista simple de repositorio:tag
+docker images --format "{{.Repository}}:{{.Tag}}"
+
+# Tabla con tamaño
+docker images --format "table {{.Repository}}\t{{.Tag}}\t{{.Size}}"
+
+# Mostrar ID completo y fecha de creación
+docker images --format "{{.ID}}: creada {{.CreatedSince}}"</code></pre>
+
+        <p><strong>Campos disponibles:</strong></p>
+
+        <p>Puedes usar <code>.Repository</code> para el nombre del repositorio, <code>.Tag</code> para la etiqueta, <code>.Digest</code> para el hash SHA256, <code>.ID</code> para el ID de la imagen, <code>.CreatedSince</code> para el tiempo desde la creación, <code>.CreatedAt</code> para la fecha exacta de creación, <code>.Size</code> para el tamaño en disco, y <code>.Labels</code> para las etiquetas de la imagen.</p>
+
+        <p><strong>Ver espacio utilizado:</strong></p>
+
+        <pre><code class="language-bash"># Resumen del espacio usado por Docker
+docker system df
+
+# Desglose detallado
+docker system df -v</code></pre>
+
+        <h2>3.5 docker stop / start / restart</h2>
+
+        <h3>Control del ciclo de vida de contenedores</h3>
+
+        <p>Estos comandos controlan el estado de ejecución de contenedores existentes.</p>
+
+        <p><strong>docker stop:</strong></p>
+
+        <p>Detiene uno o más contenedores en ejecución. Envía primero una señal SIGTERM para permitir una terminación ordenada, y después de un tiempo de gracia (10 segundos por defecto), envía SIGKILL.</p>
+
+        <pre><code class="language-bash"># Detener un contenedor
+docker stop mi-contenedor
+
+# Detener múltiples contenedores
+docker stop web-server db-server cache-server
+
+# Cambiar tiempo de gracia antes de SIGKILL
+docker stop --time=30 mi-contenedor
+docker stop -t 5 mi-contenedor
+
+# Detener todos los contenedores en ejecución
+docker stop $(docker ps -q)
+
+# Alternativa más segura (evita error si no hay contenedores)
+docker ps -q | xargs -r docker stop</code></pre>
+
+        <p><strong>docker start:</strong></p>
+
+        <p>Inicia uno o más contenedores detenidos. El contenedor se inicia con la misma configuración con la que fue creado.</p>
+
+        <pre><code class="language-bash"># Iniciar un contenedor
+docker start mi-contenedor
+
+# Iniciar múltiples contenedores
+docker start web-server db-server
+
+# Iniciar y adjuntar a la salida (ver logs)
+docker start -a mi-contenedor
+
+# Iniciar en modo interactivo
+docker start -ai mi-contenedor
+
+# Iniciar todos los contenedores detenidos
+docker start $(docker ps -aq --filter "status=exited")</code></pre>
+
+        <p><strong>docker restart:</strong></p>
+
+        <p>Reinicia contenedores. Equivale a ejecutar <code>stop</code> seguido de <code>start</code>.</p>
+
+        <pre><code class="language-bash"># Reiniciar un contenedor
+docker restart mi-contenedor
+
+# Reiniciar con tiempo de gracia personalizado
+docker restart -t 5 mi-contenedor
+
+# Reiniciar múltiples contenedores
+docker restart web-server api-server
+
+# Reiniciar todos los contenedores en ejecución
+docker restart $(docker ps -q)</code></pre>
+
+        <p><strong>docker pause / unpause:</strong></p>
+
+        <p>Congela todos los procesos de un contenedor usando cgroups freezer. A diferencia de <code>stop</code>, el contenedor sigue "existiendo" en memoria, solo que pausado.</p>
+
+        <pre><code class="language-bash"># Pausar contenedor (los procesos se congelan)
+docker pause mi-contenedor
+
+# Reanudar contenedor
+docker unpause mi-contenedor</code></pre>
+
+        <p><strong>docker kill:</strong></p>
+
+        <p>Envía una señal al proceso principal del contenedor. Por defecto envía SIGKILL (terminación inmediata).</p>
+
+        <pre><code class="language-bash"># Terminar inmediatamente (SIGKILL)
+docker kill mi-contenedor
+
+# Enviar señal específica
+docker kill --signal=SIGHUP mi-contenedor
+docker kill -s SIGUSR1 mi-contenedor</code></pre>
+
+        <p><strong>Diferencias entre stop y kill:</strong></p>
+
+        <p><code>docker stop</code> envía SIGTERM, luego SIGKILL después del timeout; permite terminación ordenada y es la forma recomendada de detener contenedores. <code>docker kill</code> envía SIGKILL inmediatamente por defecto; el proceso no tiene oportunidad de limpieza y se usa cuando un contenedor no responde a <code>stop</code>.</p>
+
+        <h2>3.6 docker rm / rmi</h2>
+
+        <h3>Eliminación de contenedores e imágenes</h3>
+
+        <p><strong>docker rm (eliminar contenedores):</strong></p>
+
+        <p>Elimina uno o más contenedores. Por defecto, solo puede eliminar contenedores detenidos.</p>
+
+        <pre><code class="language-bash"># Eliminar un contenedor detenido
+docker rm mi-contenedor
+
+# Eliminar múltiples contenedores
+docker rm contenedor1 contenedor2 contenedor3
+
+# Forzar eliminación (incluso si está en ejecución)
+docker rm -f mi-contenedor
+
+# Eliminar contenedor y sus volúmenes anónimos
+docker rm -v mi-contenedor
+
+# Eliminar todos los contenedores detenidos
+docker rm $(docker ps -aq --filter "status=exited")
+
+# Eliminar todos los contenedores (¡cuidado!)
+docker rm -f $(docker ps -aq)
+
+# Alternativa segura (no falla si no hay contenedores)
+docker ps -aq | xargs -r docker rm -f</code></pre>
+
+        <p><strong>Limpieza automática con prune:</strong></p>
+
+        <pre><code class="language-bash"># Eliminar todos los contenedores detenidos
+docker container prune
+
+# Sin confirmación
+docker container prune -f
+
+# Eliminar contenedores detenidos hace más de 24 horas
+docker container prune --filter "until=24h"</code></pre>
+
+        <p><strong>docker rmi (eliminar imágenes):</strong></p>
+
+        <p>Elimina una o más imágenes locales. No puedes eliminar una imagen si hay contenedores (incluso detenidos) basados en ella.</p>
+
+        <pre><code class="language-bash"># Eliminar imagen por nombre
+docker rmi nginx:alpine
+
+# Eliminar imagen por ID
+docker rmi a1b2c3d4e5f6
+
+# Eliminar múltiples imágenes
+docker rmi imagen1:tag imagen2:tag
+
+# Forzar eliminación
+docker rmi -f nginx:alpine
+
+# Eliminar todas las imágenes huérfanas (dangling)
+docker rmi $(docker images -qf "dangling=true")
+
+# Eliminar todas las imágenes (¡cuidado!)
+docker rmi -f $(docker images -q)</code></pre>
+
+        <p><strong>Limpieza de imágenes con prune:</strong></p>
+
+        <pre><code class="language-bash"># Eliminar imágenes huérfanas (sin tag)
+docker image prune
+
+# Eliminar TODAS las imágenes no usadas por contenedores
+docker image prune -a
+
+# Sin confirmación
+docker image prune -f
+
+# Filtrar por antigüedad
+docker image prune -a --filter "until=168h"  # 7 días</code></pre>
+
+        <p><strong>Limpieza completa del sistema:</strong></p>
+
+        <pre><code class="language-bash"># Ver espacio usado
+docker system df
+
+# Limpieza completa (contenedores, imágenes, redes, caché)
+docker system prune
+
+# Incluir volúmenes (¡cuidado con datos!)
+docker system prune --volumes
+
+# Limpieza agresiva sin confirmación
+docker system prune -af --volumes</code></pre>
+
+        <h2>3.7 docker logs</h2>
+
+        <h3>Visualizar registros de contenedores</h3>
+
+        <p>El comando <code>docker logs</code> muestra la salida estándar (stdout) y error estándar (stderr) de un contenedor.</p>
+
+        <p><strong>Sintaxis:</strong></p>
+
+        <pre><code class="language-bash">docker logs [opciones] contenedor</code></pre>
+
+        <p><strong>Opciones principales:</strong></p>
+
+        <pre><code class="language-bash"># Ver todos los logs
+docker logs mi-contenedor
+
+# Seguir logs en tiempo real (como tail -f)
+docker logs -f mi-contenedor
+docker logs --follow mi-contenedor
+
+# Mostrar timestamps
+docker logs -t mi-contenedor
+docker logs --timestamps mi-contenedor
+
+# Últimas N líneas
+docker logs --tail 100 mi-contenedor
+docker logs -n 50 mi-contenedor
+
+# Logs desde una fecha específica
+docker logs --since "2024-01-15T10:00:00" mi-contenedor
+docker logs --since "1h" mi-contenedor      # Última hora
+docker logs --since "30m" mi-contenedor     # Últimos 30 minutos
+
+# Logs hasta una fecha específica
+docker logs --until "2024-01-15T12:00:00" mi-contenedor
+docker logs --until "30m" mi-contenedor
+
+# Combinar opciones
+docker logs -f --tail 100 -t mi-contenedor
+docker logs --since "1h" --until "30m" mi-contenedor</code></pre>
+
+        <p><strong>Casos de uso prácticos:</strong></p>
+
+        <pre><code class="language-bash"># Debugging: ver últimos errores
+docker logs --tail 50 mi-app 2>&1 | grep -i error
+
+# Monitoreo continuo con timestamps
+docker logs -ft mi-servidor
+
+# Guardar logs a archivo
+docker logs mi-contenedor > logs.txt 2>&1
+
+# Ver logs de contenedor que falló
+docker logs $(docker ps -lq)</code></pre>
+
+        <h2>3.8 docker exec</h2>
+
+        <h3>Ejecutar comandos en contenedores activos</h3>
+
+        <p>El comando <code>docker exec</code> ejecuta un nuevo comando dentro de un contenedor que ya está en ejecución. Es fundamental para debugging, mantenimiento y administración.</p>
+
+        <p><strong>Sintaxis:</strong></p>
+
+        <pre><code class="language-bash">docker exec [opciones] contenedor comando [argumentos]</code></pre>
+
+        <p><strong>Modos de ejecución:</strong></p>
+
+        <pre><code class="language-bash"># Ejecutar comando simple
+docker exec mi-contenedor ls -la /app
+
+# Modo interactivo (shell dentro del contenedor)
+docker exec -it mi-contenedor bash
+docker exec -it mi-contenedor sh       # Para imágenes Alpine
+docker exec -it mi-contenedor /bin/sh
+
+# Ejecutar como usuario específico
+docker exec -u root mi-contenedor whoami
+docker exec --user www-data mi-contenedor id
+
+# Ejecutar en directorio específico
+docker exec -w /var/log mi-contenedor ls -la
+docker exec --workdir /app mi-contenedor npm test
+
+# Ejecutar con variables de entorno adicionales
+docker exec -e DEBUG=true mi-contenedor npm run debug</code></pre>
+
+        <p><strong>Ejemplos prácticos:</strong></p>
+
+        <pre><code class="language-bash"># Inspeccionar sistema de archivos
+docker exec mi-app ls -la /app
+docker exec mi-app cat /etc/hosts
+docker exec mi-app df -h
+
+# Debugging de red
+docker exec mi-app ping -c 3 google.com
+docker exec mi-app curl localhost:3000/health
+docker exec mi-app netstat -tlnp
+
+# Gestión de base de datos
+docker exec -it mysql-db mysql -u root -p
+docker exec postgres-db psql -U postgres -d mi_base
+
+# Ejecutar scripts
+docker exec mi-app python manage.py migrate
+docker exec mi-app npm run seed
+
+# Ver procesos dentro del contenedor
+docker exec mi-app ps aux
+docker exec mi-app top -bn1
+
+# Debugging con herramientas adicionales (si están instaladas)
+docker exec mi-app env
+docker exec mi-app printenv</code></pre>
+
+        <p><strong>Diferencia entre docker run y docker exec:</strong></p>
+
+        <p><code>docker run</code> crea un NUEVO contenedor a partir de una imagen, mientras que <code>docker exec</code> ejecuta comandos en un contenedor EXISTENTE y en ejecución.</p>
+
+        <h2>3.9 docker inspect</h2>
+
+        <h3>Obtener información detallada</h3>
+
+        <p>El comando <code>docker inspect</code> muestra información detallada en formato JSON sobre contenedores, imágenes, redes, volúmenes y otros objetos Docker.</p>
+
+        <p><strong>Sintaxis:</strong></p>
+
+        <pre><code class="language-bash">docker inspect [opciones] objeto [objeto...]</code></pre>
+
+        <p><strong>Uso básico:</strong></p>
+
+        <pre><code class="language-bash"># Inspeccionar contenedor
+docker inspect mi-contenedor
+
+# Inspeccionar imagen
+docker inspect nginx:alpine
+
+# Inspeccionar múltiples objetos
+docker inspect contenedor1 contenedor2
+
+# Especificar tipo de objeto
+docker inspect --type container mi-contenedor
+docker inspect --type image nginx</code></pre>
+
+        <p><strong>Extraer información específica con <code>--format</code>:</strong></p>
+
+        <pre><code class="language-bash"># Obtener IP del contenedor
+docker inspect --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' mi-contenedor
+
+# Obtener IP en red específica
+docker inspect --format '{{.NetworkSettings.Networks.bridge.IPAddress}}' mi-contenedor
+
+# Ver puertos mapeados
+docker inspect --format '{{json .NetworkSettings.Ports}}' mi-contenedor
+
+# Ver variables de entorno
+docker inspect --format '{{json .Config.Env}}' mi-contenedor
+
+# Ver volúmenes montados
+docker inspect --format '{{json .Mounts}}' mi-contenedor
+
+# Ver estado del contenedor
+docker inspect --format '{{.State.Status}}' mi-contenedor
+
+# Ver comando de inicio
+docker inspect --format '{{.Config.Cmd}}' mi-contenedor
+
+# Ver política de reinicio
+docker inspect --format '{{.HostConfig.RestartPolicy.Name}}' mi-contenedor
+
+# Ver límites de recursos
+docker inspect --format 'Memory: {{.HostConfig.Memory}}, CPUs: {{.HostConfig.NanoCpus}}' mi-contenedor</code></pre>
+
+        <p><strong>Combinación con otras herramientas:</strong></p>
+
+        <pre><code class="language-bash"># Formatear JSON con jq
+docker inspect mi-contenedor | jq '.[0].NetworkSettings.IPAddress'
+docker inspect mi-contenedor | jq '.[0].Config.Env'
+
+# Listar IPs de todos los contenedores
+docker ps -q | xargs docker inspect --format '{{.Name}}: {{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}'</code></pre>
+
+        <h2>3.10 docker cp</h2>
+
+        <h3>Copiar archivos entre host y contenedor</h3>
+
+        <p>El comando <code>docker cp</code> permite copiar archivos y directorios entre el sistema host y un contenedor (en cualquier dirección). Funciona tanto con contenedores en ejecución como detenidos.</p>
+
+        <p><strong>Sintaxis:</strong></p>
+
+        <pre><code class="language-bash">docker cp [opciones] origen destino</code></pre>
+
+        <p>El origen o destino puede ser <code>contenedor:ruta</code> o simplemente una ruta local.</p>
+
+        <p><strong>Ejemplos:</strong></p>
+
+        <pre><code class="language-bash"># Copiar archivo del host al contenedor
+docker cp archivo.txt mi-contenedor:/app/
+docker cp ./config/app.conf mi-contenedor:/etc/app/
+
+# Copiar archivo del contenedor al host
+docker cp mi-contenedor:/var/log/app.log ./logs/
+docker cp mi-contenedor:/app/data.db .
+
+# Copiar directorio completo al contenedor
+docker cp ./mi-directorio mi-contenedor:/app/
+
+# Copiar directorio del contenedor al host
+docker cp mi-contenedor:/app/uploads ./backup/
+
+# Preservar permisos y timestamps
+docker cp --archive mi-contenedor:/app/config ./backup/
+
+# Copiar desde contenedor detenido
+docker cp contenedor-detenido:/datos/importante.db ./respaldo/</code></pre>
+
+        <p><strong>Casos de uso comunes:</strong></p>
+
+        <pre><code class="language-bash"># Extraer logs para análisis
+docker cp mi-app:/var/log/app/ ./logs-debug/
+
+# Inyectar configuración en contenedor en ejecución
+docker cp nueva-config.json mi-app:/app/config/
+
+# Backup de datos de base de datos
+docker cp postgres:/var/lib/postgresql/data ./backup-db/
+
+# Copiar código fuente para debugging
+docker cp mi-app:/app/src ./codigo-debug/</code></pre>
+
+        <p><strong>Limitaciones:</strong></p>
+
+        <p>No es posible copiar entre dos contenedores directamente; debes usar el host como intermediario. Los enlaces simbólicos se copian como archivos/directorios reales. Para volúmenes, es mejor acceder directamente a la ruta del volumen en el host.</p>
+
+        <h2>3.11 Comandos adicionales útiles</h2>
+
+        <p><strong>docker stats:</strong></p>
+
+        <p>Muestra estadísticas de uso de recursos en tiempo real.</p>
+
+        <pre><code class="language-bash"># Monitorear todos los contenedores
+docker stats
+
+# Monitorear contenedores específicos
+docker stats web-server db-server
+
+# Una sola lectura (sin actualización continua)
+docker stats --no-stream
+
+# Formato personalizado
+docker stats --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}"</code></pre>
+
+        <p><strong>docker top:</strong></p>
+
+        <p>Muestra los procesos ejecutándose dentro de un contenedor.</p>
+
+        <pre><code class="language-bash"># Ver procesos de un contenedor
+docker top mi-contenedor
+
+# Con opciones de ps
+docker top mi-contenedor aux</code></pre>
+
+        <p><strong>docker diff:</strong></p>
+
+        <p>Muestra cambios en el sistema de archivos del contenedor respecto a la imagen base.</p>
+
+        <pre><code class="language-bash">docker diff mi-contenedor
+# A = Added (añadido)
+# C = Changed (modificado)
+# D = Deleted (eliminado)</code></pre>
+
+        <p><strong>docker history:</strong></p>
+
+        <p>Muestra las capas de una imagen y cómo fue construida.</p>
+
+        <pre><code class="language-bash">docker history nginx:alpine
+docker history --no-trunc mi-imagen:latest</code></pre>
+
+        <p><strong>docker port:</strong></p>
+
+        <p>Muestra los mapeos de puertos de un contenedor.</p>
+
+        <pre><code class="language-bash">docker port mi-contenedor
+docker port mi-contenedor 80</code></pre>
+
+        <p><strong>docker rename:</strong></p>
+
+        <p>Cambia el nombre de un contenedor.</p>
+
+        <pre><code class="language-bash">docker rename nombre-viejo nombre-nuevo</code></pre>
+
+        <p><strong>docker update:</strong></p>
+
+        <p>Actualiza la configuración de un contenedor en ejecución.</p>
+
+        <pre><code class="language-bash"># Cambiar límites de memoria
+docker update --memory="1g" mi-contenedor
+
+# Cambiar política de reinicio
+docker update --restart=always mi-contenedor
+
+# Actualizar múltiples contenedores
+docker update --memory="512m" cont1 cont2 cont3</code></pre>
+
+        <p><strong>docker wait:</strong></p>
+
+        <p>Bloquea hasta que el contenedor se detenga y devuelve el código de salida.</p>
+
+        <pre><code class="language-bash"># Esperar a que termine un contenedor
+docker wait mi-tarea
+echo "Código de salida: $?"</code></pre>
+
+        <p><strong>docker attach:</strong></p>
+
+        <p>Adjunta tu terminal a un contenedor en ejecución. A diferencia de <code>exec</code>, se conecta al proceso principal.</p>
+
+        <pre><code class="language-bash">docker attach mi-contenedor
+# Ctrl+P, Ctrl+Q para desconectar sin detener el contenedor</code></pre>
+
+    </section>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="script.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+</body>
+</html>

@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Componentes Principales de Docker</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div>Componentes Principales de Docker</div>
+    </header>
+
+    <section class="contenido-didactico">
+        <h1>2. Componentes Principales de Docker</h1>
+
+        <h2>2.1 Docker Engine</h2>
+        
+        <h3>El núcleo de Docker</h3>
+        
+        <p>Docker Engine es el corazón de la plataforma Docker. Es una aplicación cliente-servidor que proporciona toda la funcionalidad necesaria para construir, ejecutar y gestionar contenedores. Sin Docker Engine, ningún otro componente puede funcionar.</p>
+
+        <h3>Componentes de Docker Engine:</h3>
+
+        <p><strong>Docker Daemon (dockerd):</strong> Es el proceso principal que se ejecuta en segundo plano como un servicio del sistema. El daemon es responsable de crear y gestionar objetos Docker (imágenes, contenedores, redes, volúmenes), escuchar las peticiones que llegan a través de la API REST, y comunicarse con otros daemons para gestionar servicios Docker distribuidos. El daemon debe estar ejecutándose para que cualquier comando Docker funcione.</p>
+
+        <p><strong>API REST:</strong> Es la interfaz de programación que actúa como intermediaria entre el cliente y el daemon. Define los endpoints y métodos HTTP para todas las operaciones Docker. Permite que herramientas de terceros se integren con Docker, y puede configurarse para aceptar conexiones locales (socket Unix) o remotas (TCP).</p>
+
+        <p><strong>CLI (Command Line Interface):</strong> Es la herramienta que los usuarios utilizan directamente para interactuar con Docker. Traduce los comandos del usuario en llamadas a la API REST. Es la forma más común de trabajar con Docker en entornos de desarrollo y producción.</p>
+
+        <h3>Comandos esenciales para verificar Docker Engine:</h3>
+
+        <pre><code class="language-bash"># Ver la versión instalada de Docker
+docker --version
+
+# Información detallada del sistema Docker
+docker info
+
+# Verificar que el daemon está funcionando
+docker ps
+
+# Ver la versión del cliente y servidor por separado
+docker version</code></pre>
+
+        <p><strong>Explicación de <code>docker info</code>:</strong> Este comando muestra información valiosa como el número de contenedores (en ejecución, pausados, detenidos), el número de imágenes almacenadas localmente, la versión del kernel del host, el driver de almacenamiento utilizado, y los recursos disponibles (CPU, memoria).</p>
+
+        <h3>Modos de ejecución de Docker Engine:</h3>
+
+        <p>Docker Engine puede ejecutarse en dos modos. El <strong>modo Standalone</strong> es la instalación tradicional en un solo host, ideal para desarrollo y aplicaciones simples. El <strong>modo Swarm</strong> activa las capacidades de orquestación nativas, permitiendo gestionar un clúster de nodos Docker como una sola entidad.</p>
+
+        <h2>2.2 Docker Hub</h2>
+
+        <h3>Registro público de imágenes</h3>
+
+        <p>Docker Hub es el servicio de registro en la nube oficial de Docker y el repositorio público de imágenes más grande del mundo. Funciona como el "GitHub de las imágenes Docker", permitiendo almacenar, compartir y distribuir imágenes de contenedores.</p>
+
+        <h3>Características principales:</h3>
+
+        <p><strong>Repositorios públicos y privados:</strong> Los repositorios públicos permiten compartir imágenes con toda la comunidad y son gratuitos e ilimitados. Los repositorios privados mantienen las imágenes accesibles solo para usuarios autorizados; la cuenta gratuita incluye un repositorio privado, mientras que los planes de pago ofrecen más.</p>
+
+        <p><strong>Imágenes oficiales:</strong> Son imágenes curadas y mantenidas por Docker en colaboración con los desarrolladores del software. Pasan por revisiones de seguridad y siguen las mejores prácticas. Se identifican porque no tienen prefijo de usuario (por ejemplo, <code>nginx</code>, <code>mysql</code>, <code>python</code> en lugar de <code>usuario/nginx</code>). Deben ser tu primera opción al buscar imágenes base.</p>
+
+        <p><strong>Imágenes verificadas de editores:</strong> Son publicadas por empresas verificadas (Microsoft, Oracle, Red Hat, etc.), ofrecen soporte comercial y actualizaciones regulares, y se identifican con una insignia de "Verified Publisher".</p>
+
+        <p><strong>Automatización y CI/CD:</strong> Docker Hub ofrece integración nativa con GitHub y Bitbucket, Automated Builds que reconstruyen la imagen automáticamente cuando cambia el código fuente, y Webhooks para notificar a otros servicios cuando se publica una nueva imagen.</p>
+
+        <h3>Comandos para trabajar con Docker Hub:</h3>
+
+        <pre><code class="language-bash"># Iniciar sesión en Docker Hub
+docker login
+
+# Buscar imágenes en Docker Hub
+docker search nginx
+
+# Descargar una imagen
+docker pull nginx
+docker pull nginx:1.25-alpine  # Versión específica
+
+# Subir una imagen (requiere login)
+docker tag mi-imagen:latest mi-usuario/mi-imagen:v1.0
+docker push mi-usuario/mi-imagen:v1.0
+
+# Cerrar sesión
+docker logout</code></pre>
+
+        <p><strong>Anatomía de un nombre de imagen:</strong> Un nombre completo sigue el formato <code>[registry/]usuario/imagen:tag</code>. Por ejemplo, en <code>docker.io/library/nginx:1.25-alpine</code>, <code>docker.io</code> es el registry (Docker Hub por defecto), <code>library</code> es el usuario (imágenes oficiales), <code>nginx</code> es el nombre de la imagen, y <code>1.25-alpine</code> es el tag o versión.</p>
+
+        <p><strong>Alternativas a Docker Hub:</strong> Existen otros registries que puedes utilizar:</p>
+        <ul>
+            <li>Amazon ECR (Elastic Container Registry)</li>
+            <li>Google Container Registry (GCR)</li>
+            <li>Azure Container Registry (ACR)</li>
+            <li>GitHub Container Registry (ghcr.io)</li>
+            <li>Harbor (solución open source para registries privados)</li>
+        </ul>
+
+        <h2>2.3 Docker Desktop</h2>
+
+        <h3>Entorno de desarrollo integrado</h3>
+
+        <p>Docker Desktop es una aplicación de escritorio que proporciona un entorno completo para desarrollar con contenedores en sistemas Windows y macOS. Simplifica enormemente la instalación y configuración de Docker en estos sistemas operativos.</p>
+
+        <h3>¿Por qué es necesario Docker Desktop?</h3>
+
+        <p>Docker fue diseñado originalmente para Linux, ya que los contenedores dependen de características del kernel de Linux (namespaces, cgroups). En Windows y macOS, Docker Desktop crea una máquina virtual Linux ligera donde se ejecuta Docker Engine, abstrayendo esta complejidad del usuario.</p>
+
+        <h3>Componentes incluidos:</h3>
+
+        <p><strong>Docker Engine:</strong> El motor completo de contenedores ejecutándose en una VM Linux optimizada.</p>
+
+        <p><strong>Docker CLI:</strong> Cliente de línea de comandos preconfigurado para comunicarse con el Engine.</p>
+
+        <p><strong>Docker Compose:</strong> Herramienta para orquestación de aplicaciones multi-contenedor (se detalla en la sección 2.4).</p>
+
+        <p><strong>Docker Content Trust:</strong> Sistema de firma digital para verificar la integridad y el editor de las imágenes, proporcionando seguridad adicional en la cadena de suministro de software.</p>
+
+        <p><strong>Kubernetes:</strong> Clúster de Kubernetes de un solo nodo para desarrollo local, permitiendo probar despliegues de Kubernetes sin necesidad de infraestructura adicional.</p>
+
+        <p><strong>Interfaz gráfica de usuario (GUI):</strong> Panel de control visual para gestionar contenedores, imágenes, volúmenes y configuraciones sin usar la línea de comandos.</p>
+
+        <h3>Funcionalidades adicionales de Docker Desktop:</h3>
+
+        <p>La <strong>gestión de recursos</strong> permite configurar cuánta CPU, memoria y disco puede usar Docker. Los <strong>Dev Environments</strong> ofrecen entornos de desarrollo preconfigurados y compartibles. Las <strong>extensiones</strong> proporcionan un marketplace de herramientas adicionales que se integran con Docker Desktop. La <strong>integración con WSL 2</strong> en Windows permite usar el Windows Subsystem for Linux para mejor rendimiento.</p>
+
+        <h3>Consideraciones importantes:</h3>
+
+        <p>Docker Desktop es gratuito para uso personal, educativo y pequeñas empresas (menos de 250 empleados y menos de 10 millones de ingresos anuales). Las empresas más grandes requieren una suscripción de pago.</p>
+
+        <p>Para Linux, Docker Desktop es opcional ya que Docker Engine puede instalarse directamente. Sin embargo, Docker Desktop para Linux ofrece la misma experiencia unificada y la interfaz gráfica.</p>
+
+        <h2>2.4 Docker Compose</h2>
+
+        <h3>Orquestación de aplicaciones multi-contenedor</h3>
+
+        <p>Docker Compose es una herramienta que permite definir y ejecutar aplicaciones compuestas por múltiples contenedores. En lugar de gestionar cada contenedor individualmente, defines toda tu aplicación en un archivo YAML y la controlas con comandos simples.</p>
+
+        <h3>¿Por qué necesitas Docker Compose?</h3>
+
+        <p>Las aplicaciones modernas raramente consisten en un solo contenedor. Una aplicación web típica puede necesitar un servidor web (Nginx), una aplicación backend (Node.js, Python, Java), una base de datos (PostgreSQL, MySQL), un sistema de caché (Redis), y un servidor de correo o cola de mensajes. Sin Compose, tendrías que ejecutar múltiples comandos <code>docker run</code> con configuraciones complejas y gestionar manualmente las dependencias entre contenedores.</p>
+
+        <h3>Estructura del archivo docker-compose.yml:</h3>
+
+        <pre><code class="language-yaml">version: '3.8'  # Versión del formato de Compose
+
+services:       # Definición de contenedores
+  web:
+    image: nginx:alpine
+    ports:
+      - "80:80"           # puerto_host:puerto_contenedor
+    volumes:
+      - ./html:/usr/share/nginx/html:ro  # Montar directorio
+    depends_on:
+      - api               # Esperar a que 'api' esté listo
+    networks:
+      - frontend
+
+  api:
+    build: ./backend      # Construir desde Dockerfile
+    environment:
+      - DATABASE_URL=postgres://db:5432/myapp
+      - NODE_ENV=production
+    depends_on:
+      - db
+    networks:
+      - frontend
+      - backend
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=secreto
+      - POSTGRES_DB=myapp
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  # Volumen persistente
+    networks:
+      - backend
+
+volumes:        # Definición de volúmenes
+  postgres_data:
+
+networks:       # Definición de redes
+  frontend:
+  backend:</code></pre>
+
+        <h3>Explicación del ejemplo:</h3>
+
+        <p>Se definen tres servicios: <code>web</code> (servidor Nginx), <code>api</code> (aplicación backend) y <code>db</code> (base de datos PostgreSQL). El servicio <code>web</code> usa una imagen existente, mientras que <code>api</code> se construye desde un Dockerfile local. Los <code>depends_on</code> establecen el orden de arranque (aunque no garantizan que el servicio esté "listo", solo que el contenedor haya iniciado). Las redes separan el tráfico: <code>web</code> y <code>api</code> comparten <code>frontend</code>, mientras que <code>api</code> y <code>db</code> comparten <code>backend</code>. El volumen <code>postgres_data</code> asegura que los datos persistan aunque el contenedor se elimine.</p>
+
+        <h3>Comandos esenciales de Docker Compose:</h3>
+
+        <pre><code class="language-bash"># Iniciar todos los servicios (en segundo plano)
+docker compose up -d
+
+# Ver el estado de los servicios
+docker compose ps
+
+# Ver logs de todos los servicios
+docker compose logs
+
+# Ver logs de un servicio específico (en tiempo real)
+docker compose logs -f api
+
+# Detener todos los servicios
+docker compose stop
+
+# Detener y eliminar contenedores, redes y volúmenes anónimos
+docker compose down
+
+# Eliminar también los volúmenes nombrados
+docker compose down -v
+
+# Reconstruir imágenes antes de iniciar
+docker compose up -d --build
+
+# Escalar un servicio (crear múltiples instancias)
+docker compose up -d --scale api=3</code></pre>
+
+        <blockquote>
+            <strong>Nota sobre versiones:</strong> A partir de Docker Compose V2, el comando cambió de <code>docker-compose</code> (con guión) a <code>docker compose</code> (con espacio). La clave <code>version</code> en el archivo YAML es opcional en las versiones más recientes.
+        </blockquote>
+
+        <h2>2.5 Dockerfile</h2>
+
+        <h3>Archivo de configuración de imagen</h3>
+
+        <p>Un Dockerfile es un archivo de texto que contiene una secuencia de instrucciones para construir una imagen Docker de forma automatizada y reproducible. Cada instrucción crea una nueva capa en la imagen final.</p>
+
+        <h3>¿Por qué usar Dockerfiles?</h3>
+
+        <p>La creación de imágenes mediante Dockerfiles ofrece <strong>reproducibilidad</strong>, ya que cualquiera puede construir exactamente la misma imagen siguiendo las instrucciones. Proporciona <strong>versionado</strong> porque el Dockerfile puede guardarse en control de versiones junto con el código. Permite <strong>automatización</strong> al integrarse fácilmente en pipelines de CI/CD. Y ofrece <strong>documentación</strong>, ya que el Dockerfile sirve como documentación de cómo se configura el entorno.</p>
+
+        <h3>Instrucciones principales:</h3>
+
+        <p><strong>FROM:</strong> Define la imagen base sobre la que se construye. Debe ser la primera instrucción (excepto ARG). Ejemplo: <code>FROM node:18-alpine</code>.</p>
+
+        <p><strong>WORKDIR:</strong> Establece el directorio de trabajo para las instrucciones siguientes. Crea el directorio si no existe. Ejemplo: <code>WORKDIR /app</code>.</p>
+
+        <p><strong>COPY:</strong> Copia archivos o directorios desde el contexto de construcción a la imagen. Ejemplo: <code>COPY package*.json ./</code>.</p>
+
+        <p><strong>ADD:</strong> Similar a COPY, pero con funcionalidades adicionales como descomprimir archivos tar automáticamente y descargar archivos desde URLs. Se recomienda usar COPY a menos que necesites estas funcionalidades extra.</p>
+
+        <p><strong>RUN:</strong> Ejecuta comandos durante la construcción de la imagen. Cada RUN crea una nueva capa; combina comandos relacionados para reducir capas. Ejemplo: <code>RUN npm install --production</code>.</p>
+
+        <p><strong>ENV:</strong> Define variables de entorno disponibles durante la construcción y en el contenedor. Ejemplo: <code>ENV NODE_ENV=production</code>.</p>
+
+        <p><strong>ARG:</strong> Define variables disponibles solo durante la construcción (no en el contenedor final). Ejemplo: <code>ARG VERSION=1.0</code>.</p>
+
+        <p><strong>EXPOSE:</strong> Documenta qué puertos utiliza la aplicación. Es informativo, no publica el puerto automáticamente. Ejemplo: <code>EXPOSE 3000</code>.</p>
+
+        <p><strong>CMD:</strong> Define el comando por defecto al iniciar el contenedor. Solo puede haber un CMD; si hay varios, solo el último tiene efecto. Puede ser sobrescrito al ejecutar <code>docker run</code>. Ejemplo: <code>CMD ["npm", "start"]</code>.</p>
+
+        <p><strong>ENTRYPOINT:</strong> Similar a CMD, pero más difícil de sobrescribir. Se usa cuando el contenedor debe comportarse como un ejecutable. CMD proporciona argumentos por defecto a ENTRYPOINT si ambos están presentes.</p>
+
+        <h3>Ejemplo completo con mejores prácticas:</h3>
+
+        <pre><code class="language-dockerfile"># Usar imagen base específica y ligera
+FROM node:18-alpine AS builder
+
+# Metadata de la imagen
+LABEL maintainer="equipo@ejemplo.com"
+LABEL version="1.0"
+LABEL description="API de ejemplo con Node.js"
+
+# Crear usuario no-root por seguridad
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+# Establecer directorio de trabajo
+WORKDIR /app
+
+# Copiar solo archivos de dependencias primero (optimiza caché)
+COPY package*.json ./
+
+# Instalar dependencias
+RUN npm ci --only=production
+
+# Copiar el resto del código fuente
+COPY --chown=appuser:appgroup . .
+
+# Cambiar a usuario no-root
+USER appuser
+
+# Documentar el puerto expuesto
+EXPOSE 3000
+
+# Definir variables de entorno
+ENV NODE_ENV=production
+
+# Healthcheck para verificar que la aplicación responde
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD wget --quiet --tries=1 --spider http://localhost:3000/health || exit 1
+
+# Comando por defecto
+CMD ["node", "server.js"]</code></pre>
+
+        <h3>Mejores prácticas aplicadas en el ejemplo:</h3>
+
+        <ul>
+            <li>Se utiliza una imagen base Alpine por su tamaño reducido</li>
+            <li>Se separa la copia de <code>package.json</code> del resto del código para aprovechar la caché de Docker (si las dependencias no cambian, no se reinstalan)</li>
+            <li>Se ejecuta la aplicación como usuario no-root por seguridad</li>
+            <li>Se incluye HEALTHCHECK para que Docker pueda verificar la salud del contenedor</li>
+            <li>Se usan etiquetas (LABEL) para documentar la imagen</li>
+        </ul>
+
+        <h3>Construir una imagen desde Dockerfile:</h3>
+
+        <pre><code class="language-bash"># Construir imagen con tag
+docker build -t mi-aplicacion:1.0 .
+
+# Construir con un Dockerfile en otra ubicación
+docker build -t mi-app:latest -f docker/Dockerfile.prod .
+
+# Construir sin usar caché
+docker build --no-cache -t mi-app:latest .
+
+# Ver el historial de capas de una imagen
+docker history mi-aplicacion:1.0</code></pre>
+
+        <h2>2.6 Interrelación entre Componentes</h2>
+
+        <h3>Cómo trabajan juntos los componentes</h3>
+
+        <p>Los componentes de Docker forman un ecosistema integrado donde cada pieza cumple un rol específico. Entender cómo se relacionan es fundamental para usar Docker efectivamente.</p>
+
+        <h3>Flujo de trabajo típico de desarrollo:</h3>
+
+        <p>El proceso comienza cuando el desarrollador escribe un <strong>Dockerfile</strong> que define cómo construir la imagen de la aplicación. Luego, <strong>Docker Engine</strong> lee el Dockerfile y ejecuta cada instrucción para construir la imagen. Si el Dockerfile referencia imágenes base (como <code>FROM node:18</code>), Docker las descarga de <strong>Docker Hub</strong>. Una vez construida, la imagen puede subirse a Docker Hub (o un registry privado) para compartirla. Para aplicaciones multi-contenedor, <strong>Docker Compose</strong> define cómo los servicios interactúan. Finalmente, <strong>Docker Desktop</strong> proporciona la interfaz para gestionar todo este proceso en entornos de desarrollo.</p>
+
+        <h3>Diagrama de relaciones:</h3>
+
+        <pre><code class="language-plaintext">┌─────────────────────────────────────────────────────────────┐
+│                     DOCKER DESKTOP                          │
+│  (Interfaz unificada para desarrollo en Windows/macOS)      │
+│                                                             │
+│  ┌───────────────────────────────────────────────────────┐  │
+│  │                   DOCKER ENGINE                       │  │
+│  │  ┌─────────┐    ┌──────────┐    ┌─────────────────┐   │  │
+│  │  │ Daemon  │◄──►│ REST API │◄──►│   Docker CLI    │   │  │
+│  │  └────┬────┘    └──────────┘    └─────────────────┘   │  │
+│  │       │                                               │  │
+│  │       ▼                                               │  │
+│  │  ┌─────────────────────────────────────────────────┐  │  │
+│  │  │     Gestiona: Imágenes, Contenedores,           │  │  │
+│  │  │               Redes, Volúmenes                  │  │  │
+│  │  └─────────────────────────────────────────────────┘  │  │
+│  └───────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────┘
+          │                              ▲
+          │ pull/push                    │ build
+          ▼                              │
+┌──────────────────┐            ┌────────────────┐
+│   DOCKER HUB     │            │   DOCKERFILE   │
+│ (u otro registry)│            │                │
+│                  │            │ Define cómo    │
+│ Almacena y       │            │ construir la   │
+│ distribuye       │            │ imagen         │
+│ imágenes         │            │                │
+└──────────────────┘            └────────────────┘
+                                        │
+                                        │ referencia
+                                        ▼
+                               ┌────────────────────┐
+                               │  DOCKER COMPOSE    │
+                               │                    │
+                               │ Orquesta múltiples │
+                               │ Dockerfiles/       │
+                               │ imágenes           │
+                               └────────────────────┘</code></pre>
+
+        <h3>Ejemplo de interacción completa:</h3>
+
+        <p>Imagina que desarrollas una aplicación web con frontend React, backend Node.js y base de datos PostgreSQL.</p>
+
+        <p><strong>Primero,</strong> creas Dockerfiles para cada componente que lo necesite. El frontend tendría un Dockerfile que parte de <code>node:18-alpine</code>, copia el código, instala dependencias y construye la aplicación. El backend tendría un Dockerfile similar adaptado a su stack.</p>
+
+        <p><strong>Segundo,</strong> defines la arquitectura en <code>docker-compose.yml</code>, especificando los tres servicios (frontend, backend, db), las redes que los conectan, los volúmenes para persistencia, y las variables de entorno.</p>
+
+        <p><strong>Tercero,</strong> Docker Engine entra en acción cuando ejecutas <code>docker compose up</code>. Lee el docker-compose.yml, construye las imágenes usando los Dockerfiles, descarga imágenes base desde Docker Hub si es necesario, crea las redes y volúmenes definidos, y arranca los contenedores en el orden correcto.</p>
+
+        <p><strong>Cuarto,</strong> Docker Desktop te permite visualizar el estado de todos los contenedores, ver los logs de cada servicio, inspeccionar las redes y volúmenes, y gestionar recursos asignados a Docker.</p>
+
+        <p><strong>Finalmente,</strong> una vez validada la aplicación localmente, las imágenes pueden subirse a Docker Hub (o un registry privado) para que el equipo de operaciones las despliegue en producción.</p>
+
+    </section>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="script.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+</body>
+</html>

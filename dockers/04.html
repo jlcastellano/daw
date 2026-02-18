@@ -1,0 +1,1469 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creación de Imágenes Docker</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div>Creación de Imágenes Docker</div>
+    </header>
+
+    <section class="contenido-didactico">
+        <h1>4.1 Introducción a los Dockerfiles</h1>
+        
+        <h2>¿Qué es un Dockerfile?</h2>
+        <p>Un Dockerfile es un archivo de texto que contiene todas las instrucciones necesarias para construir una imagen Docker. Actúa como una <mark>"receta"</mark> que Docker sigue paso a paso para crear una imagen reproducible. Cada instrucción en el Dockerfile crea una nueva capa en la imagen final, y estas capas se apilan para formar el sistema de archivos completo del contenedor.</p>
+
+        <h2>Anatomía de un Dockerfile</h2>
+        <p>El Dockerfile se procesa de arriba hacia abajo. Cada línea que comienza con una instrucción reconocida (en mayúsculas por convención) genera una acción durante la construcción. Los comentarios comienzan con <code>#</code> y son ignorados durante el build.</p>
+
+        <pre><code class="language-dockerfile"># Comentario: Esto es ignorado durante la construcción
+
+# La primera instrucción debe ser FROM (excepto ARG antes de FROM)
+FROM ubuntu:22.04
+
+# Las instrucciones siguientes modifican la imagen
+LABEL maintainer="equipo@ejemplo.com"
+
+# Cada RUN, COPY, ADD crea una nueva capa
+RUN apt-get update && apt-get install -y curl
+
+# Las instrucciones de metadatos no crean capas significativas
+EXPOSE 8080
+ENV APP_ENV=production
+
+# CMD o ENTRYPOINT definen el comportamiento al ejecutar
+CMD ["bash"]</code></pre>
+
+        <h2>Convenciones de nomenclatura</h2>
+        <p>El archivo debe llamarse <code>Dockerfile</code> (sin extensión) por defecto. Docker también reconoce variantes como <code>Dockerfile.dev</code>, <code>Dockerfile.prod</code>, o cualquier nombre si se especifica con la opción <code>-f</code>. Es práctica común colocar el Dockerfile en la raíz del proyecto.</p>
+    </section>
+
+    <section class="contenido-didactico">
+        <h1>4.2 Instrucciones Fundamentales</h1>
+
+        <h2>FROM</h2>
+        <h3>Establecer la imagen base</h3>
+        <p>Toda imagen Docker se construye a partir de otra imagen. La instrucción <code>FROM</code> especifica esta imagen base y debe ser la primera instrucción del Dockerfile (con la excepción de <code>ARG</code>).</p>
+
+        <h3>Sintaxis</h3>
+        <pre><code class="language-dockerfile">FROM [--platform=&lt;plataforma&gt;] &lt;imagen&gt;[:&lt;tag&gt;] [AS &lt;nombre&gt;]</code></pre>
+
+        <h3>Ejemplos de uso</h3>
+        <pre><code class="language-dockerfile"># Imagen oficial con tag específico (recomendado)
+FROM ubuntu:22.04
+FROM python:3.11-slim
+FROM node:18-alpine
+
+# Imagen con digest para máxima reproducibilidad
+FROM nginx@sha256:abc123def456...
+
+# Especificar plataforma (útil para builds multiplataforma)
+FROM --platform=linux/amd64 golang:1.21
+
+# Nombrar etapa para multi-stage builds
+FROM node:18 AS build-stage
+FROM nginx:alpine AS production-stage
+
+# Imagen "vacía" para binarios estáticos
+FROM scratch</code></pre>
+
+        <h3>Selección de imagen base</h3>
+        <p>La elección de la imagen base es una de las decisiones más importantes. Las imágenes basadas en <strong>Alpine Linux</strong> son significativamente más pequeñas (5-10 MB base) pero usan <code>musl libc</code> en lugar de <code>glibc</code>, lo que puede causar incompatibilidades con algunos binarios. Las imágenes <em>"slim"</em> ofrecen un balance entre tamaño y compatibilidad. Las imágenes completas como <code>ubuntu</code> o <code>debian</code> son más grandes pero incluyen más herramientas y tienen mejor compatibilidad.</p>
+
+        <pre><code class="language-dockerfile"># Comparación de tamaños aproximados:
+# python:3.11          ~1 GB
+# python:3.11-slim     ~150 MB
+# python:3.11-alpine   ~50 MB</code></pre>
+
+        <h2>LABEL</h2>
+        <h3>Añadir metadatos a la imagen</h3>
+        <p><code>LABEL</code> añade metadatos en formato clave-valor a la imagen. Es útil para documentación, automatización, y gestión de imágenes.</p>
+
+        <h3>Sintaxis</h3>
+        <pre><code class="language-dockerfile">LABEL &lt;clave&gt;=&lt;valor&gt; [&lt;clave&gt;=&lt;valor&gt; ...]</code></pre>
+
+        <h3>Ejemplos</h3>
+        <pre><code class="language-dockerfile"># Labels individuales
+LABEL maintainer="equipo@ejemplo.com"
+LABEL version="1.0"
+
+# Múltiples labels en una instrucción (recomendado)
+LABEL maintainer="equipo@ejemplo.com" \
+      version="1.0" \
+      description="Aplicación web de ejemplo"
+
+# Labels con espacios requieren comillas
+LABEL description="Esta es una descripción larga \
+que ocupa múltiples líneas"
+
+# Labels según convención OCI (Open Container Initiative)
+LABEL org.opencontainers.image.title="Mi Aplicación" \
+      org.opencontainers.image.description="Descripción de la app" \
+      org.opencontainers.image.version="1.0.0" \
+      org.opencontainers.image.vendor="Mi Empresa" \
+      org.opencontainers.image.url="https://ejemplo.com" \
+      org.opencontainers.image.source="https://github.com/usuario/repo" \
+      org.opencontainers.image.licenses="MIT" \
+      org.opencontainers.image.created="2024-01-15T10:00:00Z"</code></pre>
+
+        <h3>Consultar labels</h3>
+        <pre><code class="language-bash">docker inspect --format '{{json .Config.Labels}}' mi-imagen | jq</code></pre>
+
+        <h2>RUN</h2>
+        <h3>Ejecutar comandos durante la construcción</h3>
+        <p><code>RUN</code> ejecuta comandos en una nueva capa sobre la imagen actual y confirma los resultados. Es la instrucción principal para instalar paquetes, configurar el sistema, y preparar el entorno.</p>
+
+        <h3>Sintaxis</h3>
+        <pre><code class="language-dockerfile"># Forma shell (ejecuta en /bin/sh -c)
+RUN &lt;comando&gt;
+
+# Forma exec (ejecuta directamente, sin shell)
+RUN ["ejecutable", "param1", "param2"]</code></pre>
+
+        <h3>Ejemplos básicos</h3>
+        <pre><code class="language-dockerfile"># Forma shell - más común y flexible
+RUN apt-get update && apt-get install -y nginx
+
+# Forma exec - útil cuando no quieres procesamiento de shell
+RUN ["apt-get", "update"]
+
+# El shell por defecto es /bin/sh, puedes cambiarlo
+RUN ["/bin/bash", "-c", "echo $HOME"]</code></pre>
+
+        <h3>Patrones comunes para diferentes sistemas</h3>
+        <pre><code class="language-dockerfile"># Debian/Ubuntu
+RUN apt-get update && apt-get install -y \
+    curl \
+    git \
+    vim \
+    && rm -rf /var/lib/apt/lists/*
+
+# Alpine Linux
+RUN apk add --no-cache \
+    curl \
+    git \
+    vim
+
+# CentOS/RHEL/Fedora
+RUN dnf install -y \
+    curl \
+    git \
+    vim \
+    && dnf clean all
+
+# Python pip
+RUN pip install --no-cache-dir \
+    flask \
+    requests \
+    gunicorn
+
+# Node.js npm
+RUN npm ci --only=production && npm cache clean --force</code></pre>
+
+        <h3>Combinación de comandos</h3>
+        <p>Cada instrucción <code>RUN</code> crea una nueva capa. Es mejor combinar comandos relacionados para reducir capas y tamaño.</p>
+
+        <pre><code class="language-dockerfile"># MAL: Múltiples capas, archivos temporales persisten en capas anteriores
+RUN apt-get update
+RUN apt-get install -y nginx
+RUN apt-get install -y curl
+RUN rm -rf /var/lib/apt/lists/*
+
+# BIEN: Una sola capa, limpieza efectiva
+RUN apt-get update && \
+    apt-get install -y \
+        nginx \
+        curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean</code></pre>
+
+        <h3>Heredocs (Docker BuildKit)</h3>
+        <p>A partir de Docker 20.10 con BuildKit, puedes usar heredocs para scripts multilínea más legibles:</p>
+
+        <pre><code class="language-dockerfile"># syntax=docker/dockerfile:1
+RUN &lt;&lt;EOF
+apt-get update
+apt-get install -y nginx curl
+rm -rf /var/lib/apt/lists/*
+EOF
+
+# Con shell específico
+RUN &lt;&lt;EOF bash
+set -e
+echo "Instalando dependencias..."
+apt-get update
+apt-get install -y nginx
+EOF</code></pre>
+
+        <h2>COPY y ADD</h2>
+        <h3>Copiar archivos al contenedor</h3>
+        <p>Ambas instrucciones copian archivos desde el contexto de construcción a la imagen, pero tienen diferencias importantes.</p>
+
+        <h3>COPY (recomendado para la mayoría de casos)</h3>
+        <pre><code class="language-dockerfile">COPY [--chown=&lt;usuario&gt;:&lt;grupo&gt;] &lt;origen&gt;... &lt;destino&gt;
+COPY [--chown=&lt;usuario&gt;:&lt;grupo&gt;] ["&lt;origen&gt;",... "&lt;destino&gt;"]</code></pre>
+
+        <h3>Ejemplos de COPY</h3>
+        <pre><code class="language-dockerfile"># Copiar archivo
+COPY package.json /app/
+
+# Copiar múltiples archivos
+COPY package.json package-lock.json /app/
+
+# Copiar directorio completo
+COPY src/ /app/src/
+
+# Copiar todo el contexto
+COPY . /app/
+
+# Usar comodines
+COPY *.json /app/
+COPY hom* /app/      # home.txt, homework.doc, etc.
+COPY hom?.txt /app/  # home.txt, hom1.txt, etc.
+
+# Establecer propietario
+COPY --chown=node:node package.json /app/
+COPY --chown=1000:1000 . /app/
+
+# Copiar desde otra etapa (multi-stage)
+COPY --from=builder /app/dist /usr/share/nginx/html
+COPY --from=0 /app/binary /usr/local/bin/
+
+# Copiar desde imagen externa
+COPY --from=nginx:alpine /etc/nginx/nginx.conf /etc/nginx/</code></pre>
+
+        <h3>ADD (características adicionales)</h3>
+        <p><code>ADD</code> tiene las mismas capacidades que <code>COPY</code> más:</p>
+        <ul>
+            <li>Extracción automática de archivos tar locales</li>
+            <li>Descarga de URLs remotas (no recomendado)</li>
+        </ul>
+
+        <pre><code class="language-dockerfile"># Extracción automática de tar (la principal ventaja de ADD)
+ADD archivo.tar.gz /app/
+ADD archivo.tar.xz /destino/
+
+# Las siguientes capacidades existen pero NO se recomiendan:
+# Descarga de URL (mejor usar RUN curl o wget)
+# ADD https://ejemplo.com/archivo.tar.gz /app/</code></pre>
+
+        <h3>¿Cuándo usar COPY vs ADD?</h3>
+        <p>Usa <code>COPY</code> para la mayoría de casos porque es más explícito y predecible. Usa <code>ADD</code> solo cuando necesites extraer automáticamente archivos tar locales. No uses <code>ADD</code> para descargar archivos de URLs; es mejor usar <code>RUN</code> con <code>curl</code> o <code>wget</code> porque puedes eliminar el archivo descargado en la misma capa.</p>
+
+        <pre><code class="language-dockerfile"># BIEN: Descargar y extraer en una sola capa
+RUN curl -fsSL https://ejemplo.com/archivo.tar.gz | tar -xz -C /app/
+
+# BIEN: Descargar, verificar, extraer, limpiar
+RUN curl -fsSL -o /tmp/archivo.tar.gz https://ejemplo.com/archivo.tar.gz \
+    && echo "sha256sum_esperado /tmp/archivo.tar.gz" | sha256sum -c - \
+    && tar -xzf /tmp/archivo.tar.gz -C /app/ \
+    && rm /tmp/archivo.tar.gz</code></pre>
+
+        <h2>WORKDIR</h2>
+        <h3>Establecer directorio de trabajo</h3>
+        <p><code>WORKDIR</code> establece el directorio de trabajo para las instrucciones <code>RUN</code>, <code>CMD</code>, <code>ENTRYPOINT</code>, <code>COPY</code>, y <code>ADD</code> que le sigan. Si el directorio no existe, se crea automáticamente.</p>
+
+        <h3>Sintaxis</h3>
+        <pre><code class="language-dockerfile">WORKDIR /ruta/al/directorio</code></pre>
+
+        <h3>Ejemplos</h3>
+        <pre><code class="language-dockerfile"># Establecer directorio de trabajo
+WORKDIR /app
+
+# Rutas relativas se resuelven respecto al WORKDIR anterior
+WORKDIR /app
+WORKDIR src        # Ahora es /app/src
+WORKDIR ../config  # Ahora es /app/config
+
+# Usar variables de entorno
+ENV APP_HOME=/application
+WORKDIR $APP_HOME
+
+# Múltiples WORKDIR es válido pero puede ser confuso
+WORKDIR /app
+RUN npm install
+WORKDIR /app/src
+RUN npm run build</code></pre>
+
+        <h3>Buenas prácticas</h3>
+        <pre><code class="language-dockerfile"># BIEN: Usar WORKDIR en lugar de cd en RUN
+WORKDIR /app
+RUN npm install
+
+# MAL: Usar cd en RUN (no persiste entre instrucciones)
+RUN cd /app && npm install
+RUN npm run build  # ¡Esto NO está en /app!</code></pre>
+
+        <h2>ENV</h2>
+        <h3>Establecer variables de entorno</h3>
+        <p><code>ENV</code> define variables de entorno que estarán disponibles durante la construcción y en el contenedor en ejecución.</p>
+
+        <h3>Sintaxis</h3>
+        <pre><code class="language-dockerfile">ENV &lt;clave&gt;=&lt;valor&gt; ...
+ENV &lt;clave&gt; &lt;valor&gt;  # Forma antigua, solo una variable</code></pre>
+
+        <h3>Ejemplos</h3>
+        <pre><code class="language-dockerfile"># Definir variables individuales
+ENV APP_VERSION=1.0.0
+ENV NODE_ENV=production
+
+# Múltiples variables en una línea
+ENV APP_VERSION=1.0.0 NODE_ENV=production
+
+# Múltiples variables con formato legible
+ENV APP_VERSION=1.0.0 \
+    NODE_ENV=production \
+    PORT=3000
+
+# Usar variables en instrucciones posteriores
+ENV APP_HOME=/app
+WORKDIR $APP_HOME
+COPY . $APP_HOME
+
+# Variables con espacios
+ENV MI_VARIABLE="valor con espacios"
+
+# Sobrescribir variables de imagen base
+ENV PATH="/app/bin:$PATH"</code></pre>
+
+        <h3>Diferencia entre ENV y ARG</h3>
+        <p><code>ENV</code> persiste en la imagen final y está disponible en el contenedor. <code>ARG</code> solo existe durante la construcción.</p>
+
+        <pre><code class="language-dockerfile"># ARG solo durante build
+ARG VERSION=latest
+
+# ENV persiste en el contenedor
+ENV APP_VERSION=$VERSION</code></pre>
+
+        <h2>ARG</h2>
+        <h3>Argumentos de construcción</h3>
+        <p><code>ARG</code> define variables que los usuarios pueden pasar durante la construcción con <code>--build-arg</code>. Solo existen durante el proceso de build.</p>
+
+        <h3>Sintaxis</h3>
+        <pre><code class="language-dockerfile">ARG &lt;nombre&gt;[=&lt;valor_defecto&gt;]</code></pre>
+
+        <h3>Ejemplos</h3>
+        <pre><code class="language-dockerfile"># ARG con valor por defecto
+ARG VERSION=1.0
+ARG BASE_IMAGE=ubuntu:22.04
+
+# ARG sin valor por defecto (obligatorio al construir)
+ARG REQUIRED_VAR
+
+# ARG antes de FROM (caso especial)
+ARG BASE_IMAGE=ubuntu:22.04
+FROM $BASE_IMAGE
+
+# Después de FROM, el ARG debe redeclararse si se necesita
+ARG BASE_IMAGE=ubuntu:22.04
+FROM $BASE_IMAGE
+ARG VERSION  # Redeclarar para usar después de FROM
+ENV APP_VERSION=$VERSION
+
+# Usar ARG en instrucciones
+ARG PYTHON_VERSION=3.11
+FROM python:${PYTHON_VERSION}-slim
+
+ARG ENVIRONMENT=production
+RUN if [ "$ENVIRONMENT" = "development" ]; then \
+        pip install pytest black; \
+    fi</code></pre>
+
+        <h3>Construir con argumentos</h3>
+        <pre><code class="language-bash">docker build --build-arg VERSION=2.0 --build-arg ENVIRONMENT=development -t mi-app .</code></pre>
+
+        <h3>ARGs predefinidos</h3>
+        <p>Docker tiene varios ARGs predefinidos que no necesitan declararse:</p>
+
+        <pre><code class="language-dockerfile"># Configuración de proxy (disponibles automáticamente)
+# HTTP_PROXY, http_proxy
+# HTTPS_PROXY, https_proxy
+# FTP_PROXY, ftp_proxy
+# NO_PROXY, no_proxy
+
+# Ejemplo de uso
+docker build --build-arg HTTP_PROXY=http://proxy.ejemplo.com:8080 .</code></pre>
+
+        <h2>EXPOSE</h2>
+        <h3>Documentar puertos</h3>
+        <p><code>EXPOSE</code> documenta los puertos en los que el contenedor escucha. Es principalmente documentación y no publica realmente los puertos.</p>
+
+        <h3>Sintaxis</h3>
+        <pre><code class="language-dockerfile">EXPOSE &lt;puerto&gt;[/&lt;protocolo&gt;] ...</code></pre>
+
+        <h3>Ejemplos</h3>
+        <pre><code class="language-dockerfile"># Puerto TCP (por defecto)
+EXPOSE 80
+EXPOSE 443
+
+# Puerto UDP explícito
+EXPOSE 53/udp
+
+# Múltiples puertos
+EXPOSE 80 443 8080
+
+# Puerto TCP y UDP
+EXPOSE 53/tcp 53/udp
+
+# Usar variable
+ARG PORT=8080
+EXPOSE $PORT</code></pre>
+
+        <blockquote>
+            <strong>Importante:</strong> <code>EXPOSE</code> no publica el puerto. Para publicar puertos, debes usar <code>-p</code> al ejecutar el contenedor:
+            <pre><code class="language-bash"># -P publica todos los puertos EXPOSE a puertos aleatorios del host
+docker run -P mi-imagen
+
+# -p publica puertos específicos
+docker run -p 8080:80 mi-imagen</code></pre>
+        </blockquote>
+
+        <h2>CMD</h2>
+        <h3>Comando por defecto</h3>
+        <p><code>CMD</code> especifica el comando por defecto que se ejecuta cuando se inicia un contenedor sin especificar un comando. Solo puede haber un <code>CMD</code> en el Dockerfile; si hay varios, solo el último tiene efecto.</p>
+
+        <h3>Sintaxis</h3>
+        <pre><code class="language-dockerfile"># Forma exec (recomendada) - ejecuta directamente
+CMD ["ejecutable", "param1", "param2"]
+
+# Forma exec como parámetros de ENTRYPOINT
+CMD ["param1", "param2"]
+
+# Forma shell - ejecuta en /bin/sh -c
+CMD comando param1 param2</code></pre>
+
+        <h3>Ejemplos</h3>
+        <pre><code class="language-dockerfile"># Forma exec (recomendada)
+CMD ["nginx", "-g", "daemon off;"]
+CMD ["python", "app.py"]
+CMD ["node", "server.js"]
+
+# Forma shell (se ejecuta como: /bin/sh -c "...")
+CMD npm start
+CMD python app.py
+
+# Como parámetros para ENTRYPOINT
+ENTRYPOINT ["python"]
+CMD ["app.py"]  # docker run mi-imagen -> python app.py
+                # docker run mi-imagen otro.py -> python otro.py</code></pre>
+
+        <h3>Diferencia entre forma exec y shell</h3>
+        <p>La forma exec ejecuta el comando directamente como PID 1, lo que es importante para el manejo correcto de señales (SIGTERM, etc.). La forma shell ejecuta el comando dentro de un shell, lo que permite expansión de variables pero el shell es PID 1 y puede no pasar señales correctamente.</p>
+
+        <pre><code class="language-dockerfile"># BIEN: nginx recibe señales directamente
+CMD ["nginx", "-g", "daemon off;"]
+
+# POTENCIAL PROBLEMA: shell es PID 1
+CMD nginx -g "daemon off;"</code></pre>
+
+        <h2>ENTRYPOINT</h2>
+        <h3>Punto de entrada del contenedor</h3>
+        <p><code>ENTRYPOINT</code> configura el contenedor para ejecutarse como un ejecutable. A diferencia de <code>CMD</code>, no se reemplaza fácilmente al ejecutar el contenedor.</p>
+
+        <h3>Sintaxis</h3>
+        <pre><code class="language-dockerfile"># Forma exec (recomendada)
+ENTRYPOINT ["ejecutable", "param1", "param2"]
+
+# Forma shell
+ENTRYPOINT comando param1 param2</code></pre>
+
+        <h3>Ejemplos</h3>
+        <pre><code class="language-dockerfile"># Contenedor como ejecutable
+ENTRYPOINT ["python", "app.py"]
+
+# Combinación con CMD para argumentos por defecto
+ENTRYPOINT ["python", "app.py"]
+CMD ["--port=8080"]
+
+# Al ejecutar: docker run mi-imagen -> python app.py --port=8080
+# Al ejecutar: docker run mi-imagen --port=3000 -> python app.py --port=3000</code></pre>
+
+        <h3>Patrón común con script de entrada</h3>
+        <pre><code class="language-dockerfile">COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+ENTRYPOINT ["docker-entrypoint.sh"]
+CMD ["mi-aplicacion"]</code></pre>
+
+        <p>Donde <code>docker-entrypoint.sh</code>:</p>
+
+        <pre><code class="language-bash">#!/bin/bash
+set -e
+
+# Inicialización, configuración, espera de servicios, etc.
+echo "Iniciando contenedor..."
+
+# Ejecutar el comando pasado
+exec "$@"</code></pre>
+
+        <h3>Interacción entre ENTRYPOINT y CMD</h3>
+        <p>Cuando no hay ENTRYPOINT y solo CMD, el comando es directamente el CMD. Cuando hay ENTRYPOINT sin CMD, el comando es el ENTRYPOINT. Cuando hay ambos, el comando es ENTRYPOINT más CMD como argumentos. Al ejecutar con comando adicional (<kbd>docker run imagen comando</kbd>), CMD se reemplaza pero ENTRYPOINT permanece.</p>
+
+        <pre><code class="language-dockerfile"># Ejemplo práctico
+ENTRYPOINT ["python"]
+CMD ["app.py"]
+
+# docker run mi-imagen              -> python app.py
+# docker run mi-imagen script.py    -> python script.py
+# docker run --entrypoint bash mi-imagen  -> bash (sobrescribe ENTRYPOINT)</code></pre>
+
+        <h2>USER</h2>
+        <h3>Establecer usuario de ejecución</h3>
+        <p><code>USER</code> establece el usuario (y opcionalmente el grupo) para las instrucciones <code>RUN</code>, <code>CMD</code>, y <code>ENTRYPOINT</code> que le sigan, así como para el contenedor en ejecución.</p>
+
+        <h3>Sintaxis</h3>
+        <pre><code class="language-dockerfile">USER &lt;usuario&gt;[:&lt;grupo&gt;]
+USER &lt;UID&gt;[:&lt;GID&gt;]</code></pre>
+
+        <h3>Ejemplos</h3>
+        <pre><code class="language-dockerfile"># Crear usuario y cambiar a él
+RUN useradd --create-home --shell /bin/bash appuser
+USER appuser
+
+# Usar UID/GID numérico (más portable)
+RUN useradd --uid 1000 appuser
+USER 1000:1000
+
+# Patrón común: instalar como root, ejecutar como usuario
+FROM node:18-alpine
+
+# Instalaciones como root
+RUN apk add --no-cache curl
+
+# Crear directorio de la app
+WORKDIR /app
+
+# Cambiar propietario antes de cambiar de usuario
+COPY --chown=node:node package*.json ./
+RUN npm ci --only=production
+COPY --chown=node:node . .
+
+# Cambiar a usuario no-root para ejecución
+USER node
+
+CMD ["node", "server.js"]</code></pre>
+
+        <h3>Buenas prácticas de seguridad</h3>
+        <pre><code class="language-dockerfile"># Alpine: crear usuario dedicado
+RUN addgroup -g 1001 -S appgroup && \
+    adduser -u 1001 -S appuser -G appgroup
+
+# Debian/Ubuntu: crear usuario dedicado
+RUN groupadd -r -g 1001 appgroup && \
+    useradd -r -u 1001 -g appgroup appuser
+
+# Usar usuario existente de imagen base
+# node:alpine ya tiene usuario 'node'
+USER node</code></pre>
+
+        <h2>VOLUME</h2>
+        <h3>Declarar puntos de montaje</h3>
+        <p><code>VOLUME</code> crea un punto de montaje y marca el directorio como conteniendo datos externos. Docker creará un volumen anónimo si no se monta uno explícitamente.</p>
+
+        <h3>Sintaxis</h3>
+        <pre><code class="language-dockerfile">VOLUME ["/ruta/datos"]
+VOLUME /ruta/datos /otra/ruta</code></pre>
+
+        <h3>Ejemplos</h3>
+        <pre><code class="language-dockerfile"># Volumen único
+VOLUME /var/lib/mysql
+
+# Múltiples volúmenes
+VOLUME ["/var/log", "/var/lib/mysql"]
+VOLUME /data /logs /config
+
+# Patrón para base de datos
+FROM mysql:8
+VOLUME /var/lib/mysql
+
+# Patrón para aplicación con uploads
+FROM python:3.11-slim
+WORKDIR /app
+COPY . .
+VOLUME /app/uploads</code></pre>
+
+        <h3>Consideraciones</h3>
+        <p>Los volúmenes declarados con <code>VOLUME</code> son anónimos a menos que se nombren explícitamente al ejecutar. Los cambios hechos a un directorio <code>VOLUME</code> después de declararlo en el Dockerfile no persisten en la imagen. Es mejor documentar los volúmenes y dejar que el usuario los monte explícitamente.</p>
+
+        <pre><code class="language-dockerfile"># CUIDADO: esto NO funciona como se espera
+VOLUME /app/data
+RUN echo "datos iniciales" > /app/data/archivo.txt  # No persiste</code></pre>
+
+        <h2>HEALTHCHECK</h2>
+        <h3>Verificar salud del contenedor</h3>
+        <p><code>HEALTHCHECK</code> indica a Docker cómo probar que el contenedor sigue funcionando correctamente.</p>
+
+        <h3>Sintaxis</h3>
+        <pre><code class="language-dockerfile">HEALTHCHECK [opciones] CMD comando
+HEALTHCHECK NONE  # Deshabilitar healthcheck heredado</code></pre>
+
+        <h3>Opciones</h3>
+        <p>Las opciones incluyen:</p>
+        <ul>
+            <li><code>--interval=30s</code> para el tiempo entre checks</li>
+            <li><code>--timeout=30s</code> para el tiempo máximo de espera</li>
+            <li><code>--start-period=0s</code> para el tiempo de gracia inicial</li>
+            <li><code>--start-interval=5s</code> para el intervalo durante el período de inicio</li>
+            <li><code>--retries=3</code> para el número de fallos consecutivos antes de marcar como unhealthy</li>
+        </ul>
+
+        <h3>Ejemplos</h3>
+        <pre><code class="language-dockerfile"># Healthcheck básico con curl
+HEALTHCHECK --interval=30s --timeout=10s --retries=3 \
+    CMD curl -f http://localhost:8080/health || exit 1
+
+# Healthcheck para aplicación Node.js
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD node healthcheck.js
+
+# Healthcheck con wget (Alpine)
+HEALTHCHECK --interval=30s --timeout=5s \
+    CMD wget --quiet --tries=1 --spider http://localhost:80/ || exit 1
+
+# Healthcheck para base de datos PostgreSQL
+HEALTHCHECK --interval=10s --timeout=5s --retries=5 \
+    CMD pg_isready -U postgres || exit 1
+
+# Healthcheck para Redis
+HEALTHCHECK --interval=10s --timeout=5s --retries=3 \
+    CMD redis-cli ping | grep PONG
+
+# Deshabilitar healthcheck de imagen base
+HEALTHCHECK NONE</code></pre>
+
+        <h3>Estados del healthcheck</h3>
+        <p>El contenedor puede estar <code>starting</code> durante start-period, <code>healthy</code> si el comando retorna 0, o <code>unhealthy</code> si falla más veces que --retries.</p>
+
+        <pre><code class="language-bash"># Ver estado de salud
+docker ps  # Muestra (healthy) o (unhealthy)
+docker inspect --format '{{.State.Health.Status}}' mi-contenedor</code></pre>
+
+        <h2>SHELL</h2>
+        <h3>Cambiar shell por defecto</h3>
+        <p><code>SHELL</code> permite cambiar el shell por defecto usado para la forma shell de las instrucciones.</p>
+
+        <h3>Sintaxis</h3>
+        <pre><code class="language-dockerfile">SHELL ["ejecutable", "parámetros"]</code></pre>
+
+        <h3>Ejemplos</h3>
+        <pre><code class="language-dockerfile"># Cambiar a bash (para usar características de bash)
+SHELL ["/bin/bash", "-c"]
+RUN echo $BASH_VERSION
+
+# En Windows, cambiar a PowerShell
+SHELL ["powershell", "-Command"]
+RUN Write-Host "Hola desde PowerShell"
+
+# Volver al shell por defecto
+SHELL ["/bin/sh", "-c"]</code></pre>
+
+        <h2>STOPSIGNAL</h2>
+        <h3>Señal de parada del contenedor</h3>
+        <p><code>STOPSIGNAL</code> define la señal del sistema que se enviará al contenedor para salir.</p>
+
+        <h3>Sintaxis</h3>
+        <pre><code class="language-dockerfile">STOPSIGNAL señal</code></pre>
+
+        <h3>Ejemplos</h3>
+        <pre><code class="language-dockerfile"># Usar SIGQUIT en lugar de SIGTERM
+STOPSIGNAL SIGQUIT
+
+# Usar número de señal
+STOPSIGNAL 9  # SIGKILL
+
+# Nginx usa SIGQUIT para cierre graceful
+FROM nginx:alpine
+STOPSIGNAL SIGQUIT</code></pre>
+
+        <h2>ONBUILD</h2>
+        <h3>Instrucciones para imágenes derivadas</h3>
+        <p><code>ONBUILD</code> añade una instrucción que se ejecutará cuando la imagen se use como base para otra imagen.</p>
+
+        <h3>Sintaxis</h3>
+        <pre><code class="language-dockerfile">ONBUILD &lt;INSTRUCCIÓN&gt;</code></pre>
+
+        <h3>Ejemplos</h3>
+        <pre><code class="language-dockerfile"># Imagen base para proyectos Python
+FROM python:3.11-slim
+WORKDIR /app
+ONBUILD COPY requirements.txt .
+ONBUILD RUN pip install -r requirements.txt
+ONBUILD COPY . .
+
+# Cuando alguien use esta imagen como base:
+# FROM mi-python-base
+# CMD ["python", "app.py"]
+# 
+# Automáticamente se ejecutan los ONBUILD al construir</code></pre>
+
+        <h3>Consideraciones</h3>
+        <p><code>ONBUILD</code> puede ser útil para imágenes base organizacionales, pero hace el comportamiento menos predecible. Documenta claramente qué instrucciones ONBUILD incluye tu imagen.</p>
+    </section>
+
+    <section class="contenido-didactico">
+        <h1>4.3 Archivo .dockerignore</h1>
+
+        <h2>Excluir archivos del contexto de construcción</h2>
+        <p>El archivo <code>.dockerignore</code> especifica qué archivos y directorios excluir del contexto de construcción. Funciona de manera similar a <code>.gitignore</code>.</p>
+
+        <h2>Ubicación y formato</h2>
+        <p>El archivo debe llamarse <code>.dockerignore</code> y estar en la raíz del contexto de construcción (generalmente junto al Dockerfile).</p>
+
+        <h2>Sintaxis</h2>
+        <pre><code class="language-bash"># Comentarios comienzan con #
+
+# Ignorar archivos específicos
+archivo.txt
+secretos.env
+
+# Ignorar directorios
+node_modules/
+.git/
+__pycache__/
+
+# Patrones con comodines
+*.log
+*.tmp
+*.swp
+**/*.pyc
+
+# Ignorar todo excepto algo específico
+*
+!src/
+!package.json
+!package-lock.json
+
+# Negación (incluir algo previamente excluido)
+*.md
+!README.md
+
+# Ignorar en cualquier subdirectorio
+**/.git
+**/node_modules
+**/__pycache__</code></pre>
+
+        <h2>Ejemplo completo para proyecto Node.js</h2>
+        <pre><code class="language-bash"># Control de versiones
+.git
+.gitignore
+
+# Dependencias (se reinstalan en el contenedor)
+node_modules
+
+# Archivos de desarrollo
+.env
+.env.*
+*.log
+npm-debug.log*
+
+# Editores e IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Tests y cobertura
+coverage/
+.nyc_output/
+*.test.js
+__tests__/
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Documentación no necesaria en producción
+docs/
+*.md
+!README.md
+
+# Archivos de build locales
+dist/
+build/</code></pre>
+
+        <h2>Ejemplo para proyecto Python</h2>
+        <pre><code class="language-bash"># Control de versiones
+.git
+.gitignore
+
+# Entornos virtuales
+venv/
+.venv/
+env/
+.env
+
+# Cache de Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Distribución / packaging
+build/
+dist/
+eggs/
+*.egg-info/
+*.egg
+
+# Tests
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Documentación
+docs/
+*.md</code></pre>
+
+        <h2>Beneficios de .dockerignore</h2>
+        <ul>
+            <li>Reduce el tamaño del contexto enviado al daemon de Docker</li>
+            <li>Acelera significativamente la construcción</li>
+            <li>Evita incluir archivos sensibles (como <code>.env</code> con secretos)</li>
+            <li>Previene invalidación innecesaria del caché</li>
+        </ul>
+    </section>
+
+    <section class="contenido-didactico">
+        <h1>4.4 Capas y Sistema de Caché</h1>
+
+        <h2>Entendiendo las capas de Docker</h2>
+        <p>Cada instrucción en un Dockerfile que modifica el sistema de archivos crea una nueva capa. Las capas son de solo lectura y se apilan para formar la imagen. Cuando ejecutas un contenedor, Docker añade una capa de escritura encima.</p>
+
+        <h2>Instrucciones que crean capas</h2>
+        <p>Las instrucciones <code>FROM</code>, <code>RUN</code>, <code>COPY</code>, y <code>ADD</code> crean nuevas capas con contenido del sistema de archivos. Las instrucciones <code>ENV</code>, <code>EXPOSE</code>, <code>LABEL</code>, <code>CMD</code>, <code>ENTRYPOINT</code>, <code>VOLUME</code>, <code>USER</code>, <code>WORKDIR</code>, <code>ARG</code>, <code>ONBUILD</code>, <code>STOPSIGNAL</code>, <code>HEALTHCHECK</code>, y <code>SHELL</code> crean capas vacías con solo metadatos (impacto mínimo en tamaño).</p>
+
+        <h2>Sistema de caché</h2>
+        <p>Docker cachea cada capa. Si una instrucción y todos sus ancestros no han cambiado, Docker usa la capa cacheada. Una vez que una capa se invalida, todas las capas siguientes también se invalidan.</p>
+
+        <pre><code class="language-dockerfile"># Ejemplo de orden óptimo para caché
+FROM node:18-alpine
+
+# 1. Dependencias del sistema (cambian raramente)
+RUN apk add --no-cache curl
+
+# 2. Establecer directorio de trabajo
+WORKDIR /app
+
+# 3. Copiar SOLO archivos de dependencias primero
+COPY package.json package-lock.json ./
+
+# 4. Instalar dependencias (se cachea si package*.json no cambia)
+RUN npm ci --only=production
+
+# 5. Copiar código fuente (cambia frecuentemente)
+COPY . .
+
+# 6. Metadatos y comando
+EXPOSE 3000
+CMD ["node", "server.js"]</code></pre>
+
+        <h2>Visualizar capas</h2>
+        <pre><code class="language-bash"># Ver capas de una imagen
+docker history mi-imagen
+
+# Ver capas con tamaños
+docker history --no-trunc mi-imagen
+
+# Inspeccionar capas detalladamente
+docker inspect mi-imagen | jq '.[0].RootFS.Layers'</code></pre>
+    </section>
+
+    <section class="contenido-didactico">
+        <h1>4.5 Buenas Prácticas de Optimización</h1>
+
+        <h2>Minimizar tamaño de imagen</h2>
+
+        <h3>Elegir imagen base apropiada</h3>
+        <pre><code class="language-dockerfile"># Comparación de tamaños para Node.js:
+# node:18           ~900 MB
+# node:18-slim      ~200 MB  (recomendado para producción)
+# node:18-alpine    ~170 MB  (más pequeño, posibles incompatibilidades)
+
+# Para aplicaciones que solo necesitan runtime:
+FROM node:18-alpine
+# o
+FROM gcr.io/distroless/nodejs18-debian11</code></pre>
+
+        <h3>Limpiar en la misma capa</h3>
+        <pre><code class="language-dockerfile"># MAL: La limpieza no reduce el tamaño (archivos siguen en capa anterior)
+RUN apt-get update
+RUN apt-get install -y build-essential
+RUN apt-get clean
+
+# BIEN: Limpiar en la misma instrucción RUN
+RUN apt-get update && \
+    apt-get install -y build-essential && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*</code></pre>
+
+        <h3>Eliminar archivos innecesarios</h3>
+        <pre><code class="language-dockerfile"># Instalar solo lo necesario
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Para pip
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Para npm
+RUN npm ci --only=production && npm cache clean --force</code></pre>
+
+        <h2>Optimizar para caché</h2>
+
+        <h3>Ordenar instrucciones de menos a más cambiantes</h3>
+        <pre><code class="language-dockerfile"># Las instrucciones que cambian menos van primero
+FROM python:3.11-slim
+
+# Sistema - cambia muy raramente
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Dependencias - cambian ocasionalmente
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Código - cambia frecuentemente
+COPY . .
+
+CMD ["python", "app.py"]</code></pre>
+
+        <h3>Separar dependencias del código</h3>
+        <pre><code class="language-dockerfile"># Node.js
+COPY package.json package-lock.json ./
+RUN npm ci
+COPY . .
+
+# Python
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+COPY . .
+
+# Go
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .</code></pre>
+
+        <h2>Seguridad</h2>
+
+        <h3>No ejecutar como root</h3>
+        <pre><code class="language-dockerfile">FROM node:18-alpine
+
+WORKDIR /app
+COPY --chown=node:node . .
+RUN npm ci --only=production
+
+USER node
+CMD ["node", "server.js"]</code></pre>
+
+        <h3>No incluir secretos en la imagen</h3>
+        <pre><code class="language-dockerfile"># MAL: El secreto queda en una capa
+COPY .env /app/
+RUN export $(cat .env | xargs) && ./configure
+
+# BIEN: Usar secretos de BuildKit
+# syntax=docker/dockerfile:1
+RUN --mount=type=secret,id=api_key \
+    API_KEY=$(cat /run/secrets/api_key) ./configure
+
+# Construir con:
+# docker build --secret id=api_key,src=./api_key.txt .</code></pre>
+
+        <h3>Usar imágenes de confianza</h3>
+        <pre><code class="language-dockerfile"># Preferir imágenes oficiales
+FROM python:3.11-slim  # Oficial
+
+# Verificar firmas si es posible
+# Usar digests para inmutabilidad
+FROM python@sha256:abc123...</code></pre>
+    </section>
+
+    <section class="contenido-didactico">
+        <h1>4.6 Multi-stage Builds</h1>
+
+        <h2>Concepto y beneficios</h2>
+        <p>Los multi-stage builds permiten usar múltiples instrucciones <code>FROM</code> en un Dockerfile. Cada <code>FROM</code> inicia una nueva etapa. Puedes copiar selectivamente artefactos de una etapa a otra, descartando todo lo demás.</p>
+
+        <h3>Beneficios principales</h3>
+        <ul>
+            <li>Las imágenes finales son más pequeñas porque no incluyen herramientas de compilación</li>
+            <li>Hay mejor separación entre entorno de desarrollo y producción</li>
+            <li>La seguridad mejora al no incluir compiladores ni código fuente</li>
+            <li>Se mantiene un solo Dockerfile en lugar de múltiples</li>
+        </ul>
+
+        <h2>Ejemplo básico - Aplicación Go</h2>
+        <pre><code class="language-dockerfile"># Etapa 1: Compilación
+FROM golang:1.21-alpine AS builder
+
+WORKDIR /app
+
+# Dependencias
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Compilar
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main .
+
+# Etapa 2: Imagen final
+FROM alpine:3.18
+
+# Certificados para HTTPS
+RUN apk --no-cache add ca-certificates
+
+WORKDIR /root/
+
+# Copiar solo el binario compilado
+COPY --from=builder /app/main .
+
+EXPOSE 8080
+CMD ["./main"]</code></pre>
+
+        <p><strong>Resultado:</strong> La imagen final contiene solo Alpine (~5MB) y el binario (~10-20MB), no los ~300MB del SDK de Go.</p>
+
+        <h2>Ejemplo - Aplicación Node.js</h2>
+        <pre><code class="language-dockerfile"># Etapa 1: Dependencias
+FROM node:18-alpine AS deps
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
+
+# Etapa 2: Build
+FROM node:18-alpine AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+RUN npm run build
+
+# Etapa 3: Producción
+FROM node:18-alpine AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+# Usuario no-root
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+# Copiar solo lo necesario
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+
+USER nextjs
+
+EXPOSE 3000
+CMD ["node", "server.js"]</code></pre>
+
+        <h2>Ejemplo - Aplicación Python</h2>
+        <pre><code class="language-dockerfile"># Etapa 1: Compilar dependencias
+FROM python:3.11-slim AS builder
+
+# Instalar compiladores necesarios
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Crear entorno virtual
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Instalar dependencias
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Etapa 2: Imagen de producción
+FROM python:3.11-slim AS runner
+
+# Copiar entorno virtual
+COPY --from=builder /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Usuario no-root
+RUN useradd --create-home appuser
+WORKDIR /home/appuser/app
+
+# Copiar código
+COPY --chown=appuser:appuser . .
+
+USER appuser
+
+EXPOSE 8000
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "app:app"]</code></pre>
+
+        <h2>Ejemplo - Aplicación Java/Spring Boot</h2>
+        <pre><code class="language-dockerfile"># Etapa 1: Compilación con Maven
+FROM maven:3.9-eclipse-temurin-17 AS builder
+
+WORKDIR /app
+
+# Cachear dependencias
+COPY pom.xml .
+RUN mvn dependency:go-offline -B
+
+# Compilar
+COPY src ./src
+RUN mvn package -DskipTests -B
+
+# Extraer capas del JAR (Spring Boot 2.3+)
+RUN java -Djarmode=layertools -jar target/*.jar extract
+
+# Etapa 2: Runtime
+FROM eclipse-temurin:17-jre-alpine AS runner
+
+# Usuario no-root
+RUN addgroup -S spring && adduser -S spring -G spring
+USER spring:spring
+
+WORKDIR /app
+
+# Copiar capas en orden de menos a más cambiante
+COPY --from=builder /app/dependencies/ ./
+COPY --from=builder /app/spring-boot-loader/ ./
+COPY --from=builder /app/snapshot-dependencies/ ./
+COPY --from=builder /app/application/ ./
+
+EXPOSE 8080
+ENTRYPOINT ["java", "org.springframework.boot.loader.JarLauncher"]</code></pre>
+
+        <h2>Construir etapas específicas</h2>
+        <pre><code class="language-bash"># Construir solo hasta una etapa específica
+docker build --target builder -t mi-app:builder .
+
+# Útil para:
+# - Debugging
+# - CI/CD (ejecutar tests en etapa de build)
+# - Desarrollo (incluir herramientas de desarrollo)</code></pre>
+
+        <h2>Copiar desde imágenes externas</h2>
+        <pre><code class="language-dockerfile"># Copiar binarios de otras imágenes
+COPY --from=nginx:alpine /etc/nginx/nginx.conf /etc/nginx/
+COPY --from=busybox:uclibc /bin/busybox /bin/busybox</code></pre>
+    </section>
+
+    <section class="contenido-didactico">
+        <h1>4.7 Comandos de Construcción</h1>
+
+        <h2>docker build</h2>
+        <h3>Construir imagen desde Dockerfile</h3>
+
+        <pre><code class="language-bash"># Sintaxis básica
+docker build [opciones] &lt;contexto&gt;</code></pre>
+
+        <h3>Ejemplos comunes</h3>
+        <pre><code class="language-bash"># Construir en directorio actual
+docker build .
+
+# Con nombre y tag
+docker build -t mi-app:1.0 .
+
+# Múltiples tags
+docker build -t mi-app:1.0 -t mi-app:latest .
+
+# Dockerfile en ubicación diferente
+docker build -f docker/Dockerfile.prod -t mi-app:prod .
+
+# Sin usar caché
+docker build --no-cache -t mi-app .
+
+# Construir etapa específica (multi-stage)
+docker build --target builder -t mi-app:builder .
+
+# Con argumentos de construcción
+docker build --build-arg VERSION=1.0 --build-arg ENV=prod -t mi-app .
+
+# Especificar plataforma (para builds multiplataforma)
+docker build --platform linux/amd64 -t mi-app .
+
+# Ver salida completa (BuildKit)
+docker build --progress=plain -t mi-app .</code></pre>
+
+        <h3>Opciones importantes</h3>
+        <ul>
+            <li><code>-t, --tag</code> asigna nombre y tag a la imagen</li>
+            <li><code>-f, --file</code> especifica Dockerfile alternativo</li>
+            <li><code>--build-arg</code> pasa variables ARG</li>
+            <li><code>--target</code> construye etapa específica en multi-stage</li>
+            <li><code>--no-cache</code> ignora el caché de capas</li>
+            <li><code>--pull</code> siempre intenta descargar imagen base más reciente</li>
+            <li><code>--platform</code> especifica plataforma de destino</li>
+            <li><code>--secret</code> monta secretos durante el build (BuildKit)</li>
+            <li><code>--ssh</code> permite acceso SSH durante el build (BuildKit)</li>
+            <li><code>--progress</code> cambia formato de salida (auto, plain, tty)</li>
+        </ul>
+
+        <h3>Construcción con secretos (BuildKit)</h3>
+        <pre><code class="language-bash"># Montar secreto desde archivo
+docker build --secret id=mysecret,src=./secret.txt -t mi-app .
+
+# En el Dockerfile:
+# RUN --mount=type=secret,id=mysecret cat /run/secrets/mysecret</code></pre>
+
+        <h3>Construcción con SSH (BuildKit)</h3>
+        <pre><code class="language-bash"># Usar agente SSH del host
+docker build --ssh default -t mi-app .
+
+# En el Dockerfile:
+# RUN --mount=type=ssh git clone git@github.com:org/repo.git</code></pre>
+
+        <h2>docker buildx</h2>
+        <h3>Construcción avanzada multiplataforma</h3>
+        <p><code>docker buildx</code> es un plugin que extiende las capacidades de construcción de Docker.</p>
+
+        <pre><code class="language-bash"># Crear builder multiplataforma
+docker buildx create --name mybuilder --use
+
+# Ver builders disponibles
+docker buildx ls
+
+# Construir para múltiples plataformas
+docker buildx build --platform linux/amd64,linux/arm64 -t mi-app:multi .
+
+# Construir y publicar a registro
+docker buildx build --platform linux/amd64,linux/arm64 \
+    -t usuario/mi-app:latest \
+    --push .
+
+# Construir y cargar a Docker local (solo una plataforma)
+docker buildx build --platform linux/amd64 -t mi-app --load .</code></pre>
+
+        <h2>docker tag</h2>
+        <h3>Etiquetar imágenes</h3>
+
+        <pre><code class="language-bash"># Crear nuevo tag para imagen existente
+docker tag imagen:tag nuevo-nombre:nuevo-tag
+
+# Ejemplos
+docker tag mi-app:latest mi-app:1.0
+docker tag mi-app:latest usuario/mi-app:latest
+docker tag mi-app:latest registro.ejemplo.com:5000/mi-app:1.0</code></pre>
+
+        <h2>docker push</h2>
+        <h3>Publicar imagen a registro</h3>
+
+        <pre><code class="language-bash"># Iniciar sesión en registro
+docker login
+docker login registro.ejemplo.com
+
+# Publicar imagen
+docker push usuario/mi-app:latest
+docker push registro.ejemplo.com:5000/mi-app:1.0
+
+# Publicar todos los tags de una imagen
+docker push --all-tags usuario/mi-app</code></pre>
+
+        <h2>docker save / load</h2>
+        <h3>Exportar e importar imágenes como archivos</h3>
+
+        <pre><code class="language-bash"># Guardar imagen a archivo tar
+docker save -o mi-app.tar mi-app:latest
+docker save mi-app:latest | gzip > mi-app.tar.gz
+
+# Cargar imagen desde archivo
+docker load -i mi-app.tar
+docker load < mi-app.tar.gz</code></pre>
+    </section>
+
+    <section class="contenido-didactico">
+        <h1>4.8 Ejemplos Completos por Tecnología</h1>
+
+        <h2>Dockerfile para aplicación Node.js/Express</h2>
+        <pre><code class="language-dockerfile"># syntax=docker/dockerfile:1
+
+# Etapa 1: Dependencias
+FROM node:18-alpine AS deps
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+RUN npm ci --only=production
+
+# Etapa 2: Builder
+FROM node:18-alpine AS builder
+WORKDIR /app
+
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+RUN npm run build
+
+# Etapa 3: Runner
+FROM node:18-alpine AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 expressjs
+
+COPY --from=builder --chown=expressjs:nodejs /app/dist ./dist
+COPY --from=deps --chown=expressjs:nodejs /app/node_modules ./node_modules
+COPY --chown=expressjs:nodejs package.json ./
+
+USER expressjs
+
+EXPOSE 3000
+ENV PORT 3000
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD node -e "require('http').get('http://localhost:3000/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"
+
+CMD ["node", "dist/server.js"]</code></pre>
+
+        <h2>Dockerfile para aplicación Python/Flask</h2>
+        <pre><code class="language-dockerfile"># syntax=docker/dockerfile:1
+
+# Etapa 1: Builder
+FROM python:3.11-slim AS builder
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    gcc \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
+
+# Etapa 2: Runner
+FROM python:3.11-slim AS runner
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq5 \
+    curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && useradd --create-home --shell /bin/bash app
+
+COPY --from=builder /opt/venv /opt/venv
+
+WORKDIR /home/app
+ENV PATH="/opt/venv/bin:$PATH" \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+COPY --chown=app:app . .
+
+USER app
+
+EXPOSE 8000
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "4", "app:create_app()"]</code></pre>
+
+        <h2>Dockerfile para aplicación Go</h2>
+        <pre><code class="language-dockerfile"># syntax=docker/dockerfile:1
+
+# Etapa 1: Builder
+FROM golang:1.21-alpine AS builder
+
+RUN apk add --no-cache git ca-certificates tzdata
+
+WORKDIR /app
+
+COPY go.mod go.sum ./
+RUN go mod download && go mod verify
+
+COPY . .
+
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
+    -ldflags='-w -s -extldflags "-static"' \
+    -o /app/server ./cmd/server
+
+# Etapa 2: Runner (imagen mínima)
+FROM scratch AS runner
+
+COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY --from=builder /app/server /server
+
+EXPOSE 8080
+
+ENTRYPOINT ["/server"]</code></pre>
+
+        <h2>Dockerfile para aplicación React (SPA)</h2>
+        <pre><code class="language-dockerfile"># syntax=docker/dockerfile:1
+
+# Etapa 1: Dependencias
+FROM node:18-alpine AS deps
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
+
+# Etapa 2: Build
+FROM node:18-alpine AS builder
+WORKDIR /app
+
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+ARG REACT_APP_API_URL
+ENV REACT_APP_API_URL=$REACT_APP_API_URL
+
+RUN npm run build
+
+# Etapa 3: Servidor Nginx
+FROM nginx:alpine AS runner
+
+RUN rm /etc/nginx/conf.d/default.conf
+
+COPY nginx.conf /etc/nginx/conf.d/
+
+COPY --from=builder /app/build /usr/share/nginx/html
+
+RUN chown -R nginx:nginx /usr/share/nginx/html && \
+    chown -R nginx:nginx /var/cache/nginx && \
+    chown -R nginx:nginx /var/log/nginx && \
+    touch /var/run/nginx.pid && \
+    chown -R nginx:nginx /var/run/nginx.pid
+
+USER nginx
+
+EXPOSE 80
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+    CMD wget --quiet --tries=1 --spider http://localhost:80/ || exit 1
+
+CMD ["nginx", "-g", "daemon off;"]</code></pre>
+    </section>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="script.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+</body>
+</html>

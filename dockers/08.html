@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Capítulo 8: Seguridad en Docker</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div>Capítulo 8: Seguridad en Docker</div>
+    </header>
+
+    <section class="contenido-didactico">
+        <h1>8.1 Fundamentos de Seguridad</h1>
+        <p>La seguridad en Docker se basa en cinco principios fundamentales: <strong>mínimo privilegio</strong> (otorgar solo los permisos necesarios), <strong>aislamiento de contenedores</strong> (separar cargas de trabajo), <strong>actualización regular de imágenes</strong> (parchar vulnerabilidades), <strong>escaneo de vulnerabilidades</strong> (detectar problemas antes del despliegue) y <strong>control de acceso</strong> (limitar quién puede hacer qué).</p>
+    </section>
+
+    <section class="contenido-didactico">
+        <h1>8.2 Escaneo de Vulnerabilidades</h1>
+        
+        <pre><code class="language-bash"># Escanear imagen con Trivy (recomendado, gratuito y completo)
+trivy image nginx:latest
+
+# Escanear solo vulnerabilidades críticas y altas
+trivy image --severity CRITICAL,HIGH nginx:latest
+
+# Escanear imagen con Docker Scout (integrado en Docker Desktop)
+docker scout cves nginx:latest</code></pre>
+
+        <p><strong>Herramientas recomendadas:</strong> Trivy (código abierto, fácil de integrar en CI/CD), Docker Scout (integrado en Docker), Snyk (buena integración con repositorios), Grype (alternativa ligera a Trivy).</p>
+        
+        <p><strong>Nota:</strong> <code>docker scan</code> fue deprecado en favor de <code>docker scout</code>.</p>
+    </section>
+
+    <section class="contenido-didactico">
+        <h1>8.3 Configuración Segura</h1>
+        
+        <h2>Usuario no root</h2>
+        <pre><code class="language-dockerfile">FROM nginx:alpine
+RUN adduser -D -s /sbin/nologin appuser
+USER appuser</code></pre>
+
+        <h2>Limitar recursos</h2>
+        <pre><code class="language-bash">docker run -d --memory="256m" --cpus="0.5" --pids-limit=100 nginx</code></pre>
+
+        <h2>Deshabilitar escalada de privilegios</h2>
+        <pre><code class="language-bash">docker run -d --security-opt=no-new-privileges:true --read-only nginx</code></pre>
+
+        <h2>Sistema de archivos de solo lectura con excepciones</h2>
+        <pre><code class="language-bash">docker run -d --read-only --tmpfs /tmp --tmpfs /var/cache/nginx nginx</code></pre>
+
+        <p><strong>Prácticas a evitar:</strong> ejecutar como root, exponer el socket de Docker (<code>/var/run/docker.sock</code>), usar imágenes no verificadas, almacenar secretos en variables de entorno o en la imagen.</p>
+    </section>
+
+    <section class="contenido-didactico">
+        <h1>8.4 Gestión de Secretos</h1>
+        
+        <h2>Docker Swarm (producción)</h2>
+        <pre><code class="language-bash"># Crear secreto desde archivo
+echo "mi_password_seguro" | docker secret create db_password -
+
+# Usar en servicio
+docker service create --secret db_password --name db \
+  -e MYSQL_ROOT_PASSWORD_FILE=/run/secrets/db_password mysql:8.0</code></pre>
+
+        <h2>Docker Compose (desarrollo)</h2>
+        <pre><code class="language-yaml">version: '3.8'
+services:
+  db:
+    image: mysql:8.0
+    secrets:
+      - db_password
+    environment:
+      - MYSQL_ROOT_PASSWORD_FILE=/run/secrets/db_password
+
+secrets:
+  db_password:
+    file: ./secrets/db_password.txt  # Para desarrollo local
+    # external: true                  # Para producción con Swarm</code></pre>
+
+        <p><strong>Importante:</strong> Los secretos se montan en <code>/run/secrets/&lt;nombre&gt;</code> como archivos, no como variables de entorno, lo que es más seguro.</p>
+    </section>
+
+    <section class="contenido-didactico">
+        <h1>8.5 Control de Acceso</h1>
+        
+        <h2>Configurar TLS para el daemon Docker</h2>
+        <p>Crear archivo <code>/etc/docker/daemon.json</code>:</p>
+        
+        <pre><code class="language-json">{
+  "hosts": ["unix:///var/run/docker.sock", "tcp://0.0.0.0:2376"],
+  "tls": true,
+  "tlscacert": "/etc/docker/certs/ca.pem",
+  "tlscert": "/etc/docker/certs/server-cert.pem",
+  "tlskey": "/etc/docker/certs/server-key.pem",
+  "tlsverify": true
+}</code></pre>
+
+        <h2>Conectar con TLS</h2>
+        <pre><code class="language-bash">docker --tlsverify --tlscacert=ca.pem --tlscert=cert.pem --tlskey=key.pem \
+  -H=tcp://servidor:2376 ps</code></pre>
+    </section>
+
+    <section class="contenido-didactico">
+        <h1>8.6 Monitoreo y Auditoría</h1>
+        
+        <pre><code class="language-bash"># Eventos en tiempo real
+docker events --filter 'type=container'
+
+# Monitorear recursos
+docker stats --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}"
+
+# Logs con timestamps
+docker logs -f --timestamps --tail 100 mi_contenedor
+
+# Inspeccionar configuración de seguridad
+docker inspect --format='{{.HostConfig.SecurityOpt}}' mi_contenedor</code></pre>
+
+        <p><strong>Aspectos clave a monitorear:</strong> uso anormal de CPU/memoria, eventos de creación/destrucción de contenedores, intentos de acceso fallidos, cambios en configuración y tráfico de red inusual.</p>
+    </section>
+
+    <section class="contenido-didactico">
+        <h1>8.7 Hardening de Contenedores</h1>
+        
+        <h2>Eliminar capabilities innecesarias</h2>
+        <pre><code class="language-bash">docker run -d --cap-drop ALL --cap-add NET_BIND_SERVICE nginx</code></pre>
+
+        <h2>Aplicar perfil Seccomp (filtra llamadas al sistema)</h2>
+        <pre><code class="language-bash">docker run -d --security-opt seccomp=/etc/docker/seccomp-default.json nginx</code></pre>
+
+        <h2>Aplicar perfil AppArmor (control de acceso obligatorio)</h2>
+        <pre><code class="language-bash">docker run -d --security-opt apparmor=docker-default nginx</code></pre>
+
+        <h2>Ejemplo completo de contenedor hardeneado</h2>
+        <pre><code class="language-bash">docker run -d \
+  --name nginx-seguro \
+  --user 1000:1000 \
+  --read-only \
+  --tmpfs /tmp \
+  --tmpfs /var/cache/nginx \
+  --cap-drop ALL \
+  --cap-add NET_BIND_SERVICE \
+  --security-opt no-new-privileges:true \
+  --security-opt apparmor=docker-default \
+  --memory="256m" \
+  --cpus="0.5" \
+  --pids-limit=50 \
+  --network mi-red-aislada \
+  nginx:alpine</code></pre>
+    </section>
+
+    <section class="contenido-didactico">
+        <h1>8.8 Checklist de Seguridad</h1>
+        
+        <ul>
+            <li>Usar imágenes oficiales o verificadas</li>
+            <li>Escanear imágenes antes de desplegar</li>
+            <li>Ejecutar contenedores como usuario no root</li>
+            <li>Aplicar <code>--read-only</code> cuando sea posible</li>
+            <li>Limitar recursos (memoria, CPU, PIDs)</li>
+            <li>Eliminar capabilities innecesarias (<code>--cap-drop ALL</code>)</li>
+            <li>Usar <code>--security-opt no-new-privileges:true</code></li>
+            <li>Gestionar secretos de forma segura (no en env vars)</li>
+            <li>Aislar contenedores en redes dedicadas</li>
+            <li>Configurar TLS para acceso remoto al daemon</li>
+            <li>Implementar logging y monitoreo</li>
+            <li>Actualizar imágenes regularmente</li>
+        </ul>
+    </section>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="script.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+</body>
+</html>

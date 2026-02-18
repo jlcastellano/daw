@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redes en Docker</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div>Redes en Docker</div>
+    </header>
+
+    <section class="contenido-didactico">
+        <h1>5. Redes en Docker</h1>
+
+        <h2>5.1 Modelo de Red en Docker</h2>
+        
+        <h3>Arquitectura CNM (Container Network Model)</h3>
+        
+        <p>Docker implementa el modelo CNM que define tres componentes fundamentales: <strong>Sandbox</strong> (configuración de red del contenedor, incluyendo interfaces, tabla de rutas y DNS), <strong>Endpoint</strong> (conexión entre sandbox y red, típicamente un par veth), y <strong>Network</strong> (grupo de endpoints que pueden comunicarse directamente).</p>
+
+        <pre><code class="language-bash"># Ver redes disponibles
+docker network ls
+
+# Inspeccionar red específica
+docker network inspect bridge
+
+# Ver a qué redes está conectado un contenedor
+docker inspect --format '{{json .NetworkSettings.Networks}}' mi-contenedor | jq</code></pre>
+
+        <h2>5.2 Drivers de Red</h2>
+
+        <h3>Bridge (por defecto)</h3>
+
+        <p>Red privada interna en el host. Los contenedores obtienen IP del rango de la red y pueden comunicarse entre sí. Requiere port mapping para acceso externo.</p>
+
+        <pre><code class="language-bash"># Red bridge por defecto (docker0)
+docker run -d --name web nginx
+docker inspect web | grep IPAddress  # 172.17.0.x
+
+# Red bridge personalizada (recomendado)
+docker network create mi-red
+docker run -d --name web --network mi-red nginx</code></pre>
+
+        <p><strong>Diferencias entre bridge por defecto y personalizada:</strong></p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Característica</th>
+                    <th>Bridge por defecto</th>
+                    <th>Bridge personalizada</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>DNS automático</td>
+                    <td>No (solo IP)</td>
+                    <td>Sí (por nombre)</td>
+                </tr>
+                <tr>
+                    <td>Aislamiento</td>
+                    <td>Compartida</td>
+                    <td>Aislada</td>
+                </tr>
+                <tr>
+                    <td>Conexión en caliente</td>
+                    <td>No</td>
+                    <td>Sí</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>Host</h3>
+
+        <p>El contenedor comparte directamente el stack de red del host. Sin aislamiento de red ni necesidad de port mapping. Mejor rendimiento pero menor seguridad.</p>
+
+        <pre><code class="language-bash">docker run -d --network host nginx
+# Nginx accesible directamente en puerto 80 del host</code></pre>
+
+        <h3>None</h3>
+
+        <p>Desactiva completamente la red. Útil para contenedores que no necesitan conectividad o para configuración manual.</p>
+
+        <pre><code class="language-bash">docker run -d --network none alpine sleep infinity</code></pre>
+
+        <h3>Overlay</h3>
+
+        <p>Permite comunicación entre contenedores en diferentes hosts Docker. Requiere Swarm mode o configuración manual con almacén KV externo.</p>
+
+        <pre><code class="language-bash"># Inicializar Swarm
+docker swarm init
+
+# Crear red overlay
+docker network create -d overlay mi-red-overlay
+
+# Usar en servicios
+docker service create --network mi-red-overlay --name web nginx</code></pre>
+
+        <h3>Macvlan</h3>
+
+        <p>Asigna dirección MAC real al contenedor, haciéndolo aparecer como dispositivo físico en la red. Útil para aplicaciones que necesitan estar directamente en la red física.</p>
+
+        <pre><code class="language-bash">docker network create -d macvlan \
+    --subnet=192.168.1.0/24 \
+    --gateway=192.168.1.1 \
+    -o parent=eth0 \
+    mi-macvlan
+
+docker run -d --network mi-macvlan --ip 192.168.1.100 nginx</code></pre>
+
+        <h3>IPvlan</h3>
+
+        <p>Similar a macvlan pero comparte la MAC del host. Útil cuando hay restricciones de MAC en la red o límites de MACs por puerto.</p>
+
+        <pre><code class="language-bash">docker network create -d ipvlan \
+    --subnet=192.168.1.0/24 \
+    -o parent=eth0 \
+    -o ipvlan_mode=l2 \
+    mi-ipvlan</code></pre>
+
+        <h2>5.3 Gestión de Redes</h2>
+
+        <h3>Crear redes</h3>
+
+        <pre><code class="language-bash"># Red básica
+docker network create mi-red
+
+# Red con configuración específica
+docker network create \
+    --driver bridge \
+    --subnet 172.20.0.0/16 \
+    --ip-range 172.20.240.0/20 \
+    --gateway 172.20.0.1 \
+    --opt "com.docker.network.bridge.name"="mi-bridge" \
+    mi-red-custom
+
+# Red con IPv6
+docker network create \
+    --ipv6 \
+    --subnet 2001:db8::/64 \
+    mi-red-ipv6
+
+# Red interna (sin acceso a internet)
+docker network create --internal red-interna</code></pre>
+
+        <h3>Conectar y desconectar contenedores</h3>
+
+        <pre><code class="language-bash"># Conectar contenedor existente a red
+docker network connect mi-red mi-contenedor
+
+# Conectar con IP específica
+docker network connect --ip 172.20.0.10 mi-red mi-contenedor
+
+# Conectar con alias
+docker network connect --alias db-master mi-red mi-contenedor
+
+# Desconectar
+docker network disconnect mi-red mi-contenedor</code></pre>
+
+        <h3>Eliminar redes</h3>
+
+        <pre><code class="language-bash"># Eliminar red específica
+docker network rm mi-red
+
+# Eliminar redes no utilizadas
+docker network prune
+
+# Eliminar con confirmación automática
+docker network prune -f</code></pre>
+
+        <h2>5.4 Port Mapping</h2>
+
+        <h3>Publicar puertos</h3>
+
+        <pre><code class="language-bash"># Mapeo específico: host:contenedor
+docker run -p 8080:80 nginx
+
+# Solo especificar puerto del contenedor (puerto host aleatorio)
+docker run -p 80 nginx
+docker port mi-contenedor  # Ver puerto asignado
+
+# Publicar todos los puertos expuestos (EXPOSE en Dockerfile)
+docker run -P nginx
+
+# Múltiples puertos
+docker run -p 8080:80 -p 8443:443 nginx
+
+# Especificar IP del host
+docker run -p 127.0.0.1:8080:80 nginx  # Solo accesible desde localhost
+docker run -p 192.168.1.10:8080:80 nginx
+
+# Protocolo específico (TCP por defecto)
+docker run -p 53:53/udp dns-server
+docker run -p 53:53/tcp -p 53:53/udp dns-server
+
+# Rango de puertos
+docker run -p 8080-8090:8080-8090 mi-app</code></pre>
+
+        <h3>Inspeccionar puertos</h3>
+
+        <pre><code class="language-bash"># Ver mapeo de puertos
+docker port mi-contenedor
+
+# Formato específico
+docker port mi-contenedor 80/tcp</code></pre>
+
+        <h2>5.5 DNS y Resolución de Nombres</h2>
+
+        <h3>DNS automático en redes personalizadas</h3>
+
+        <p>Los contenedores en redes bridge personalizadas pueden comunicarse por nombre.</p>
+
+        <pre><code class="language-bash">docker network create app-net
+
+docker run -d --name db --network app-net postgres
+docker run -d --name api --network app-net mi-api
+
+# Desde 'api' se puede acceder a 'db' por nombre
+docker exec api ping db  # Funciona</code></pre>
+
+        <h3>Alias de red</h3>
+
+        <pre><code class="language-bash"># Crear alias al conectar
+docker run -d --name postgres-1 --network app-net --network-alias db postgres
+docker run -d --name postgres-2 --network app-net --network-alias db postgres
+
+# Ambos responden al alias 'db' (round-robin DNS)</code></pre>
+
+        <h3>Configuración DNS personalizada</h3>
+
+        <pre><code class="language-bash"># Servidor DNS específico
+docker run --dns 8.8.8.8 --dns 8.8.4.4 nginx
+
+# Dominio de búsqueda
+docker run --dns-search ejemplo.com nginx
+
+# Entradas de hosts personalizadas
+docker run --add-host mi-host:192.168.1.100 nginx
+docker run --add-host host.docker.internal:host-gateway nginx  # Acceder al host
+
+# Configurar hostname
+docker run --hostname mi-servidor nginx</code></pre>
+
+        <h2>5.6 Configuración Avanzada</h2>
+
+        <h3>Opciones de red del contenedor</h3>
+
+        <pre><code class="language-bash"># IP estática (requiere red con subnet definido)
+docker run --network mi-red --ip 172.20.0.100 nginx
+
+# Dirección MAC específica
+docker run --mac-address 02:42:ac:11:00:02 nginx
+
+# Modo de red de otro contenedor (comparten stack de red)
+docker run -d --name app nginx
+docker run --network container:app alpine  # Comparte red con 'app'
+
+# Añadir capabilities de red
+docker run --cap-add NET_ADMIN alpine
+
+# Deshabilitar resolución DNS
+docker run --dns-opt use-vc nginx</code></pre>
+
+        <h3>Opciones del driver bridge</h3>
+
+        <pre><code class="language-bash">docker network create \
+    -o "com.docker.network.bridge.enable_icc=true" \
+    -o "com.docker.network.bridge.enable_ip_masquerade=true" \
+    -o "com.docker.network.bridge.host_binding_ipv4=0.0.0.0" \
+    -o "com.docker.network.driver.mtu=1500" \
+    mi-red</code></pre>
+
+        <h3>Configuración en daemon.json</h3>
+
+        <pre><code class="language-json">{
+  "bip": "172.17.0.1/16",
+  "fixed-cidr": "172.17.0.0/24",
+  "mtu": 1500,
+  "default-gateway": "172.17.0.1",
+  "dns": ["8.8.8.8", "8.8.4.4"]
+}</code></pre>
+
+        <h2>5.7 Patrones de Arquitectura de Red</h2>
+
+        <h3>Patrón: Segmentación Frontend/Backend</h3>
+
+        <pre><code class="language-bash"># Crear redes
+docker network create frontend
+docker network create backend
+
+# Base de datos (solo backend)
+docker run -d --name db \
+    --network backend \
+    -e POSTGRES_PASSWORD=secret \
+    postgres
+
+# API (conectada a ambas)
+docker run -d --name api \
+    --network backend \
+    mi-api
+docker network connect frontend api
+
+# Proxy/Load Balancer (solo frontend, expuesto)
+docker run -d --name proxy \
+    --network frontend \
+    -p 80:80 \
+    nginx</code></pre>
+
+        <h3>Patrón: Red interna para servicios sensibles</h3>
+
+        <pre><code class="language-bash"># Red interna sin acceso a internet
+docker network create --internal datos
+
+# Servicios de datos aislados
+docker run -d --name redis --network datos redis
+docker run -d --name db --network datos postgres
+
+# API con acceso a red interna y externa
+docker network create api-net
+docker run -d --name api --network api-net mi-api
+docker network connect datos api</code></pre>
+
+        <h3>Patrón: Comunicación con el host</h3>
+
+        <pre><code class="language-bash"># Linux: usar gateway de la red bridge
+docker run --add-host host.docker.internal:172.17.0.1 mi-app
+
+# Docker Desktop (Mac/Windows): host.docker.internal disponible automáticamente
+docker run mi-app  # Puede usar host.docker.internal
+
+# Alternativa: modo host (sin aislamiento)
+docker run --network host mi-app</code></pre>
+
+        <h2>5.8 Diagnóstico y Resolución de Problemas</h2>
+
+        <h3>Herramientas de inspección</h3>
+
+        <pre><code class="language-bash"># Detalles completos de la red
+docker network inspect mi-red
+
+# Ver contenedores en una red
+docker network inspect mi-red --format '{{range .Containers}}{{.Name}} {{end}}'
+
+# Ver configuración de red de un contenedor
+docker inspect mi-contenedor --format '{{json .NetworkSettings}}' | jq
+
+# IP de un contenedor
+docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' mi-contenedor</code></pre>
+
+        <h3>Pruebas de conectividad</h3>
+
+        <pre><code class="language-bash"># Ping entre contenedores
+docker exec contenedor1 ping contenedor2
+
+# Verificar puertos abiertos
+docker exec contenedor1 nc -zv contenedor2 5432
+
+# Resolución DNS
+docker exec contenedor nslookup otro-contenedor
+
+# Herramienta completa de diagnóstico
+docker run --rm --network container:mi-contenedor nicolaka/netshoot \
+    bash -c "ping db && curl api:8080/health"
+
+# Captura de tráfico
+docker run --rm --net container:mi-contenedor nicolaka/netshoot \
+    tcpdump -i eth0 port 80</code></pre>
+
+        <h3>Problemas comunes y soluciones</h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Problema</th>
+                    <th>Causa</th>
+                    <th>Solución</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>No resuelve nombres</td>
+                    <td>Red bridge por defecto</td>
+                    <td>Usar red personalizada</td>
+                </tr>
+                <tr>
+                    <td>Puerto ya en uso</td>
+                    <td>Conflicto en host</td>
+                    <td>Cambiar puerto host o liberar</td>
+                </tr>
+                <tr>
+                    <td>No puede conectar a host</td>
+                    <td>Aislamiento de red</td>
+                    <td>Usar <code>host.docker.internal</code></td>
+                </tr>
+                <tr>
+                    <td>Timeout entre contenedores</td>
+                    <td>Redes diferentes</td>
+                    <td>Verificar que estén en misma red</td>
+                </tr>
+                <tr>
+                    <td>Sin acceso a internet</td>
+                    <td>Red interna o DNS</td>
+                    <td>Verificar <code>--internal</code> y configuración DNS</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>Verificar reglas de iptables (Linux)</h3>
+
+        <pre><code class="language-bash"># Ver reglas de Docker
+sudo iptables -L -n -v | grep -A5 DOCKER
+
+# Ver NAT
+sudo iptables -t nat -L -n</code></pre>
+
+        <h2>5.9 Seguridad de Red</h2>
+
+        <h3>Principios básicos</h3>
+
+        <pre><code class="language-bash"># Limitar exposición de puertos (solo localhost)
+docker run -p 127.0.0.1:8080:80 nginx
+
+# Usar redes internas para servicios sensibles
+docker network create --internal secure-net
+
+# No usar --network host en producción sin necesidad
+
+# Separar redes por función/sensibilidad
+docker network create dmz
+docker network create internal</code></pre>
+
+        <h3>Deshabilitar comunicación entre contenedores (ICC)</h3>
+
+        <pre><code class="language-bash"># En red específica
+docker network create -o "com.docker.network.bridge.enable_icc=false" isolated
+
+# Globalmente en daemon.json
+{
+  "icc": false
+}</code></pre>
+
+        <h2>5.10 Comandos de Referencia Rápida</h2>
+
+        <pre><code class="language-bash"># Listar
+docker network ls
+docker network ls --filter driver=bridge
+
+# Crear
+docker network create NOMBRE
+docker network create --driver bridge --subnet 10.0.0.0/24 NOMBRE
+
+# Inspeccionar
+docker network inspect NOMBRE
+docker network inspect NOMBRE -f '{{.IPAM.Config}}'
+
+# Conectar/Desconectar
+docker network connect NOMBRE CONTENEDOR
+docker network connect --ip 10.0.0.5 NOMBRE CONTENEDOR
+docker network disconnect NOMBRE CONTENEDOR
+
+# Eliminar
+docker network rm NOMBRE
+docker network prune
+
+# Ejecutar en red
+docker run --network NOMBRE IMAGEN
+docker run --network NOMBRE --ip 10.0.0.5 IMAGEN
+
+# Publicar puertos
+docker run -p HOST:CONTENEDOR IMAGEN
+docker run -p IP:HOST:CONTENEDOR IMAGEN
+docker run -P IMAGEN</code></pre>
+
+    </section>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="script.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+</body>
+</html>

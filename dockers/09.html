@@ -1,0 +1,1352 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Casos Prácticos - Docker</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div>Casos Prácticos con Docker</div>
+    </header>
+
+    <section class="contenido-didactico">
+        <h1>9. Casos Prácticos</h1>
+
+        <h2>9.1 Despliegue de Aplicación Web Simple</h2>
+
+        <h3>Aplicación Node.js con Nginx</h3>
+
+        <p><strong>Arquitectura:</strong></p>
+
+        <pre><code class="language-plaintext">[Cliente] → [Nginx (80)] → [Node.js App (3000)]</code></pre>
+
+        <p>Nginx actúa como proxy inverso, recibiendo las peticiones del cliente y redirigiéndolas a la aplicación Node.js. Esto permite gestionar SSL, balanceo de carga y caché en el futuro.</p>
+
+        <h3>Paso 1: Crear estructura del proyecto</h3>
+
+        <pre><code class="language-bash">mkdir node-nginx-app
+cd node-nginx-app
+mkdir nginx</code></pre>
+
+        <h3>Paso 2: Crear package.json</h3>
+
+        <pre><code class="language-json">{
+  "name": "node-app",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}</code></pre>
+
+        <blockquote>
+            <strong>Nota:</strong> Se actualizó la versión de Express a una más reciente y segura.
+        </blockquote>
+
+        <h3>Paso 3: Crear app.js</h3>
+
+        <pre><code class="language-javascript">const express = require('express');
+const app = express();
+const port = 3000;
+
+app.get('/', (req, res) => {
+  res.send('¡Hola desde Node.js!');
+});
+
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
+});
+
+app.listen(port, '0.0.0.0', () => {
+  console.log(`Aplicación corriendo en puerto ${port}`);
+});</code></pre>
+
+        <p><strong>Mejoras realizadas:</strong></p>
+        <ul>
+            <li>Se añadió endpoint <code>/health</code> para healthchecks</li>
+            <li>Se especificó <code>0.0.0.0</code> para escuchar en todas las interfaces de red del contenedor</li>
+        </ul>
+
+        <h3>Paso 4: Crear nginx/default.conf</h3>
+
+        <pre><code class="language-nginx">upstream nodejs {
+    server app:3000;
+}
+
+server {
+    listen 80;
+    server_name localhost;
+
+    location / {
+        proxy_pass http://nodejs;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+    }
+}</code></pre>
+
+        <p><strong>Correcciones realizadas:</strong></p>
+        <ul>
+            <li>Se movió a una subcarpeta <code>nginx/</code> para mejor organización</li>
+            <li>Se añadió bloque <code>upstream</code> para facilitar escalado futuro</li>
+            <li>Se añadieron headers adicionales para pasar información del cliente real</li>
+        </ul>
+
+        <h3>Paso 5: Crear Dockerfile</h3>
+
+        <pre><code class="language-dockerfile">FROM node:18-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm install --production
+
+COPY . .
+
+EXPOSE 3000
+
+USER node
+
+CMD ["npm", "start"]</code></pre>
+
+        <p><strong>Mejoras realizadas:</strong></p>
+        <ul>
+            <li>Se actualizó a Node.js 18 LTS con imagen Alpine (más ligera)</li>
+            <li>Se añadió <code>--production</code> para no instalar dependencias de desarrollo</li>
+            <li>Se añadió <code>USER node</code> por seguridad (no ejecutar como root)</li>
+        </ul>
+
+        <h3>Paso 6: Crear docker-compose.yml</h3>
+
+        <pre><code class="language-yaml">version: '3.8'
+
+services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      app:
+        condition: service_healthy
+    restart: unless-stopped
+
+  app:
+    build: .
+    expose:
+      - "3000"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped</code></pre>
+
+        <p><strong>Correcciones y mejoras realizadas:</strong></p>
+        <ul>
+            <li>Se añadió healthcheck para verificar que la aplicación está lista</li>
+            <li>Nginx espera a que la app esté healthy antes de iniciar</li>
+            <li>Se añadió <code>:ro</code> (read-only) al volumen de configuración</li>
+            <li>Se usa <code>wget</code> en lugar de <code>curl</code> porque la imagen Alpine de Node no incluye curl por defecto</li>
+        </ul>
+
+        <h3>Paso 7: Crear .dockerignore</h3>
+
+        <pre><code class="language-plaintext">node_modules
+npm-debug.log
+.git
+.gitignore
+README.md
+.env</code></pre>
+
+        <p>Este archivo evita copiar archivos innecesarios a la imagen.</p>
+
+        <h3>Paso 8: Construir y ejecutar</h3>
+
+        <pre><code class="language-bash">docker compose up --build</code></pre>
+
+        <p>Accede a <code>http://localhost</code> para ver la aplicación.</p>
+
+        <h3>Estructura final del proyecto</h3>
+
+        <pre><code class="language-plaintext">node-nginx-app/
+├── app.js
+├── package.json
+├── Dockerfile
+├── .dockerignore
+├── docker-compose.yml
+└── nginx/
+    └── default.conf</code></pre>
+
+        <h2>9.2 Base de Datos Containerizada</h2>
+
+        <h3>PostgreSQL con Persistencia y Backups</h3>
+
+        <h3>Paso 1: Crear estructura</h3>
+
+        <pre><code class="language-bash">mkdir -p postgres-project/backups
+mkdir -p postgres-project/scripts
+cd postgres-project</code></pre>
+
+        <h3>Paso 2: Crear scripts/init.sql</h3>
+
+        <pre><code class="language-sql">-- Crear tabla de usuarios
+CREATE TABLE IF NOT EXISTS usuarios (
+    id SERIAL PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Insertar datos de prueba
+INSERT INTO usuarios (nombre, email) 
+VALUES 
+    ('Usuario Test', 'test@example.com'),
+    ('Admin', 'admin@example.com')
+ON CONFLICT (email) DO NOTHING;
+
+-- Crear índice para búsquedas por email
+CREATE INDEX IF NOT EXISTS idx_usuarios_email ON usuarios(email);</code></pre>
+
+        <p><strong>Mejoras realizadas:</strong></p>
+        <ul>
+            <li>Se añadió <code>IF NOT EXISTS</code> para evitar errores en reinicios</li>
+            <li>Se añadió restricción <code>UNIQUE</code> en email</li>
+            <li>Se añadió <code>ON CONFLICT</code> para evitar duplicados</li>
+            <li>Se añadió índice para mejorar rendimiento de búsquedas</li>
+        </ul>
+
+        <h3>Paso 3: Crear scripts/backup.sh</h3>
+
+        <pre><code class="language-bash">#!/bin/bash
+
+# Configuración
+BACKUP_DIR="/backups"
+DATE=$(date +%Y%m%d_%H%M%S)
+BACKUP_FILE="${BACKUP_DIR}/backup_${DATE}.sql"
+RETENTION_DAYS=7
+
+# Crear backup
+echo "Iniciando backup: ${BACKUP_FILE}"
+pg_dump -h db -U postgres -d miapp > "${BACKUP_FILE}"
+
+if [ $? -eq 0 ]; then
+    echo "Backup completado exitosamente"
+    gzip "${BACKUP_FILE}"
+    echo "Backup comprimido: ${BACKUP_FILE}.gz"
+else
+    echo "Error al crear backup"
+    exit 1
+fi
+
+# Eliminar backups antiguos
+echo "Eliminando backups con más de ${RETENTION_DAYS} días..."
+find ${BACKUP_DIR} -name "backup_*.sql.gz" -mtime +${RETENTION_DAYS} -delete
+
+echo "Proceso de backup finalizado"</code></pre>
+
+        <p><strong>Mejoras realizadas:</strong></p>
+        <ul>
+            <li>Se añadió compresión con gzip</li>
+            <li>Se añadió rotación automática de backups antiguos</li>
+            <li>Se añadió manejo de errores</li>
+            <li>Se añadió logging informativo</li>
+        </ul>
+
+        <h3>Paso 4: Dar permisos de ejecución</h3>
+
+        <pre><code class="language-bash">chmod +x scripts/backup.sh</code></pre>
+
+        <h3>Paso 5: Crear archivo .env</h3>
+
+        <pre><code class="language-bash">POSTGRES_USER=postgres
+POSTGRES_PASSWORD=secreto_seguro_123
+POSTGRES_DB=miapp</code></pre>
+
+        <blockquote>
+            <strong>Nota:</strong> Este archivo no debe incluirse en control de versiones. Crea un <code>.env.example</code> como plantilla.
+        </blockquote>
+
+        <h3>Paso 6: Crear docker-compose.yml</h3>
+
+        <pre><code class="language-yaml">version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB:-miapp}
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-miapp}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  backup:
+    image: postgres:15-alpine
+    volumes:
+      - ./backups:/backups
+      - ./scripts/backup.sh:/backup.sh:ro
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - PGPASSWORD=${POSTGRES_PASSWORD}
+    entrypoint: ["/bin/sh", "-c"]
+    command: ["echo 'Servicio de backup listo. Ejecutar manualmente o programar con cron.' && tail -f /dev/null"]
+    restart: unless-stopped
+
+  adminer:
+    image: adminer:latest
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    restart: unless-stopped
+
+volumes:
+  postgres_data:</code></pre>
+
+        <p><strong>Correcciones y mejoras realizadas:</strong></p>
+        <ul>
+            <li>Se actualizó a PostgreSQL 15 con imagen Alpine</li>
+            <li>Se corrigió el healthcheck para usar las variables correctas</li>
+            <li>Se añadió <code>PGPASSWORD</code> para que el backup no pida contraseña</li>
+            <li>Se añadió Adminer como interfaz web para gestionar la base de datos</li>
+            <li>El servicio de backup ahora se mantiene activo para ejecutar backups manualmente</li>
+            <li>Se añadieron valores por defecto con <code>${VAR:-default}</code></li>
+        </ul>
+
+        <h3>Paso 7: Ejecutar</h3>
+
+        <pre><code class="language-bash"># Iniciar servicios
+docker compose up -d
+
+# Verificar que PostgreSQL está listo
+docker compose ps
+
+# Conectarse a la base de datos
+docker compose exec db psql -U postgres -d miapp
+
+# Ejecutar backup manualmente
+docker compose exec backup /backup.sh
+
+# Ver backups creados
+ls -la backups/</code></pre>
+
+        <h3>Paso 8: Programar backups automáticos (opcional)</h3>
+
+        <p>Para backups automáticos, puedes añadir una entrada cron en el host:</p>
+
+        <pre><code class="language-bash"># Editar crontab
+crontab -e
+
+# Añadir línea para backup diario a las 2:00 AM
+0 2 * * * cd /ruta/a/postgres-project && docker compose exec -T backup /backup.sh >> /var/log/postgres-backup.log 2>&1</code></pre>
+
+        <h3>Estructura final del proyecto</h3>
+
+        <pre><code class="language-plaintext">postgres-project/
+├── docker-compose.yml
+├── .env
+├── .env.example
+├── scripts/
+│   ├── init.sql
+│   └── backup.sh
+└── backups/</code></pre>
+
+        <h2>9.3 Stack LAMP Básico</h2>
+
+        <h3>Linux + Apache + MySQL + PHP</h3>
+
+        <p><strong>Arquitectura:</strong></p>
+
+        <pre><code class="language-plaintext">[Cliente] → [Apache + PHP (80)] → [MySQL (3306)]
+                ↓
+        [phpMyAdmin (8080)]</code></pre>
+
+        <h3>Paso 1: Crear estructura</h3>
+
+        <pre><code class="language-bash">mkdir -p lamp-stack/src
+mkdir -p lamp-stack/config
+cd lamp-stack</code></pre>
+
+        <h3>Paso 2: Crear src/index.php</h3>
+
+        <pre><code class="language-php">&lt;?php
+// Configuración de errores para desarrollo
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+
+$host = 'db';
+$user = 'lamp_user';
+$pass = 'lamp_pass';
+$dbname = 'lamp_db';
+
+echo "&lt;h1&gt;Stack LAMP con Docker&lt;/h1&gt;";
+
+try {
+    $conn = new mysqli($host, $user, $pass, $dbname);
+    
+    if ($conn->connect_error) {
+        throw new Exception("Error de conexión: " . $conn->connect_error);
+    }
+    
+    echo "&lt;p style='color: green;'&gt;¡Conexión exitosa a MySQL!&lt;/p&gt;";
+    
+    // Mostrar versión de MySQL
+    $result = $conn->query("SELECT VERSION() as version");
+    $row = $result->fetch_assoc();
+    echo "&lt;p&gt;Versión de MySQL: " . htmlspecialchars($row['version']) . "&lt;/p&gt;";
+    
+    // Mostrar versión de PHP
+    echo "&lt;p&gt;Versión de PHP: " . phpversion() . "&lt;/p&gt;";
+    
+    // Mostrar información del servidor
+    echo "&lt;p&gt;Servidor: " . $_SERVER['SERVER_SOFTWARE'] . "&lt;/p&gt;";
+    
+    $conn->close();
+    
+} catch (Exception $e) {
+    echo "&lt;p style='color: red;'&gt;Error: " . htmlspecialchars($e->getMessage()) . "&lt;/p&gt;";
+    echo "&lt;p&gt;Verifica que el contenedor de MySQL esté corriendo y la base de datos esté lista.&lt;/p&gt;";
+}
+?&gt;
+
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;LAMP Stack&lt;/title&gt;
+    &lt;style&gt;
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        h1 { color: #333; }
+        p { margin: 10px 0; }
+    &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;hr&gt;
+    &lt;p&gt;&lt;a href="/phpinfo.php"&gt;Ver phpinfo()&lt;/a&gt;&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+        <h3>Paso 3: Crear src/phpinfo.php</h3>
+
+        <pre><code class="language-php">&lt;?php
+phpinfo();</code></pre>
+
+        <p>Útil para verificar la configuración de PHP y las extensiones instaladas.</p>
+
+        <h3>Paso 4: Crear config/php.ini</h3>
+
+        <pre><code class="language-ini">; Configuración PHP para desarrollo
+display_errors = On
+error_reporting = E_ALL
+log_errors = On
+error_log = /var/log/php_errors.log
+
+; Límites
+memory_limit = 256M
+upload_max_filesize = 64M
+post_max_size = 64M
+max_execution_time = 300
+
+; Timezone
+date.timezone = Europe/Madrid</code></pre>
+
+        <h3>Paso 5: Crear Dockerfile</h3>
+
+        <pre><code class="language-dockerfile">FROM php:8.2-apache
+
+# Instalar extensiones de PHP necesarias
+RUN docker-php-ext-install mysqli pdo pdo_mysql
+
+# Habilitar mod_rewrite de Apache (útil para frameworks)
+RUN a2enmod rewrite
+
+# Copiar configuración PHP personalizada
+COPY config/php.ini /usr/local/etc/php/conf.d/custom.ini
+
+# Establecer permisos correctos
+RUN chown -R www-data:www-data /var/www/html
+
+EXPOSE 80</code></pre>
+
+        <p><strong>Correcciones realizadas:</strong></p>
+        <ul>
+            <li>Se actualizó a PHP 8.2</li>
+            <li>Se añadieron extensiones PDO para mayor flexibilidad</li>
+            <li>Se habilitó mod_rewrite</li>
+            <li>Se corrigieron permisos</li>
+        </ul>
+
+        <h3>Paso 6: Crear .env</h3>
+
+        <pre><code class="language-bash">MYSQL_ROOT_PASSWORD=root_password_seguro
+MYSQL_DATABASE=lamp_db
+MYSQL_USER=lamp_user
+MYSQL_PASSWORD=lamp_pass</code></pre>
+
+        <h3>Paso 7: Crear docker-compose.yml</h3>
+
+        <pre><code class="language-yaml">version: '3.8'
+
+services:
+  web:
+    build: .
+    volumes:
+      - ./src:/var/www/html
+    ports:
+      - "80:80"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: mysql:8.0
+    volumes:
+      - mysql_data:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    ports:
+      - "8080:80"
+    environment:
+      - PMA_HOST=db
+      - PMA_USER=root
+      - PMA_PASSWORD=${MYSQL_ROOT_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  mysql_data:</code></pre>
+
+        <p><strong>Correcciones y mejoras realizadas:</strong></p>
+        <ul>
+            <li>Se actualizó a MySQL 8.0</li>
+            <li>Se añadió healthcheck para MySQL</li>
+            <li>Apache espera a que MySQL esté healthy</li>
+            <li>Se corrigió la imagen de phpMyAdmin (era <code>phpmyadmin/phpmyadmin</code>, ahora es <code>phpmyadmin</code>)</li>
+            <li>Se añadieron variables de entorno desde archivo <code>.env</code></li>
+        </ul>
+
+        <h3>Paso 8: Ejecutar</h3>
+
+        <pre><code class="language-bash"># Construir e iniciar
+docker compose up --build -d
+
+# Verificar estado
+docker compose ps
+
+# Ver logs si hay problemas
+docker compose logs -f</code></pre>
+
+        <p><strong>Accesos:</strong></p>
+        <ul>
+            <li>Aplicación PHP: <code>http://localhost</code></li>
+            <li>phpMyAdmin: <code>http://localhost:8080</code></li>
+        </ul>
+
+        <h3>Estructura final del proyecto</h3>
+
+        <pre><code class="language-plaintext">lamp-stack/
+├── docker-compose.yml
+├── Dockerfile
+├── .env
+├── .env.example
+├── config/
+│   └── php.ini
+└── src/
+    ├── index.php
+    └── phpinfo.php</code></pre>
+
+        <h2>9.4 Stack MEAN Básico</h2>
+
+        <h3>MongoDB + Express + Angular + Node.js</h3>
+
+        <p><strong>Arquitectura:</strong></p>
+
+        <pre><code class="language-plaintext">[Cliente] → [Angular (4200)] → [Express API (3000)] → [MongoDB (27017)]</code></pre>
+
+        <h3>Paso 1: Crear estructura del proyecto</h3>
+
+        <pre><code class="language-bash">mkdir mean-app
+cd mean-app
+mkdir -p backend/src
+mkdir -p frontend</code></pre>
+
+        <h3>Paso 2: Configurar Backend</h3>
+
+        <h4>backend/package.json</h4>
+
+        <pre><code class="language-json">{
+  "name": "mean-backend",
+  "version": "1.0.0",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^7.6.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}</code></pre>
+
+        <h4>backend/src/server.js</h4>
+
+        <pre><code class="language-javascript">const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+
+const app = express();
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+
+// Configuración de MongoDB
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/mean_app';
+
+// Conexión a MongoDB con reintentos
+const connectWithRetry = () => {
+    console.log('Intentando conectar a MongoDB...');
+    mongoose.connect(MONGO_URI)
+        .then(() => {
+            console.log('MongoDB conectado exitosamente');
+        })
+        .catch((err) => {
+            console.error('Error de conexión a MongoDB:', err.message);
+            console.log('Reintentando en 5 segundos...');
+            setTimeout(connectWithRetry, 5000);
+        });
+};
+
+connectWithRetry();
+
+// Modelo simple para pruebas
+const ItemSchema = new mongoose.Schema({
+    nombre: { type: String, required: true },
+    descripcion: String,
+    creado: { type: Date, default: Date.now }
+});
+
+const Item = mongoose.model('Item', ItemSchema);
+
+// Rutas
+app.get('/', (req, res) => {
+    res.json({ mensaje: 'API MEAN funcionando correctamente' });
+});
+
+app.get('/health', (req, res) => {
+    const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
+    res.json({ 
+        status: 'ok', 
+        database: dbStatus,
+        timestamp: new Date().toISOString()
+    });
+});
+
+// CRUD básico de items
+app.get('/api/items', async (req, res) => {
+    try {
+        const items = await Item.find().sort({ creado: -1 });
+        res.json(items);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/items', async (req, res) => {
+    try {
+        const item = new Item(req.body);
+        await item.save();
+        res.status(201).json(item);
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+});
+
+app.delete('/api/items/:id', async (req, res) => {
+    try {
+        await Item.findByIdAndDelete(req.params.id);
+        res.json({ mensaje: 'Item eliminado' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Servidor corriendo en puerto ${PORT}`);
+});</code></pre>
+
+        <p><strong>Mejoras realizadas:</strong></p>
+        <ul>
+            <li>Se añadió lógica de reconexión automática a MongoDB</li>
+            <li>Se añadió endpoint <code>/health</code> con estado de la base de datos</li>
+            <li>Se implementó un CRUD básico funcional</li>
+            <li>Se actualizó la sintaxis de Mongoose (las opciones <code>useNewUrlParser</code> y <code>useUnifiedTopology</code> ya no son necesarias en Mongoose 7+)</li>
+        </ul>
+
+        <h4>backend/Dockerfile</h4>
+
+        <pre><code class="language-dockerfile">FROM node:18-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm install
+
+COPY . .
+
+EXPOSE 3000
+
+USER node
+
+CMD ["npm", "start"]</code></pre>
+
+        <h4>backend/.dockerignore</h4>
+
+        <pre><code class="language-plaintext">node_modules
+npm-debug.log
+.git
+.env</code></pre>
+
+        <h3>Paso 3: Configurar Frontend</h3>
+
+        <p>Para este ejemplo, crearemos una aplicación Angular sencilla sin necesidad de tener Angular CLI instalado en el host.</p>
+
+        <h4>frontend/package.json</h4>
+
+        <pre><code class="language-json">{
+  "name": "mean-frontend",
+  "version": "1.0.0",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve --host 0.0.0.0 --disable-host-check",
+    "build": "ng build",
+    "watch": "ng build --watch --configuration development"
+  },
+  "private": true,
+  "dependencies": {
+    "@angular/animations": "^16.2.0",
+    "@angular/common": "^16.2.0",
+    "@angular/compiler": "^16.2.0",
+    "@angular/core": "^16.2.0",
+    "@angular/forms": "^16.2.0",
+    "@angular/platform-browser": "^16.2.0",
+    "@angular/platform-browser-dynamic": "^16.2.0",
+    "@angular/router": "^16.2.0",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0",
+    "zone.js": "~0.13.0"
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "^16.2.0",
+    "@angular/cli": "^16.2.0",
+    "@angular/compiler-cli": "^16.2.0",
+    "typescript": "~5.1.3"
+  }
+}</code></pre>
+
+        <h4>frontend/angular.json</h4>
+
+        <pre><code class="language-json">{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "newProjectRoot": "projects",
+  "projects": {
+    "frontend": {
+      "projectType": "application",
+      "root": "",
+      "sourceRoot": "src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:browser",
+          "options": {
+            "outputPath": "dist/frontend",
+            "index": "src/index.html",
+            "main": "src/main.ts",
+            "polyfills": ["zone.js"],
+            "tsConfig": "tsconfig.json",
+            "assets": ["src/favicon.ico", "src/assets"],
+            "styles": ["src/styles.css"],
+            "scripts": []
+          },
+          "configurations": {
+            "production": {
+              "optimization": true,
+              "sourceMap": false
+            },
+            "development": {
+              "optimization": false,
+              "sourceMap": true
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular-devkit/build-angular:dev-server",
+          "configurations": {
+            "production": {
+              "buildTarget": "frontend:build:production"
+            },
+            "development": {
+              "buildTarget": "frontend:build:development"
+            }
+          },
+          "defaultConfiguration": "development"
+        }
+      }
+    }
+  }
+}</code></pre>
+
+        <h4>frontend/tsconfig.json</h4>
+
+        <pre><code class="language-json">{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "baseUrl": "./",
+    "outDir": "./dist/out-tsc",
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "sourceMap": true,
+    "declaration": false,
+    "downlevelIteration": true,
+    "experimentalDecorators": true,
+    "moduleResolution": "node",
+    "importHelpers": true,
+    "target": "ES2022",
+    "module": "ES2022",
+    "useDefineForClassFields": false,
+    "lib": ["ES2022", "dom"]
+  },
+  "angularCompilerOptions": {
+    "enableI18nLegacyMessageIdFormat": false,
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true,
+    "strictTemplates": true
+  }
+}</code></pre>
+
+        <h4>frontend/src/index.html</h4>
+
+        <pre><code class="language-html">&lt;!doctype html&gt;
+&lt;html lang="es"&gt;
+&lt;head&gt;
+  &lt;meta charset="utf-8"&gt;
+  &lt;title&gt;MEAN Stack App&lt;/title&gt;
+  &lt;base href="/"&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;
+  &lt;link rel="icon" type="image/x-icon" href="favicon.ico"&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;app-root&gt;&lt;/app-root&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+        <h4>frontend/src/main.ts</h4>
+
+        <pre><code class="language-typescript">import { bootstrapApplication } from '@angular/platform-browser';
+import { provideHttpClient } from '@angular/common/http';
+import { AppComponent } from './app/app.component';
+
+bootstrapApplication(AppComponent, {
+  providers: [
+    provideHttpClient()
+  ]
+}).catch(err => console.error(err));</code></pre>
+
+        <h4>frontend/src/styles.css</h4>
+
+        <pre><code class="language-css">body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 20px;
+  background-color: #f5f5f5;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+h1 {
+  color: #333;
+}
+
+.item-list {
+  list-style: none;
+  padding: 0;
+}
+
+.item-list li {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+button {
+  padding: 8px 16px;
+  cursor: pointer;
+  border: none;
+  border-radius: 4px;
+}
+
+button.primary {
+  background-color: #007bff;
+  color: white;
+}
+
+button.danger {
+  background-color: #dc3545;
+  color: white;
+}
+
+input {
+  padding: 8px;
+  margin-right: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.status {
+  padding: 10px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+}
+
+.status.connected {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status.disconnected {
+  background-color: #f8d7da;
+  color: #721c24;
+}</code></pre>
+
+        <h4>frontend/src/app/app.component.ts</h4>
+
+        <pre><code class="language-typescript">import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
+
+interface Item {
+  _id?: string;
+  nombre: string;
+  descripcion?: string;
+  creado?: Date;
+}
+
+interface HealthStatus {
+  status: string;
+  database: string;
+  timestamp: string;
+}
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  template: `
+    &lt;div class="container"&gt;
+      &lt;h1&gt;MEAN Stack - Lista de Items&lt;/h1&gt;
+      
+      &lt;div class="status" [class.connected]="apiStatus === 'connected'" 
+           [class.disconnected]="apiStatus !== 'connected'"&gt;
+        Estado de la API: {{ apiStatus }} | Base de datos: {{ dbStatus }}
+      &lt;/div&gt;
+
+      &lt;div class="add-item"&gt;
+        &lt;input [(ngModel)]="nuevoItem" placeholder="Nombre del item" /&gt;
+        &lt;button class="primary" (click)="agregarItem()"&gt;Agregar&lt;/button&gt;
+      &lt;/div&gt;
+
+      &lt;ul class="item-list"&gt;
+        &lt;li *ngFor="let item of items"&gt;
+          &lt;span&gt;{{ item.nombre }}&lt;/span&gt;
+          &lt;button class="danger" (click)="eliminarItem(item._id!)"&gt;Eliminar&lt;/button&gt;
+        &lt;/li&gt;
+      &lt;/ul&gt;
+
+      &lt;p *ngIf="items.length === 0"&gt;No hay items. ¡Agrega uno!&lt;/p&gt;
+    &lt;/div&gt;
+  `
+})
+export class AppComponent implements OnInit {
+  items: Item[] = [];
+  nuevoItem = '';
+  apiStatus = 'checking...';
+  dbStatus = 'checking...';
+  
+  private apiUrl = 'http://localhost:3000';
+
+  constructor(private http: HttpClient) {}
+
+  ngOnInit() {
+    this.checkHealth();
+    this.cargarItems();
+  }
+
+  checkHealth() {
+    this.http.get&lt;HealthStatus&gt;(`${this.apiUrl}/health`).subscribe({
+      next: (res) => {
+        this.apiStatus = 'connected';
+        this.dbStatus = res.database;
+      },
+      error: () => {
+        this.apiStatus = 'disconnected';
+        this.dbStatus = 'unknown';
+      }
+    });
+  }
+
+  cargarItems() {
+    this.http.get&lt;Item[]&gt;(`${this.apiUrl}/api/items`).subscribe({
+      next: (items) => this.items = items,
+      error: (err) => console.error('Error cargando items:', err)
+    });
+  }
+
+  agregarItem() {
+    if (!this.nuevoItem.trim()) return;
+    
+    this.http.post&lt;Item&gt;(`${this.apiUrl}/api/items`, { nombre: this.nuevoItem }).subscribe({
+      next: (item) => {
+        this.items.unshift(item);
+        this.nuevoItem = '';
+      },
+      error: (err) => console.error('Error agregando item:', err)
+    });
+  }
+
+  eliminarItem(id: string) {
+    this.http.delete(`${this.apiUrl}/api/items/${id}`).subscribe({
+      next: () => {
+        this.items = this.items.filter(item => item._id !== id);
+      },
+      error: (err) => console.error('Error eliminando item:', err)
+    });
+  }
+}</code></pre>
+
+        <h4>frontend/Dockerfile</h4>
+
+        <pre><code class="language-dockerfile">FROM node:18-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm install
+
+COPY . .
+
+EXPOSE 4200
+
+CMD ["npm", "start"]</code></pre>
+
+        <h4>frontend/.dockerignore</h4>
+
+        <pre><code class="language-plaintext">node_modules
+dist
+.git</code></pre>
+
+        <h3>Paso 4: Crear archivos adicionales necesarios</h3>
+
+        <p>Crea estos archivos vacíos para que Angular funcione:</p>
+
+        <pre><code class="language-bash">mkdir -p frontend/src/assets
+touch frontend/src/assets/.gitkeep
+touch frontend/src/favicon.ico</code></pre>
+
+        <h3>Paso 5: Crear docker-compose.yml</h3>
+
+        <pre><code class="language-yaml">version: '3.8'
+
+services:
+  frontend:
+    build: ./frontend
+    ports:
+      - "4200:4200"
+    volumes:
+      - ./frontend/src:/app/src
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  backend:
+    build: ./backend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./backend/src:/app/src
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      - MONGO_URI=mongodb://database:27017/mean_app
+      - PORT=3000
+    restart: unless-stopped
+
+  database:
+    image: mongo:6
+    volumes:
+      - mongodb_data:/data/db
+    ports:
+      - "27017:27017"
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+
+  mongo-express:
+    image: mongo-express:latest
+    ports:
+      - "8081:8081"
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=database
+      - ME_CONFIG_BASICAUTH_USERNAME=admin
+      - ME_CONFIG_BASICAUTH_PASSWORD=admin123
+    depends_on:
+      database:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  mongodb_data:</code></pre>
+
+        <p><strong>Correcciones y mejoras realizadas:</strong></p>
+        <ul>
+            <li>Se actualizó a MongoDB 6 con healthcheck correcto usando <code>mongosh</code></li>
+            <li>Se añadió Mongo Express como interfaz web para gestionar la base de datos</li>
+            <li>Se eliminaron las opciones de Mongoose obsoletas en Node.js</li>
+            <li>Backend espera a que MongoDB esté healthy</li>
+            <li>Se añadieron volúmenes solo para el código fuente (hot reload)</li>
+        </ul>
+
+        <h3>Paso 6: Ejecutar</h3>
+
+        <pre><code class="language-bash"># Construir e iniciar (la primera vez toma varios minutos por npm install)
+docker compose up --build
+
+# O en segundo plano
+docker compose up --build -d
+
+# Ver logs
+docker compose logs -f</code></pre>
+
+        <p><strong>Accesos:</strong></p>
+        <ul>
+            <li>Frontend Angular: <code>http://localhost:4200</code></li>
+            <li>Backend API: <code>http://localhost:3000</code></li>
+            <li>Health check: <code>http://localhost:3000/health</code></li>
+            <li>Mongo Express: <code>http://localhost:8081</code> (usuario: admin, contraseña: admin123)</li>
+        </ul>
+
+        <h3>Estructura final del proyecto</h3>
+
+        <pre><code class="language-plaintext">mean-app/
+├── docker-compose.yml
+├── backend/
+│   ├── Dockerfile
+│   ├── .dockerignore
+│   ├── package.json
+│   └── src/
+│       └── server.js
+└── frontend/
+    ├── Dockerfile
+    ├── .dockerignore
+    ├── package.json
+    ├── angular.json
+    ├── tsconfig.json
+    └── src/
+        ├── index.html
+        ├── main.ts
+        ├── styles.css
+        ├── favicon.ico
+        ├── assets/
+        └── app/
+            └── app.component.ts</code></pre>
+
+        <h2>9.5 Comandos Útiles para los Casos Prácticos</h2>
+
+        <h3>Gestión de servicios</h3>
+
+        <pre><code class="language-bash"># Construir e iniciar todos los servicios
+docker compose up --build
+
+# Iniciar en segundo plano
+docker compose up -d
+
+# Iniciar solo un servicio específico (y sus dependencias)
+docker compose up -d backend
+
+# Reconstruir un servicio específico
+docker compose up -d --build frontend
+
+# Ver estado de los servicios
+docker compose ps
+
+# Ver uso de recursos
+docker compose top
+docker stats</code></pre>
+
+        <h3>Logs y depuración</h3>
+
+        <pre><code class="language-bash"># Ver logs de todos los servicios
+docker compose logs
+
+# Ver logs de un servicio en tiempo real
+docker compose logs -f backend
+
+# Ver últimas 100 líneas de logs
+docker compose logs --tail=100 backend
+
+# Ejecutar comando en un contenedor activo
+docker compose exec backend sh
+
+# Ejecutar comando único
+docker compose exec db psql -U postgres -d miapp -c "SELECT * FROM usuarios;"</code></pre>
+
+        <h3>Gestión de datos</h3>
+
+        <pre><code class="language-bash"># Backup de PostgreSQL
+docker compose exec db pg_dump -U postgres miapp > backup.sql
+
+# Restaurar PostgreSQL
+docker compose exec -T db psql -U postgres miapp < backup.sql
+
+# Backup de MySQL
+docker compose exec db mysqldump -u root -p lamp_db > backup.sql
+
+# Backup de MongoDB
+docker compose exec database mongodump --out /data/backup
+docker cp $(docker compose ps -q database):/data/backup ./backup
+
+# Ver volúmenes
+docker volume ls
+
+# Inspeccionar volumen
+docker volume inspect mean-app_mongodb_data</code></pre>
+
+        <h3>Limpieza</h3>
+
+        <pre><code class="language-bash"># Detener servicios
+docker compose stop
+
+# Detener y eliminar contenedores y redes
+docker compose down
+
+# Detener y eliminar también volúmenes (¡CUIDADO: elimina datos!)
+docker compose down -v
+
+# Eliminar imágenes construidas
+docker compose down --rmi local
+
+# Limpieza completa del proyecto
+docker compose down -v --rmi local --remove-orphans</code></pre>
+
+        <h3>Escalado y rendimiento</h3>
+
+        <pre><code class="language-bash"># Escalar un servicio (requiere configuración adicional para load balancing)
+docker compose up -d --scale backend=3
+
+# Ver estadísticas de recursos en tiempo real
+docker stats $(docker compose ps -q)</code></pre>
+
+        <h2>9.6 Solución de Problemas Comunes</h2>
+
+        <details>
+            <summary>El frontend no puede conectar con el backend</summary>
+            <p>Verifica que CORS está configurado en el backend y que la URL de la API en el frontend apunta a <code>localhost:3000</code> (desde el navegador) o al nombre del servicio (desde otro contenedor).</p>
+        </details>
+
+        <details>
+            <summary>La base de datos no está lista cuando la aplicación intenta conectar</summary>
+            <p>Usa <code>depends_on</code> con <code>condition: service_healthy</code> y configura healthchecks adecuados. Implementa lógica de reintentos en la aplicación.</p>
+        </details>
+
+        <details>
+            <summary>Los cambios en el código no se reflejan</summary>
+            <p>Verifica que los volúmenes están correctamente configurados. Para cambios en <code>package.json</code> o <code>Dockerfile</code>, necesitas reconstruir con <code>--build</code>.</p>
+        </details>
+
+        <details>
+            <summary>Error "port is already allocated"</summary>
+            <p>Otro proceso está usando ese puerto. Cambia el puerto en el archivo compose o detén el proceso conflictivo con <code>lsof -i :PUERTO</code> y <code>kill PID</code>.</p>
+        </details>
+
+        <details>
+            <summary>Permisos denegados en volúmenes (Linux)</summary>
+            <p>Los archivos creados dentro del contenedor pueden tener permisos de root. Añade <code>user: "1000:1000"</code> en el servicio o ajusta permisos en el Dockerfile.</p>
+        </details>
+
+    </section>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="script.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+</body>
+</html>
