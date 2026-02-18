@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificación y Pruebas del Sistema Apache-Tomcat con SSL</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div>Verificación y Pruebas del Sistema Apache-Tomcat con SSL</div>
+    </header>
+
+    <section class="contenido-didactico">
+        <h1>Verificación y Pruebas del Sistema Apache-Tomcat con SSL</h1>
+
+        <h2>1. Verificación de Servicios y Configuraciones</h2>
+
+        <h3>1.1. Comprobar Estado de los Servicios</h3>
+        <p>Para verificar que los servicios están funcionando correctamente, ejecuta los siguientes comandos:</p>
+
+        <pre><code class="language-bash"># Verificar Apache
+sudo systemctl status apache2
+
+# Verificar Tomcat
+sudo systemctl status tomcat
+
+# Verificar módulos Apache activos
+apache2ctl -M | grep ssl
+apache2ctl -M | grep proxy</code></pre>
+
+        <h3>1.2. Verificar Configuración de SSL</h3>
+        <p>Comprueba que los certificados SSL están correctamente instalados y tienen los permisos adecuados:</p>
+
+        <pre><code class="language-bash"># Verificar certificados
+sudo openssl x509 -in /etc/apache2/ssl/tomcat.crt -text -noout
+
+# Verificar permisos de certificados
+sudo ls -l /etc/apache2/ssl/</code></pre>
+
+        <h2>2. Pruebas de Conectividad</h2>
+
+        <h3>2.1. Pruebas de Puertos</h3>
+        <p>Verifica que los puertos necesarios están en escucha y la conectividad SSL funciona correctamente:</p>
+
+        <pre><code class="language-bash"># Verificar puertos en escucha
+sudo netstat -tulpn | grep -E ':80|:443|:8009|:8443'
+
+# Verificar conectividad SSL
+openssl s_client -connect localhost:443 -servername tu-dominio.com</code></pre>
+
+        <h3>2.2. Pruebas de Redirección HTTP a HTTPS</h3>
+        <p>Comprueba que la redirección automática de HTTP a HTTPS está funcionando:</p>
+
+        <pre><code class="language-bash"># Prueba de redirección
+curl -I http://localhost
+
+# Prueba de conexión HTTPS
+curl -I -k https://localhost</code></pre>
+
+        <p><strong>Respuesta esperada para HTTP:</strong></p>
+        <pre><code class="language-http">HTTP/1.1 301 Moved Permanently
+Location: https://localhost/</code></pre>
+
+        <h2>3. Pruebas de Seguridad SSL</h2>
+
+        <h3>3.1. Verificar Configuración SSL</h3>
+        <p>Utiliza la herramienta <code>testssl.sh</code> para realizar un análisis completo de la configuración SSL:</p>
+
+        <pre><code class="language-bash"># Instalar testssl.sh
+git clone --depth 1 https://github.com/drwetter/testssl.sh.git
+cd testssl.sh
+./testssl.sh https://localhost</code></pre>
+
+        <h3>3.2. Verificar Headers de Seguridad</h3>
+        <p>Comprueba que los headers de seguridad están correctamente configurados:</p>
+
+        <pre><code class="language-bash">curl -I -k https://localhost | grep -E "Strict-Transport-Security|X-Frame-Options|X-Content-Type-Options"</code></pre>
+
+        <h2>4. Pruebas de la Aplicación</h2>
+
+        <h3>4.1. Crear Página de Prueba JSP</h3>
+        <p>Crea una página JSP de prueba para verificar que el proxy SSL está funcionando correctamente:</p>
+
+        <pre><code class="language-bash">sudo nano /opt/tomcat/apache-tomcat-10.1.35/webapps/ROOT/ssltest.jsp</code></pre>
+
+        <p>Contenido del archivo <code>ssltest.jsp</code>:</p>
+
+        <pre><code class="language-jsp">&lt;%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%&gt;
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;Test SSL Proxy&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;Información del Servidor SSL&lt;/h1&gt;
+    &lt;p&gt;Fecha y hora: &lt;%= new java.util.Date() %&gt;&lt;/p&gt;
+    &lt;p&gt;Servidor: &lt;%= application.getServerInfo() %&gt;&lt;/p&gt;
+    &lt;p&gt;Protocolo: &lt;%= request.getProtocol() %&gt;&lt;/p&gt;
+    &lt;p&gt;Esquema: &lt;%= request.getScheme() %&gt;&lt;/p&gt;
+    &lt;p&gt;SSL: &lt;%= request.isSecure() %&gt;&lt;/p&gt;
+    &lt;p&gt;Headers SSL:&lt;/p&gt;
+    &lt;pre&gt;
+    &lt;% 
+        java.util.Enumeration headerNames = request.getHeaderNames();
+        while(headerNames.hasMoreElements()) {
+            String headerName = (String)headerNames.nextElement();
+            out.println(headerName + ": " + request.getHeader(headerName));
+        }
+    %&gt;
+    &lt;/pre&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+        <h2>5. Monitorización y Logs</h2>
+
+        <h3>5.1. Monitorizar Logs en Tiempo Real</h3>
+        <p>Monitoriza los logs de Apache y Tomcat para detectar posibles errores:</p>
+
+        <pre><code class="language-bash"># Apache SSL access log
+tail -f /var/log/apache2/access.ssl.log
+
+# Apache SSL error log
+tail -f /var/log/apache2/error.ssl.log
+
+# Tomcat logs
+tail -f /opt/tomcat/logs/catalina.out</code></pre>
+
+        <h3>5.2. Verificar Rendimiento</h3>
+        <p>Realiza pruebas de carga para verificar el rendimiento del sistema:</p>
+
+        <pre><code class="language-bash"># Instalar Apache Benchmark si no está instalado
+sudo apt install apache2-utils
+
+# Realizar prueba de rendimiento
+ab -n 1000 -c 10 -k -f TLS1.2 https://localhost/ssltest.jsp</code></pre>
+
+        <h2>6. Solución de Problemas Comunes</h2>
+
+        <h3>Error: SSL_ERROR_RX_RECORD_TOO_LONG</h3>
+        <p>Si encuentras este error, verifica lo siguiente:</p>
+        <ul>
+            <li>Verificar que el puerto 443 está correctamente configurado</li>
+            <li>Comprobar la directiva <code>SSLEngine on</code></li>
+            <li>Verificar la configuración del VirtualHost SSL</li>
+        </ul>
+
+        <h3>Error: SSL certificate problem: self signed certificate</h3>
+        <p>Este error es normal cuando se utilizan certificados autofirmados:</p>
+        <ul>
+            <li>Es normal con certificados autofirmados</li>
+            <li>En producción, usar certificados de una CA reconocida</li>
+            <li>Para pruebas, usar el flag <code>-k</code> en curl o importar el certificado en el navegador</li>
+        </ul>
+
+        <h2>Lista de Verificación Final</h2>
+        <p>Asegúrate de que todos los siguientes puntos están correctos:</p>
+        <ul>
+            <li>✓ Redirección HTTP a HTTPS funcionando</li>
+            <li>✓ Certificados SSL correctamente instalados</li>
+            <li>✓ Headers de seguridad presentes</li>
+            <li>✓ Proxy AJP funcionando</li>
+            <li>✓ Logs sin errores</li>
+            <li>✓ Permisos de archivos correctos</li>
+            <li>✓ Firewall configurado</li>
+        </ul>
+
+        <h2>Comandos Útiles para Diagnóstico</h2>
+        <p>Comandos adicionales que pueden ser útiles durante el diagnóstico:</p>
+
+        <pre><code class="language-bash"># Verificar sintaxis de configuración Apache
+sudo apache2ctl configtest
+
+# Verificar sintaxis de configuración SSL
+sudo apache2ctl -t
+
+# Verificar conectividad AJP
+nc -zv localhost 8009
+
+# Verificar certificado SSL
+echo | openssl s_client -connect localhost:443 2>/dev/null | openssl x509 -text
+
+# Verificar headers de seguridad
+curl -v -k https://localhost 2>&1 | grep -i "< server:"</code></pre>
+    </section>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="script.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+</body>
+</html>

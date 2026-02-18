@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuración de Apache como Proxy Inverso con SSL para Tomcat</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div>Configuración de Apache como Proxy Inverso con SSL para Tomcat</div>
+    </header>
+
+    <section class="contenido-didactico">
+        <h1>Configuración de Apache como Proxy Inverso SSL para Tomcat</h1>
+
+        <h2>1. Instalación de Apache y Módulos Necesarios</h2>
+        <p>Primero, actualizamos el sistema e instalamos Apache:</p>
+        <pre><code class="language-bash">sudo apt update
+sudo apt install apache2</code></pre>
+
+        <h3>1.1. Habilitar Módulos Apache</h3>
+        <p>Habilitamos los módulos necesarios para el funcionamiento del proxy inverso con SSL:</p>
+        <pre><code class="language-bash">sudo a2enmod ssl
+sudo a2enmod proxy
+sudo a2enmod proxy_ajp
+sudo a2enmod proxy_balancer
+sudo a2enmod proxy_http
+sudo a2enmod headers
+sudo a2enmod lbmethod_byrequests
+sudo a2enmod rewrite</code></pre>
+
+        <h2>2. Configuración de SSL en Apache</h2>
+
+        <h3>2.1. Crear Directorio para Certificados</h3>
+        <p>Creamos el directorio donde almacenaremos los certificados SSL y copiamos los archivos desde Tomcat:</p>
+        <pre><code class="language-bash">sudo mkdir /etc/apache2/ssl
+sudo cp /opt/tomcat/apache-tomcat-10.1.35/conf/ssl/tomcat.crt /etc/apache2/ssl/
+sudo cp /opt/tomcat/apache-tomcat-10.1.35/conf/ssl/tomcat.csr /etc/apache2/ssl/
+sudo cp /opt/tomcat/apache-tomcat-10.1.35/conf/ssl/tomcat.key /etc/apache2/ssl/
+sudo cp /opt/tomcat/apache-tomcat-10.1.35/conf/ssl/tomcat.p12 /etc/apache2/ssl/</code></pre>
+
+        <h3>2.2. Ajustar Permisos</h3>
+        <p>Por seguridad, ajustamos los permisos de los certificados para que solo el usuario root pueda acceder a ellos:</p>
+        <pre><code class="language-bash">sudo chmod 600 /etc/apache2/ssl/*
+sudo chown root:root /etc/apache2/ssl/*</code></pre>
+
+        <h2>3. Configuración del Virtual Host SSL</h2>
+
+        <h3>3.1. Crear Archivo de Configuración</h3>
+        <p>Creamos el archivo de configuración para el Virtual Host con SSL:</p>
+        <pre><code class="language-bash">sudo nano /etc/apache2/sites-available/000-default-ssl.conf</code></pre>
+
+        <p>Añadimos la siguiente configuración:</p>
+        <pre><code class="language-apache">&lt;VirtualHost *:443&gt;
+    ServerName tu-dominio.com
+    ServerAdmin webmaster@localhost
+    DocumentRoot /var/www/html
+
+    # Configuración SSL
+    SSLEngine on
+    SSLCertificateFile /etc/apache2/ssl/tomcat.crt
+    SSLCertificateKeyFile /etc/apache2/ssl/tomcat.key
+
+    # Configuración de Seguridad SSL
+    SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1
+    SSLCipherSuite ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384
+    SSLHonorCipherOrder off
+    SSLSessionTickets off
+
+    # Headers de Seguridad
+    Header always set Strict-Transport-Security "max-age=63072000"
+    Header always set X-Frame-Options SAMEORIGIN
+    Header always set X-Content-Type-Options nosniff
+
+    # Configuración del Proxy
+    &lt;Proxy balancer://tomcat_cluster&gt;
+        BalancerMember ajp://localhost:8009
+        ProxySet lbmethod=byrequests
+    &lt;/Proxy&gt;
+
+    ProxyPreserveHost On
+    ProxyRequests Off
+    ProxyPass / balancer://tomcat_cluster/
+    ProxyPassReverse / balancer://tomcat_cluster/
+
+    # Logs
+    ErrorLog ${APACHE_LOG_DIR}/error.ssl.log
+    CustomLog ${APACHE_LOG_DIR}/access.ssl.log combined
+&lt;/VirtualHost&gt;</code></pre>
+
+        <h3>3.2. Configurar Redirección HTTP a HTTPS</h3>
+        <p>Editamos el archivo de configuración por defecto para redirigir todo el tráfico HTTP a HTTPS:</p>
+        <pre><code class="language-bash">sudo nano /etc/apache2/sites-available/000-default.conf</code></pre>
+
+        <p>Añadimos la siguiente configuración:</p>
+        <pre><code class="language-apache">&lt;VirtualHost *:80&gt;
+    ServerName tu-dominio.com
+    ServerAdmin webmaster@localhost
+    DocumentRoot /var/www/html
+
+    RewriteEngine On
+    RewriteCond %{HTTPS} off
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+&lt;/VirtualHost&gt;</code></pre>
+
+        <h2>4. Configuración de AJP Seguro en Tomcat</h2>
+
+        <h3>4.1. Modificar server.xml en Tomcat</h3>
+        <p>Editamos el archivo de configuración de Tomcat para habilitar el conector AJP:</p>
+        <pre><code class="language-bash">sudo nano /opt/tomcat/apache-tomcat-10.1.35/conf/server.xml</code></pre>
+
+        <p>Añadimos o modificamos el conector AJP:</p>
+        <pre><code class="language-xml">&lt;Connector protocol="AJP/1.3"
+    address="0.0.0.0"
+    port="8009"
+    redirectPort="8443"
+    secretRequired="false"
+    URIEncoding="UTF-8"
+    enableLookups="false"
+    tomcatAuthentication="false" /&gt;</code></pre>
+
+        <h2>5. Habilitar Sitios y Reiniciar Servicios</h2>
+        <p>Habilitamos el sitio SSL y reiniciamos los servicios para aplicar los cambios:</p>
+        <pre><code class="language-bash">sudo a2ensite 000-default-ssl.conf
+sudo systemctl restart tomcat
+sudo systemctl restart apache2</code></pre>
+
+        <h2>6. Configuración del Firewall</h2>
+        <p>Configuramos el firewall para permitir el tráfico HTTPS y bloquear el acceso directo a Tomcat:</p>
+        <pre><code class="language-bash">sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+sudo ufw deny 8080/tcp
+sudo ufw deny 8443/tcp
+sudo ufw status</code></pre>
+
+        <h2>Consideraciones de Seguridad</h2>
+        <ul>
+            <li>Asegúrate de que el puerto AJP (8009) solo sea accesible localmente</li>
+            <li>Mantén actualizados los certificados SSL</li>
+            <li>Configura regular rotación de logs</li>
+            <li>Revisa periódicamente las configuraciones de seguridad SSL</li>
+            <li>Considera implementar WAF (Web Application Firewall)</li>
+        </ul>
+
+        <h2>Optimización de Rendimiento</h2>
+        <ul>
+            <li>Ajusta el número de trabajadores de Apache según los recursos del servidor</li>
+            <li>Configura el caché de SSL session</li>
+            <li>Monitoriza el uso de recursos</li>
+            <li>Considera usar HTTP/2 para mejor rendimiento</li>
+        </ul>
+    </section>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="script.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+</body>
+</html>
