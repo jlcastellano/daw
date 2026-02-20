@@ -44,10 +44,6 @@ mkdir nginx</code></pre>
   }
 }</code></pre>
 
-        <blockquote>
-            <strong>Nota:</strong> Se actualizó la versión de Express a una más reciente y segura.
-        </blockquote>
-
         <h3>Paso 3: Crear app.js</h3>
 
         <pre><code class="language-javascript">const express = require('express');
@@ -65,12 +61,6 @@ app.get('/health', (req, res) => {
 app.listen(port, '0.0.0.0', () => {
   console.log(`Aplicación corriendo en puerto ${port}`);
 });</code></pre>
-
-        <p><strong>Mejoras realizadas:</strong></p>
-        <ul>
-            <li>Se añadió endpoint <code>/health</code> para healthchecks</li>
-            <li>Se especificó <code>0.0.0.0</code> para escuchar en todas las interfaces de red del contenedor</li>
-        </ul>
 
         <h3>Paso 4: Crear nginx/default.conf</h3>
 
@@ -95,16 +85,11 @@ server {
     }
 }</code></pre>
 
-        <p><strong>Correcciones realizadas:</strong></p>
-        <ul>
-            <li>Se movió a una subcarpeta <code>nginx/</code> para mejor organización</li>
-            <li>Se añadió bloque <code>upstream</code> para facilitar escalado futuro</li>
-            <li>Se añadieron headers adicionales para pasar información del cliente real</li>
-        </ul>
-
         <h3>Paso 5: Crear Dockerfile</h3>
 
         <pre><code class="language-dockerfile">FROM node:18-alpine
+
+RUN apk add --no-cache wget
 
 WORKDIR /app
 
@@ -120,18 +105,9 @@ USER node
 
 CMD ["npm", "start"]</code></pre>
 
-        <p><strong>Mejoras realizadas:</strong></p>
-        <ul>
-            <li>Se actualizó a Node.js 18 LTS con imagen Alpine (más ligera)</li>
-            <li>Se añadió <code>--production</code> para no instalar dependencias de desarrollo</li>
-            <li>Se añadió <code>USER node</code> por seguridad (no ejecutar como root)</li>
-        </ul>
-
         <h3>Paso 6: Crear docker-compose.yml</h3>
 
-        <pre><code class="language-yaml">version: '3.8'
-
-services:
+        <pre><code class="language-yaml">services:
   nginx:
     image: nginx:alpine
     ports:
@@ -155,13 +131,6 @@ services:
       start_period: 10s
     restart: unless-stopped</code></pre>
 
-        <p><strong>Correcciones y mejoras realizadas:</strong></p>
-        <ul>
-            <li>Se añadió healthcheck para verificar que la aplicación está lista</li>
-            <li>Nginx espera a que la app esté healthy antes de iniciar</li>
-            <li>Se añadió <code>:ro</code> (read-only) al volumen de configuración</li>
-            <li>Se usa <code>wget</code> en lugar de <code>curl</code> porque la imagen Alpine de Node no incluye curl por defecto</li>
-        </ul>
 
         <h3>Paso 7: Crear .dockerignore</h3>
 
@@ -221,14 +190,6 @@ ON CONFLICT (email) DO NOTHING;
 -- Crear índice para búsquedas por email
 CREATE INDEX IF NOT EXISTS idx_usuarios_email ON usuarios(email);</code></pre>
 
-        <p><strong>Mejoras realizadas:</strong></p>
-        <ul>
-            <li>Se añadió <code>IF NOT EXISTS</code> para evitar errores en reinicios</li>
-            <li>Se añadió restricción <code>UNIQUE</code> en email</li>
-            <li>Se añadió <code>ON CONFLICT</code> para evitar duplicados</li>
-            <li>Se añadió índice para mejorar rendimiento de búsquedas</li>
-        </ul>
-
         <h3>Paso 3: Crear scripts/backup.sh</h3>
 
         <pre><code class="language-bash">#!/bin/bash
@@ -258,14 +219,6 @@ find ${BACKUP_DIR} -name "backup_*.sql.gz" -mtime +${RETENTION_DAYS} -delete
 
 echo "Proceso de backup finalizado"</code></pre>
 
-        <p><strong>Mejoras realizadas:</strong></p>
-        <ul>
-            <li>Se añadió compresión con gzip</li>
-            <li>Se añadió rotación automática de backups antiguos</li>
-            <li>Se añadió manejo de errores</li>
-            <li>Se añadió logging informativo</li>
-        </ul>
-
         <h3>Paso 4: Dar permisos de ejecución</h3>
 
         <pre><code class="language-bash">chmod +x scripts/backup.sh</code></pre>
@@ -282,9 +235,7 @@ POSTGRES_DB=miapp</code></pre>
 
         <h3>Paso 6: Crear docker-compose.yml</h3>
 
-        <pre><code class="language-yaml">version: '3.8'
-
-services:
+        <pre><code class="language-yaml">services:
   db:
     image: postgres:15-alpine
     volumes:
@@ -329,15 +280,6 @@ services:
 volumes:
   postgres_data:</code></pre>
 
-        <p><strong>Correcciones y mejoras realizadas:</strong></p>
-        <ul>
-            <li>Se actualizó a PostgreSQL 15 con imagen Alpine</li>
-            <li>Se corrigió el healthcheck para usar las variables correctas</li>
-            <li>Se añadió <code>PGPASSWORD</code> para que el backup no pida contraseña</li>
-            <li>Se añadió Adminer como interfaz web para gestionar la base de datos</li>
-            <li>El servicio de backup ahora se mantiene activo para ejecutar backups manualmente</li>
-            <li>Se añadieron valores por defecto con <code>${VAR:-default}</code></li>
-        </ul>
 
         <h3>Paso 7: Ejecutar</h3>
 
@@ -454,7 +396,8 @@ try {
         <h3>Paso 3: Crear src/phpinfo.php</h3>
 
         <pre><code class="language-php">&lt;?php
-phpinfo();</code></pre>
+phpinfo();
+?&gt;</code></pre>
 
         <p>Útil para verificar la configuración de PHP y las extensiones instaladas.</p>
 
@@ -492,14 +435,6 @@ COPY config/php.ini /usr/local/etc/php/conf.d/custom.ini
 RUN chown -R www-data:www-data /var/www/html
 
 EXPOSE 80</code></pre>
-
-        <p><strong>Correcciones realizadas:</strong></p>
-        <ul>
-            <li>Se actualizó a PHP 8.2</li>
-            <li>Se añadieron extensiones PDO para mayor flexibilidad</li>
-            <li>Se habilitó mod_rewrite</li>
-            <li>Se corrigieron permisos</li>
-        </ul>
 
         <h3>Paso 6: Crear .env</h3>
 
@@ -557,14 +492,6 @@ services:
 volumes:
   mysql_data:</code></pre>
 
-        <p><strong>Correcciones y mejoras realizadas:</strong></p>
-        <ul>
-            <li>Se actualizó a MySQL 8.0</li>
-            <li>Se añadió healthcheck para MySQL</li>
-            <li>Apache espera a que MySQL esté healthy</li>
-            <li>Se corrigió la imagen de phpMyAdmin (era <code>phpmyadmin/phpmyadmin</code>, ahora es <code>phpmyadmin</code>)</li>
-            <li>Se añadieron variables de entorno desde archivo <code>.env</code></li>
-        </ul>
 
         <h3>Paso 8: Ejecutar</h3>
 
@@ -609,7 +536,7 @@ docker compose logs -f</code></pre>
         <pre><code class="language-bash">mkdir mean-app
 cd mean-app
 mkdir -p backend/src
-mkdir -p frontend</code></pre>
+mkdir -p frontend/src/app</code></pre>
 
         <h3>Paso 2: Configurar Backend</h3>
 
@@ -722,14 +649,6 @@ app.listen(PORT, '0.0.0.0', () => {
     console.log(`Servidor corriendo en puerto ${PORT}`);
 });</code></pre>
 
-        <p><strong>Mejoras realizadas:</strong></p>
-        <ul>
-            <li>Se añadió lógica de reconexión automática a MongoDB</li>
-            <li>Se añadió endpoint <code>/health</code> con estado de la base de datos</li>
-            <li>Se implementó un CRUD básico funcional</li>
-            <li>Se actualizó la sintaxis de Mongoose (las opciones <code>useNewUrlParser</code> y <code>useUnifiedTopology</code> ya no son necesarias en Mongoose 7+)</li>
-        </ul>
-
         <h4>backend/Dockerfile</h4>
 
         <pre><code class="language-dockerfile">FROM node:18-alpine
@@ -788,7 +707,8 @@ npm-debug.log
     "@angular-devkit/build-angular": "^16.2.0",
     "@angular/cli": "^16.2.0",
     "@angular/compiler-cli": "^16.2.0",
-    "typescript": "~5.1.3"
+    "typescript": "~5.1.3",
+    "@types/node": "^18.18.0"
   }
 }</code></pre>
 
@@ -813,7 +733,7 @@ npm-debug.log
             "main": "src/main.ts",
             "polyfills": ["zone.js"],
             "tsConfig": "tsconfig.json",
-            "assets": ["src/favicon.ico", "src/assets"],
+            "assets": ["src/assets"],
             "styles": ["src/styles.css"],
             "scripts": []
           },
@@ -831,12 +751,15 @@ npm-debug.log
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
+          "options": {
+            "browserTarget": "frontend:build"
+          },
           "configurations": {
             "production": {
-              "buildTarget": "frontend:build:production"
+              "browserTarget": "frontend:build:production"
             },
             "development": {
-              "buildTarget": "frontend:build:development"
+              "browserTarget": "frontend:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -1119,9 +1042,7 @@ touch frontend/src/favicon.ico</code></pre>
 
         <h3>Paso 5: Crear docker-compose.yml</h3>
 
-        <pre><code class="language-yaml">version: '3.8'
-
-services:
+        <pre><code class="language-yaml">services:
   frontend:
     build: ./frontend
     ports:
@@ -1176,14 +1097,6 @@ services:
 volumes:
   mongodb_data:</code></pre>
 
-        <p><strong>Correcciones y mejoras realizadas:</strong></p>
-        <ul>
-            <li>Se actualizó a MongoDB 6 con healthcheck correcto usando <code>mongosh</code></li>
-            <li>Se añadió Mongo Express como interfaz web para gestionar la base de datos</li>
-            <li>Se eliminaron las opciones de Mongoose obsoletas en Node.js</li>
-            <li>Backend espera a que MongoDB esté healthy</li>
-            <li>Se añadieron volúmenes solo para el código fuente (hot reload)</li>
-        </ul>
 
         <h3>Paso 6: Ejecutar</h3>
 
